@@ -1,0 +1,77 @@
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #ff0000;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #ff0000;
+            margin-top: 40px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        h3 {
+            margin-top: 25px;
+            color: #555;
+        }
+        .last-updated {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+        ul.guidelines-list {
+            padding-left: 20px;
+        }
+        ul.guidelines-list li {
+            margin-bottom: 15px;
+            position: relative;
+            padding-left: 25px;
+        }
+        ul.guidelines-list li:before {
+            content: "•";
+            color: #ff0000;
+            font-size: 1.5em;
+            position: absolute;
+            left: 0;
+            top: -3px;
+        }
+        .warning-box {
+            background-color: #fff8f8;
+            border-left: 4px solid #ff0000;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .dos-donts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 25px 0;
+        }
+        .dos, .donts {
+            flex: 1;
+            min-width: 300px;
+        }
+        .dos h3 {
+            color: #2e7d32;
+        }
+        .donts h3 {
+            color: #c62828;
+        }
