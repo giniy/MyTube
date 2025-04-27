@@ -112,6 +112,9 @@ if (session_status() === PHP_SESSION_NONE) {
             color: #ff0000;
             margin-bottom: 15px;
         }
+        a{
+            color: #493939;
+        }
     </style>
 </head>
 <body>
@@ -298,7 +301,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 <i class="fas fa-comments"></i>
                 <h3>Community Forum</h3>
                 <p>Get help from other users</p>
-                <p><a href="forum.php">Visit our forum</a></p>
+                <p><a href="forum.php" style="color: #ff0303;">Visit our forum</a></p>
             </div>
         </div>
         

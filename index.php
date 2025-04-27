@@ -1,6 +1,8 @@
 <?php
 require_once 'includes/config.php';
 require_once 'includes/header.php';
+require_once 'includes/functions.php';
+
 
 // Get all videos
 $query = "SELECT v.*, u.username FROM videos v JOIN users u ON v.user_id = u.id ORDER BY uploaded_at DESC";
@@ -59,7 +61,7 @@ if (!$featuredVideo) {
                     </button>
                 <?php endif; ?>
 
-                
+
 
                 <?php
                 // Get likes count
@@ -148,6 +150,9 @@ if (!$featuredVideo) {
                 <h3><?= htmlspecialchars($video['title']) ?></h3>
                 <p><?= htmlspecialchars($video['description']) ?></p>
                 <p>Uploaded by: <?= htmlspecialchars($video['username']) ?></p>
+                <!-- <p><?= htmlspecialchars(formatUserDate($video['uploaded_at'])) ?></p> -->
+                <p><?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['uploaded_at']))) ?></p>
+
             </div>
         <?php endwhile; ?>
     </section>

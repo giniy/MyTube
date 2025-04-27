@@ -150,6 +150,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php require_once 'includes/footer.php'; ?>
 
 <style>
+
+p {
+    color: #a73aff;
+    margin-left: 24px;
+    margin-top: -18px;
+}
+    
 .contact-container {
     max-width: 1200px;
     margin: 0 auto;

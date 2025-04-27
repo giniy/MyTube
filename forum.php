@@ -117,6 +117,11 @@ $recentActivity = $conn->query("
 <?php require_once 'includes/footer.php'; ?>
 
 <style>
+a {
+    color: #ff0606;
+    text-decoration: none;
+}
+    
 .forum-container {
     max-width: 1200px;
     margin: 0 auto;
