@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 27, 2025 at 03:38 AM
+-- Generation Time: Apr 27, 2025 at 07:20 PM
 -- Server version: 8.0.36
 -- PHP Version: 8.0.30
 
@@ -27,23 +27,13 @@ SET time_zone = "+00:00";
 -- Table structure for table `comments`
 --
 
--- CREATE TABLE `comments` (
---   `id` int NOT NULL,
---   `user_id` int NOT NULL,
---   `video_id` int NOT NULL,
---   `comment` text NOT NULL,
---   `created_at` datetime DEFAULT CURRENT_TIMESTAMP
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
 CREATE TABLE `comments` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `user_id` int NOT NULL,
   `video_id` int NOT NULL,
   `comment` text NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `comments`
@@ -198,7 +188,7 @@ INSERT INTO `likes` (`id`, `user_id`, `video_id`, `created_at`) VALUES
 (8, 1, 1, '2025-04-26 21:50:10'),
 (11, 1, 3, '2025-04-26 22:05:02'),
 (12, 1, 2, '2025-04-26 23:47:47'),
-(13, 1, 4, '2025-04-27 01:37:25');
+(15, 1, 4, '2025-04-27 16:55:59');
 
 -- --------------------------------------------------------
 
@@ -245,9 +235,9 @@ CREATE TABLE `videos` (
 
 INSERT INTO `videos` (`id`, `user_id`, `title`, `description`, `video_file`, `thumbnail_file`, `uploaded_at`, `view_count`, `share_count`) VALUES
 (1, 1, 'My home', 'My home tour', 'video_680cf9bdbd2526.94629116.mp4', 'thumb_680cf9bdbd2577.97704446.png', '2025-04-26 20:50:29', 3, 0),
-(2, 1, 'Nature', 'Nature view and landscape', 'video_680cfa4c6c66c4.68329273.mp4', 'thumb_680cfa4c6c66f7.97821358.png', '2025-04-26 20:52:52', 0, 0),
+(2, 1, 'Nature', 'Nature view and landscape', 'video_680cfa4c6c66c4.68329273.mp4', 'thumb_680cfa4c6c66f7.97821358.png', '2025-04-26 20:52:52', 0, 2),
 (3, 1, 'Mehendi Tatoo', 'Amazing Design of Mehendi Tatoo', 'video_680d10e01c7f76.84740889.mp4', 'thumb_680d10e01c8019.99983827.png', '2025-04-26 22:29:12', 0, 1),
-(4, 1, 'Sigrid - Mirror', 'Sigrid - Mirror\r\n\"Mirror\" is a song by Norwegian singer-songwriter Sigrid from her second studio album, How to Let Go (2022)', 'video_680d89677336d2.88466596.mp4', 'thumb_680d8967733790.33137399.png', '2025-04-27 07:03:27', 0, 0);
+(4, 1, 'Sigrid - Mirror', 'Sigrid - Mirror\r\n\"Mirror\" is a song by Norwegian singer-songwriter Sigrid from her second studio album, How to Let Go (2022)', 'video_680d89677336d2.88466596.mp4', 'thumb_680d8967733790.33137399.png', '2025-04-27 07:03:27', 0, 2);
 
 --
 -- Indexes for dumped tables
@@ -362,7 +352,7 @@ ALTER TABLE `forum_topics`
 -- AUTO_INCREMENT for table `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `users`
