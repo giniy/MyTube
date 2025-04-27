@@ -55,9 +55,10 @@ if (!$featuredVideo) {
                 <?php endif; ?>
                 
                 <?php if (isLoggedIn()): ?>
-                    <button onclick="shareVideo(<?= $featuredVideo['id'] ?>)">
-                        🔗 Share
-                    </button>
+                <!-- SHARE BUTTON -->
+                <button id="share-button-<?= $featuredVideo['id'] ?>" onclick="shareVideo(<?= $featuredVideo['id'] ?>)">
+                    🔗 Share
+                </button>
                 <?php else: ?>
                     <p><a href="auth/login.php">Login</a> to Share</p>
                 <?php endif; ?>
@@ -73,16 +74,14 @@ if (!$featuredVideo) {
                 ?>
                 <p class="like_share">Likes: <?= $likeData['like_count'] ?> | Shares: <?= $featuredVideo['share_count'] ?></p>
             </div>
-            <!-- Share Modal -->
+            <!-- SHARE MODAL -->
             <div id="share-modal" class="modal" style="display: none;">
                 <div class="modal-content">
                     <span class="close" onclick="closeModal()">×</span>
-                    <!-- <h4>Copy this link to share:</h4> -->
-                    <input type="text" id="share-link" readonly>
+                    <input type="text" id="share-link" readonly style="width: 100%;">
                     <button onclick="copyLink()">Copy Link</button>
                 </div>
             </div>
-
             <!-- Comments Section -->
             <div class="comments-section">
                 <h4>Comments</h4>
@@ -179,12 +178,39 @@ function likeVideo(videoId) {
     });
 }
 
-
 function shareVideo(videoId) {
+    // First, generate the share link
     const shareLink = window.location.href.split('?')[0] + "?video_id=" + videoId;
-    // Set the link in the input field
     document.getElementById("share-link").value = shareLink;
-    // Show the modal
+    
+    // Now send a POST request to increase share count
+    fetch('share_video.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'video_id=' + encodeURIComponent(videoId)
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data.trim() === "success") {
+            // Optionally, you can change the Share button style here
+            const shareButton = document.getElementById("share-button-" + videoId);
+            if (shareButton) {
+                shareButton.style.backgroundColor = "#008CBA"; // Blue
+                shareButton.innerText = "Shared";
+                shareButton.disabled = true;
+                shareButton.classList.add("shared"); // Optional class for animation
+            }
+        } else {
+            console.error('Share failed:', data);
+        }
+    })
+    .catch(error => {
+        console.error('Error sharing:', error);
+    });
+
+    // Finally, show the Share modal
     document.getElementById("share-modal").style.display = "block";
 }
 
@@ -195,11 +221,11 @@ function closeModal() {
 function copyLink() {
     const shareLink = document.getElementById("share-link");
     shareLink.select();
-    shareLink.setSelectionRange(0, 99999); // For mobile devices
-    document.execCommand("copy"); // Copy the link to clipboard
-    // alert("Link copied to clipboard!");
-    closeModal(); // Close the modal after copying
+    shareLink.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    closeModal();
 }
+
 
 // Sync background video with main video
 document.addEventListener('DOMContentLoaded', function() {
