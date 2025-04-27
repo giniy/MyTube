@@ -64,12 +64,13 @@ body {
 }
 
 .video-player video {
-    width: 100%;
-    max-height: 600px;
+    width: 98%;
+    margin-left: 0px;
+    border-radius: 6px;
+    max-height: 480px;
     display: block;
-    background: transparent;
+    background: transparent; /* Ensure this is set */
 }
-
 /* Adjust content positioning */
 .video-container {
     display: flex;
@@ -189,14 +190,6 @@ header {
     max-height: 400px;
     max-width: 400px;
 /*    background: #000;*/
-}
-.video-player video {
-    width: 100%;
-    margin-left: 20px;
-    border-radius: 6px;
-    max-height: 480px;
-    display: block;
-    background: transparent; /* Ensure this is set */
 }
 
 /* Sidebar Styles */
