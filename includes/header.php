@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="favicon/play.png">
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyTube</title>
     <link href="static/css/vid.css" rel="stylesheet">
