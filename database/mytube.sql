@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 27, 2025 at 07:20 PM
+-- Generation Time: Apr 27, 2025 at 09:25 PM
 -- Server version: 8.0.36
 -- PHP Version: 8.0.30
 
@@ -40,7 +40,6 @@ CREATE TABLE `comments` (
 --
 
 INSERT INTO `comments` (`id`, `user_id`, `video_id`, `comment`, `created_at`) VALUES
-(1, 1, 1, 'nice home', '2025-04-26 20:50:56'),
 (2, 1, 3, 'Nice design', '2025-04-26 22:30:05'),
 (3, 1, 3, 'I love it', '2025-04-26 22:30:13'),
 (4, 1, 4, 'Nice song', '2025-04-27 07:07:38');
@@ -140,7 +139,8 @@ CREATE TABLE `forum_replies` (
 --
 
 INSERT INTO `forum_replies` (`id`, `topic_id`, `user_id`, `content`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'Did you try to upload low size of video?', '2025-04-26 18:47:23', '2025-04-26 18:47:23');
+(1, 1, 1, 'Did you try to upload low size of video?', '2025-04-26 18:47:23', '2025-04-26 18:47:23'),
+(2, 2, 1, 'Yes, we are working on it.', '2025-04-27 17:58:09', '2025-04-27 17:58:09');
 
 -- --------------------------------------------------------
 
@@ -165,7 +165,8 @@ CREATE TABLE `forum_topics` (
 --
 
 INSERT INTO `forum_topics` (`id`, `category_id`, `user_id`, `title`, `content`, `is_faq`, `is_closed`, `created_at`, `updated_at`) VALUES
-(1, 2, 1, 'Upload issue', 'I am not able to upload the video on the site.', 0, 0, '2025-04-26 18:46:26', '2025-04-26 18:47:23');
+(1, 2, 1, 'Upload issue', 'I am not able to upload the video on the site.', 0, 0, '2025-04-26 18:46:26', '2025-04-26 18:47:23'),
+(2, 1, 1, 'How to share the video?', 'I am not able to shared the video , there is only copy link option is available.', 0, 0, '2025-04-27 17:57:33', '2025-04-27 17:58:09');
 
 -- --------------------------------------------------------
 
@@ -185,10 +186,10 @@ CREATE TABLE `likes` (
 --
 
 INSERT INTO `likes` (`id`, `user_id`, `video_id`, `created_at`) VALUES
-(8, 1, 1, '2025-04-26 21:50:10'),
 (11, 1, 3, '2025-04-26 22:05:02'),
-(12, 1, 2, '2025-04-26 23:47:47'),
-(15, 1, 4, '2025-04-27 16:55:59');
+(15, 1, 4, '2025-04-27 16:55:59'),
+(16, 1, 5, '2025-04-27 19:18:25'),
+(17, 1, 7, '2025-04-27 19:21:23');
 
 -- --------------------------------------------------------
 
@@ -234,10 +235,11 @@ CREATE TABLE `videos` (
 --
 
 INSERT INTO `videos` (`id`, `user_id`, `title`, `description`, `video_file`, `thumbnail_file`, `uploaded_at`, `view_count`, `share_count`) VALUES
-(1, 1, 'My home', 'My home tour', 'video_680cf9bdbd2526.94629116.mp4', 'thumb_680cf9bdbd2577.97704446.png', '2025-04-26 20:50:29', 3, 0),
-(2, 1, 'Nature', 'Nature view and landscape', 'video_680cfa4c6c66c4.68329273.mp4', 'thumb_680cfa4c6c66f7.97821358.png', '2025-04-26 20:52:52', 0, 2),
 (3, 1, 'Mehendi Tatoo', 'Amazing Design of Mehendi Tatoo', 'video_680d10e01c7f76.84740889.mp4', 'thumb_680d10e01c8019.99983827.png', '2025-04-26 22:29:12', 0, 1),
-(4, 1, 'Sigrid - Mirror', 'Sigrid - Mirror\r\n\"Mirror\" is a song by Norwegian singer-songwriter Sigrid from her second studio album, How to Let Go (2022)', 'video_680d89677336d2.88466596.mp4', 'thumb_680d8967733790.33137399.png', '2025-04-27 07:03:27', 0, 2);
+(4, 1, 'Sigrid - Mirror', 'Sigrid - Mirror\r\n\"Mirror\" is a song by Norwegian singer-songwriter Sigrid from her second studio album, How to Let Go (2022)', 'video_680d89677336d2.88466596.mp4', 'thumb_680d8967733790.33137399.png', '2025-04-27 07:03:27', 0, 2),
+(5, 1, 'Nature | Farm', 'Nature views and farm', 'video_680e82f833b179.99706520.mp4', 'thumb_680e82f833b1e7.30486898.png', '2025-04-28 00:48:16', 0, 1),
+(6, 1, 'Home Tour', 'Let me show you my home', 'video_680e833a0a8786.15406396.mp4', 'thumb_680e833a0a87e1.29644312.png', '2025-04-28 00:49:22', 0, 0),
+(7, 1, 'In the Mirror | Sigrid Song', 'Artist: Sigrid\r\nReleased: 2022 | Album: How to Let Go\r\nGenres: Disco, Nigerian R&B, Afropop, Pop', 'video_680e83aba19329.60549494.mp4', 'thumb_680e83aba19362.81882149.png', '2025-04-28 00:51:15', 0, 1);
 
 --
 -- Indexes for dumped tables
@@ -340,19 +342,19 @@ ALTER TABLE `forum_categories`
 -- AUTO_INCREMENT for table `forum_replies`
 --
 ALTER TABLE `forum_replies`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `forum_topics`
 --
 ALTER TABLE `forum_topics`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -364,7 +366,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `videos`
 --
 ALTER TABLE `videos`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
