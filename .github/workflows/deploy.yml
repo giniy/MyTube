@@ -16,7 +16,7 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@4.3.0  # ✅ Fixed Syntax
         with:
           server: ftpupload.net  # Your InfinityFree FTP host
-          username: if0_38842714
+          username: ${{ secrets.FTP_USERNAME }} # if0_38842714
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./  # Change this if necessary
           server-dir: /htdocs/

@@ -27,13 +27,23 @@ SET time_zone = "+00:00";
 -- Table structure for table `comments`
 --
 
+-- CREATE TABLE `comments` (
+--   `id` int NOT NULL,
+--   `user_id` int NOT NULL,
+--   `video_id` int NOT NULL,
+--   `comment` text NOT NULL,
+--   `created_at` datetime DEFAULT CURRENT_TIMESTAMP
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
 CREATE TABLE `comments` (
-  `id` int NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
   `video_id` int NOT NULL,
   `comment` text NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `comments`
