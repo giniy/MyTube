@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 26, 2025 at 09:49 PM
+-- Generation Time: Apr 27, 2025 at 03:38 AM
 -- Server version: 8.0.36
 -- PHP Version: 8.0.30
 
@@ -42,7 +42,8 @@ CREATE TABLE `comments` (
 INSERT INTO `comments` (`id`, `user_id`, `video_id`, `comment`, `created_at`) VALUES
 (1, 1, 1, 'nice home', '2025-04-26 20:50:56'),
 (2, 1, 3, 'Nice design', '2025-04-26 22:30:05'),
-(3, 1, 3, 'I love it', '2025-04-26 22:30:13');
+(3, 1, 3, 'I love it', '2025-04-26 22:30:13'),
+(4, 1, 4, 'Nice song', '2025-04-27 07:07:38');
 
 -- --------------------------------------------------------
 
@@ -169,6 +170,29 @@ INSERT INTO `forum_topics` (`id`, `category_id`, `user_id`, `title`, `content`, 
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `likes`
+--
+
+CREATE TABLE `likes` (
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `video_id` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `likes`
+--
+
+INSERT INTO `likes` (`id`, `user_id`, `video_id`, `created_at`) VALUES
+(8, 1, 1, '2025-04-26 21:50:10'),
+(11, 1, 3, '2025-04-26 22:05:02'),
+(12, 1, 2, '2025-04-26 23:47:47'),
+(13, 1, 4, '2025-04-27 01:37:25');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -200,17 +224,20 @@ CREATE TABLE `videos` (
   `description` text,
   `video_file` varchar(255) NOT NULL,
   `thumbnail_file` varchar(255) NOT NULL,
-  `uploaded_at` datetime DEFAULT CURRENT_TIMESTAMP
+  `uploaded_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `view_count` int DEFAULT '0',
+  `share_count` int DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `videos`
 --
 
-INSERT INTO `videos` (`id`, `user_id`, `title`, `description`, `video_file`, `thumbnail_file`, `uploaded_at`) VALUES
-(1, 1, 'My home', 'My home tour', 'video_680cf9bdbd2526.94629116.mp4', 'thumb_680cf9bdbd2577.97704446.png', '2025-04-26 20:50:29'),
-(2, 1, 'Nature', 'Nature view and landscape', 'video_680cfa4c6c66c4.68329273.mp4', 'thumb_680cfa4c6c66f7.97821358.png', '2025-04-26 20:52:52'),
-(3, 1, 'Mehendi Tatoo', 'Amazing Design of Mehendi Tatoo', 'video_680d10e01c7f76.84740889.mp4', 'thumb_680d10e01c8019.99983827.png', '2025-04-26 22:29:12');
+INSERT INTO `videos` (`id`, `user_id`, `title`, `description`, `video_file`, `thumbnail_file`, `uploaded_at`, `view_count`, `share_count`) VALUES
+(1, 1, 'My home', 'My home tour', 'video_680cf9bdbd2526.94629116.mp4', 'thumb_680cf9bdbd2577.97704446.png', '2025-04-26 20:50:29', 3, 0),
+(2, 1, 'Nature', 'Nature view and landscape', 'video_680cfa4c6c66c4.68329273.mp4', 'thumb_680cfa4c6c66f7.97821358.png', '2025-04-26 20:52:52', 0, 0),
+(3, 1, 'Mehendi Tatoo', 'Amazing Design of Mehendi Tatoo', 'video_680d10e01c7f76.84740889.mp4', 'thumb_680d10e01c8019.99983827.png', '2025-04-26 22:29:12', 0, 1),
+(4, 1, 'Sigrid - Mirror', 'Sigrid - Mirror\r\n\"Mirror\" is a song by Norwegian singer-songwriter Sigrid from her second studio album, How to Let Go (2022)', 'video_680d89677336d2.88466596.mp4', 'thumb_680d8967733790.33137399.png', '2025-04-27 07:03:27', 0, 0);
 
 --
 -- Indexes for dumped tables
@@ -259,6 +286,14 @@ ALTER TABLE `forum_topics`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `likes`
+--
+ALTER TABLE `likes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_like` (`user_id`,`video_id`),
+  ADD KEY `video_id` (`video_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -281,7 +316,7 @@ ALTER TABLE `videos`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `contact_messages`
@@ -314,6 +349,12 @@ ALTER TABLE `forum_topics`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `likes`
+--
+ALTER TABLE `likes`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
@@ -323,7 +364,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `videos`
 --
 ALTER TABLE `videos`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
@@ -349,6 +390,13 @@ ALTER TABLE `forum_replies`
 ALTER TABLE `forum_topics`
   ADD CONSTRAINT `forum_topics_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `forum_categories` (`id`),
   ADD CONSTRAINT `forum_topics_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `likes`
+--
+ALTER TABLE `likes`
+  ADD CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `likes_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `videos`

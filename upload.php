@@ -1,6 +1,11 @@
 <?php
 require_once 'includes/config.php';
 
+// Temporarily increase limits (remove in production)
+ini_set('upload_max_filesize', '100M');
+ini_set('post_max_size', '101M');
+ini_set('max_execution_time', 300);
+
 if (!isLoggedIn()) {
     header('Location: auth/login.php');
     exit;

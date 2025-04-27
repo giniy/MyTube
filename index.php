@@ -26,6 +26,13 @@ if (!$featuredVideo) {
 }
 ?>
 
+<div class="video-page-background">
+    <video id="background-video" autoplay muted loop>
+        <source src="<?= VIDEO_UPLOAD_PATH . $featuredVideo['video_file'] ?>" type="video/mp4">
+    </video>
+    <div class="blur-overlay"></div>
+</div>
+
 <main>
     <div class="video-container">
         <?php if ($featuredVideo): ?>
@@ -36,8 +43,46 @@ if (!$featuredVideo) {
             </video>
             <h3><?= htmlspecialchars($featuredVideo['title']) ?></h3>
             <p><?= htmlspecialchars($featuredVideo['description']) ?></p>
-            <p>Uploaded by: <?= htmlspecialchars($featuredVideo['username']) ?></p>
-            
+            <p>Uploaded by: <?= htmlspecialchars($featuredVideo['username']) ?></p>  
+        
+            <div class="video-actions">
+                <?php if (isLoggedIn()): ?>
+                    <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">
+                        👍 Like
+                    </button>
+                <?php else: ?>
+                    <p><a href="auth/login.php">Login</a> to Like</p>
+                <?php endif; ?>
+                
+                <?php if (isLoggedIn()): ?>
+                    <button onclick="shareVideo(<?= $featuredVideo['id'] ?>)">
+                        🔗 Share
+                    </button>
+                <?php else: ?>
+                    <p><a href="auth/login.php">Login</a> to Share</p>
+                <?php endif; ?>
+
+                <?php
+                // Get likes count
+                $likesQuery = "SELECT COUNT(*) as like_count FROM likes WHERE video_id = ?";
+                $stmt = $conn->prepare($likesQuery);
+                $stmt->bind_param("i", $featuredVideo['id']);
+                $stmt->execute();
+                $likesResult = $stmt->get_result();
+                $likeData = $likesResult->fetch_assoc();
+                ?>
+                <p class="like_share">Likes: <?= $likeData['like_count'] ?> | Shares: <?= $featuredVideo['share_count'] ?></p>
+            </div>
+            <!-- Share Modal -->
+            <div id="share-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">×</span>
+                    <!-- <h4>Copy this link to share:</h4> -->
+                    <input type="text" id="share-link" readonly>
+                    <button onclick="copyLink()">Copy Link</button>
+                </div>
+            </div>
+
             <!-- Comments Section -->
             <div class="comments-section">
                 <h4>Comments</h4>
@@ -111,6 +156,90 @@ if (!$featuredVideo) {
     </section>
 </main>
 
+<script>
+function likeVideo(videoId) {
+    // Make AJAX request to like the video
+    fetch('like_video.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'video_id=' + videoId
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data.trim() === "success") {
+            const likeButton = document.getElementById("like-button-" + videoId);
+            likeButton.style.backgroundColor = "#ff0000"; // Change to red or any color
+            likeButton.innerText = "Liked"; // Update text
+            likeButton.disabled = true; // Disable the button after click (optional)
+            // You can add animation like a pulse here
+            likeButton.classList.add("liked"); // Apply class for pulse animation
+        }
+    });
+}
+
+
+function shareVideo(videoId) {
+    const shareLink = window.location.href.split('?')[0] + "?video_id=" + videoId;
+    // Set the link in the input field
+    document.getElementById("share-link").value = shareLink;
+    // Show the modal
+    document.getElementById("share-modal").style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById("share-modal").style.display = "none";
+}
+
+function copyLink() {
+    const shareLink = document.getElementById("share-link");
+    shareLink.select();
+    shareLink.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand("copy"); // Copy the link to clipboard
+    // alert("Link copied to clipboard!");
+    closeModal(); // Close the modal after copying
+}
+
+// Sync background video with main video
+document.addEventListener('DOMContentLoaded', function() {
+    const mainVideo = document.getElementById('main-video');
+    const bgVideo = document.getElementById('background-video');
+    
+    // Sync playback
+    function syncVideos() {
+        bgVideo.currentTime = mainVideo.currentTime;
+    }
+    
+    mainVideo.addEventListener('play', function() {
+        syncVideos();
+        bgVideo.play();
+    });
+    
+    mainVideo.addEventListener('pause', function() {
+        bgVideo.pause();
+    });
+    
+    mainVideo.addEventListener('seeked', syncVideos);
+    
+    mainVideo.addEventListener('ended', function() {
+        bgVideo.currentTime = 0;
+        bgVideo.pause();
+    });
+    
+    // Handle video source changes
+    mainVideo.addEventListener('loadedmetadata', syncVideos);
+});
+
+
+
+// JavaScript function
+function adjustBlur(intensity) {
+    const overlay = document.querySelector('.blur-overlay');
+    overlay.style.backdropFilter = `blur(${intensity}px)`;
+    overlay.style.webkitBackdropFilter = `blur(${intensity}px)`;
+}
+</script>
 <?php require_once 'includes/footer.php'; ?>
 
 <style>

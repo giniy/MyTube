@@ -1,7 +1,7 @@
 
 <?php
 session_start();
-
+// define('SITE_URL', 'http://localhost/mytube'); // Change to your actual site URL
 function isAdmin() {
     // Check if user is logged in and has 'user_role' set in session
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role'])) {
