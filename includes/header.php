@@ -13,7 +13,8 @@
     <header>
         <div class="logo">
             <!-- <a class="nav-link" href="index.php"><img src="static/images/guitar.png" alt="Logo">MyTube</a> -->
-            <a class="nav-link" href="index.php" style="text-decoration: none; color: #ff0000; font-weight: bold;">MyTube</a>
+            <a class="nav-link" href="../index.php" style="text-decoration: none; color: #ff0000; font-weight: bold;">MyTube
+            </a>
         </div>
 
         <div class="search-bar">

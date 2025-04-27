@@ -87,7 +87,7 @@ require_once '../includes/header.php';
         </div>
         <button type="submit">Sign Up</button>
     </form>
-    <p>Already have an account? <a href="login.php">Login</a></p>
+    <p class="form_p">Already have an account? <a href="login.php" style="color: #ff0000;" >Login</a></p>
 </main>
 
 <?php require_once '../includes/footer.php'; ?>

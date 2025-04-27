@@ -50,18 +50,16 @@ if (!$featuredVideo) {
                     <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">
                         👍 Like
                     </button>
-                <?php else: ?>
-                    <p><a href="auth/login.php">Login</a> to Like</p>
                 <?php endif; ?>
                 
                 <?php if (isLoggedIn()): ?>
-                <!-- SHARE BUTTON -->
-                <button id="share-button-<?= $featuredVideo['id'] ?>" onclick="shareVideo(<?= $featuredVideo['id'] ?>)">
-                    🔗 Share
-                </button>
-                <?php else: ?>
-                    <p><a href="auth/login.php">Login</a> to Share</p>
+                    <!-- SHARE BUTTON -->
+                    <button id="share-button-<?= $featuredVideo['id'] ?>" onclick="shareVideo(<?= $featuredVideo['id'] ?>)">
+                        🔗 Share
+                    </button>
                 <?php endif; ?>
+
+                
 
                 <?php
                 // Get likes count
