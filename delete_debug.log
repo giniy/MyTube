@@ -1,0 +1,48 @@
+[2025-04-27 20:56:16] Script accessed
+Video ID received: 1
+Attempting to delete:
+Video: uploads/videos/video_680cf9bdbd2526.94629116.mp4
+Thumbnail: uploads/thumbnails/thumb_680cf9bdbd2577.97704446.png
+Results:
+Video deleted: No
+Thumbnail deleted: No
+DB record deleted: No
+[2025-04-27 20:56:29] Script accessed
+Video ID received: 1
+Attempting to delete:
+Video: uploads/videos/video_680cf9bdbd2526.94629116.mp4
+Thumbnail: uploads/thumbnails/thumb_680cf9bdbd2577.97704446.png
+Results:
+Video deleted: No
+Thumbnail deleted: No
+DB record deleted: No
+[2025-04-27 20:58:22] Delete process started
+Video ID: 1
+Video path: uploads/videos/video_680cf9bdbd2526.94629116.mp4
+Thumbnail path: uploads/thumbnails/thumb_680cf9bdbd2577.97704446.png
+Results:
+Video deleted: Yes
+Thumbnail deleted: Yes
+DB deleted: No
+[2025-04-27 20:58:30] Delete process started
+Video ID: 1
+Video path: uploads/videos/video_680cf9bdbd2526.94629116.mp4
+Thumbnail path: uploads/thumbnails/thumb_680cf9bdbd2577.97704446.png
+Results:
+Video deleted: Yes
+Thumbnail deleted: Yes
+DB deleted: No
+[2025-04-27 21:15:22] DELETE PROCESS STARTED
+Video path: uploads/videos/video_680cf9bdbd2526.94629116.mp4
+Thumbnail path: uploads/thumbnails/thumb_680cf9bdbd2577.97704446.png
+RESULTS:
+Video deleted: Yes
+Thumbnail deleted: Yes
+DB record deleted: Yes
+[2025-04-27 21:16:19] DELETE PROCESS STARTED
+Video path: uploads/videos/video_680cfa4c6c66c4.68329273.mp4
+Thumbnail path: uploads/thumbnails/thumb_680cfa4c6c66f7.97821358.png
+RESULTS:
+Video deleted: Yes
+Thumbnail deleted: Yes
+DB record deleted: Yes

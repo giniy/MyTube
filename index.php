@@ -1,8 +1,17 @@
+
 <?php
 require_once 'includes/config.php';
 require_once 'includes/header.php';
 require_once 'includes/functions.php';
 
+// Add this after require statements
+if (isset($_GET['deleted'])) {
+    $deletedId = intval($_GET['deleted']);
+    // echo '<div class="deletion-message">Video #'.$deletedId.' was deleted successfully.</div>';
+    // Force refresh of video list
+    $query = "SELECT v.*, u.username FROM videos v JOIN users u ON v.user_id = u.id ORDER BY uploaded_at DESC";
+    $result = $conn->query($query); // Re-query fresh data
+}
 
 // Get all videos
 $query = "SELECT v.*, u.username FROM videos v JOIN users u ON v.user_id = u.id ORDER BY uploaded_at DESC";
@@ -25,6 +34,14 @@ if (!$featuredVideo) {
     $featuredQuery = "SELECT v.*, u.username FROM videos v JOIN users u ON v.user_id = u.id ORDER BY uploaded_at DESC LIMIT 1";
     $featuredResult = $conn->query($featuredQuery);
     $featuredVideo = $featuredResult->fetch_assoc();
+}
+
+// Check if current user can delete this video
+$canDelete = false;
+if (isLoggedIn() && $featuredVideo) {
+    $user_id = $_SESSION['user_id'];
+    // Allow deletion if user is owner or admin
+    $canDelete = ($user_id == $featuredVideo['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
 }
 ?>
 
@@ -55,13 +72,16 @@ if (!$featuredVideo) {
                 <?php endif; ?>
                 
                 <?php if (isLoggedIn()): ?>
-                    <!-- SHARE BUTTON -->
                     <button id="share-button-<?= $featuredVideo['id'] ?>" onclick="shareVideo(<?= $featuredVideo['id'] ?>)">
                         🔗 Share
                     </button>
                 <?php endif; ?>
 
-
+                <?php if ($canDelete): ?>
+                    <button id="delete-button-<?= $featuredVideo['id'] ?>" onclick="confirmDelete(<?= $featuredVideo['id'] ?>)" class="delete-btn">
+                        🗑️ Delete
+                    </button>
+                <?php endif; ?>
 
                 <?php
                 // Get likes count
@@ -150,9 +170,7 @@ if (!$featuredVideo) {
                 <h3><?= htmlspecialchars($video['title']) ?></h3>
                 <p><?= htmlspecialchars($video['description']) ?></p>
                 <p>Uploaded by: <?= htmlspecialchars($video['username']) ?></p>
-                <!-- <p><?= htmlspecialchars(formatUserDate($video['uploaded_at'])) ?></p> -->
                 <p><?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['uploaded_at']))) ?></p>
-
             </div>
         <?php endwhile; ?>
     </section>
@@ -172,21 +190,18 @@ function likeVideo(videoId) {
     .then(data => {
         if (data.trim() === "success") {
             const likeButton = document.getElementById("like-button-" + videoId);
-            likeButton.style.backgroundColor = "#ff0000"; // Change to red or any color
-            likeButton.innerText = "Liked"; // Update text
-            likeButton.disabled = true; // Disable the button after click (optional)
-            // You can add animation like a pulse here
-            likeButton.classList.add("liked"); // Apply class for pulse animation
+            likeButton.style.backgroundColor = "#ff0000";
+            likeButton.innerText = "Liked";
+            likeButton.disabled = true;
+            likeButton.classList.add("liked");
         }
     });
 }
 
 function shareVideo(videoId) {
-    // First, generate the share link
     const shareLink = window.location.href.split('?')[0] + "?video_id=" + videoId;
     document.getElementById("share-link").value = shareLink;
     
-    // Now send a POST request to increase share count
     fetch('share_video.php', {
         method: 'POST',
         headers: {
@@ -197,24 +212,39 @@ function shareVideo(videoId) {
     .then(response => response.text())
     .then(data => {
         if (data.trim() === "success") {
-            // Optionally, you can change the Share button style here
             const shareButton = document.getElementById("share-button-" + videoId);
             if (shareButton) {
-                shareButton.style.backgroundColor = "#008CBA"; // Blue
+                shareButton.style.backgroundColor = "#008CBA";
                 shareButton.innerText = "Shared";
                 shareButton.disabled = true;
-                shareButton.classList.add("shared"); // Optional class for animation
+                shareButton.classList.add("shared");
             }
-        } else {
-            console.error('Share failed:', data);
         }
-    })
-    .catch(error => {
-        console.error('Error sharing:', error);
     });
 
-    // Finally, show the Share modal
     document.getElementById("share-modal").style.display = "block";
+}
+
+function confirmDelete(videoId) {
+    if (confirm('Permanently delete this video?')) {
+        fetch('delete_video.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Cache-Control': 'no-cache'
+            },
+            body: 'video_id=' + videoId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Force complete page reload with cache busting
+                window.location.href = window.location.href.split('?')[0] + '?deleted=' + videoId + '&t=' + Date.now();
+            } else {
+                alert('Error: ' + (data.message || 'Deletion failed'));
+            }
+        });
+    }
 }
 
 function closeModal() {
@@ -229,13 +259,11 @@ function copyLink() {
     closeModal();
 }
 
-
 // Sync background video with main video
 document.addEventListener('DOMContentLoaded', function() {
     const mainVideo = document.getElementById('main-video');
     const bgVideo = document.getElementById('background-video');
     
-    // Sync playback
     function syncVideos() {
         bgVideo.currentTime = mainVideo.currentTime;
     }
@@ -256,21 +284,44 @@ document.addEventListener('DOMContentLoaded', function() {
         bgVideo.pause();
     });
     
-    // Handle video source changes
     mainVideo.addEventListener('loadedmetadata', syncVideos);
 });
 
-
-
-// JavaScript function
 function adjustBlur(intensity) {
     const overlay = document.querySelector('.blur-overlay');
     overlay.style.backdropFilter = `blur(${intensity}px)`;
     overlay.style.webkitBackdropFilter = `blur(${intensity}px)`;
 }
 </script>
-<?php require_once 'includes/footer.php'; ?>
 
 <style>
+.delete-btn {
+    background-color: #ff3333;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 10px;
+}
 
+.delete-btn:hover {
+    background-color: #cc0000;
+
+.deletion-message {
+    background: #4CAF50;
+    color: white;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 5px;
+    animation: fadeOut 5s forwards;
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; height: 0; padding: 0; margin: 0; }
+}
+}
 </style>
+
+<?php require_once 'includes/footer.php'; ?>

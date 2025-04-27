@@ -14,38 +14,54 @@
         <div class="footer-section">
             <h4>Navigation</h4>
             <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="#">Trending</a></li>
-                <li><a href="subscriptions.php">Subscriptions</a></li>
-                <li><a href="#">Library</a></li>
-                <li><a href="upload.php">Upload</a></li>
+                <li><a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php">Home</a></li>
+                <li><a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/coming.php">Trending</a></li>
+                <li><a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/subscriptions.php">Subscriptions</a></li>
+                <li><a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/coming.php">Library</a></li>
+                <li><a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/upload.php">Upload</a></li>
             </ul>
         </div>
 
         <div class="footer-section">
             <h4>Legal</h4>
             <ul>
-                <li><a href="terms.php">Terms of Service</a></li>
-                <li><a href="privacy.php">Privacy Policy</a></li>
-                <li><a href="copyright.php">Copyright</a></li>
-                <li><a href="guidelines.php">Community Guidelines</a></li>
+                <li>
+                <a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/terms.php">Terms of Service</a>
+                </li>
+                <li>
+                <a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/privacy.php">Privacy Policy</a>
+                </li>
+                <li>
+                <a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/copyright.php">Copyright</a>
+                </li>
+                <li>
+                <a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/guidelines.php">Community Guidelines</a>
+                </li>
             </ul>
         </div>
 
         <div class="footer-section">
             <h4>Help & Support</h4>
             <ul>
-                <li><a href="help.php">Help Center</a></li>
-                <li><a href="contact.php">Contact Us</a></li>
-                <li><a href="feedback.php">Send Feedback</a></li>
-                <li><a href="about.php">About</a></li>
+                <li>
+                <a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/help.php">Help Center</a>
+                </li>
+                <li>
+                <a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/contact.php">Contact Us</a>
+                </li>
+                <li>
+                <a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/feedback.php">Send Feedback</a>
+                </li>
+                <li>
+                <a href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/about.php">About</a>
+                </li>
             </ul>
         </div>
     </div>
 
     <div class="footer-bottom">
         <p>&copy; <?php echo date("Y"); ?> MyTube. All rights reserved.</p>
-        <p class="footer-lang">Language: <a href="#">English</a></p>
+        <p class="footer-lang">Language : English</p>
     </div>
 </footer>
 

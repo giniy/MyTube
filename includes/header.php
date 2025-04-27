@@ -13,8 +13,8 @@
     <header>
         <div class="logo">
             <!-- <a class="nav-link" href="index.php"><img src="static/images/guitar.png" alt="Logo">MyTube</a> -->
-            <a class="nav-link" href="./index.php" style="text-decoration: none; color: #ff0000; font-weight: bold;">MyTube
-            </a>
+     <!-- <a class="nav-link" href="./index.php" style="text-decoration: none; color: #ff0000; font-weight: bold;">MyTube</a> -->
+            <a class="nav-link" style="text-decoration: none; color: #ff0000; font-weight: bold;" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" style="...">MyTube</a>
         </div>
 
         <div class="search-bar">
