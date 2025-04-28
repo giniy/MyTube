@@ -266,8 +266,9 @@
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #0b0a0a;
+    color: #484545;
     font-weight: 500;
+
 }
 
 .form-group input[type="text"],
@@ -280,12 +281,14 @@
     border-radius: 4px;
     color: #000;
     font-size: 1rem;
+    background-color: #a39e9e;
 }
 
 .form-group textarea {
     min-height: 120px;
     resize: vertical;
     color: black;
+    background-color: #a39e9e;
 }
 
 .form-group input[type="file"] {
