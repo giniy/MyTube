@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 28, 2025 at 07:26 AM
+-- Generation Time: Apr 28, 2025 at 09:02 AM
 -- Server version: 8.0.36
 -- PHP Version: 8.0.30
 
@@ -45,10 +45,11 @@ INSERT INTO `comments` (`id`, `user_id`, `video_id`, `comment`, `created_at`, `p
 (2, 1, 3, 'Nice design', '2025-04-26 22:30:05', NULL, 1),
 (3, 1, 3, 'I love it', '2025-04-26 22:30:13', NULL, 0),
 (4, 1, 4, 'Nice song', '2025-04-27 07:07:38', NULL, 1),
-(5, 1, 7, 'nice song', '2025-04-28 10:04:43', NULL, 1),
-(6, 1, 7, 'yea!', '2025-04-28 10:44:23', 5, 1),
+(5, 1, 7, 'nice song', '2025-04-28 10:04:43', NULL, 2),
+(6, 1, 7, 'yea!', '2025-04-28 10:44:23', 5, 2),
 (7, 1, 3, 'yes', '2025-04-28 10:53:30', 2, 0),
-(8, 1, 7, 'Amazing song', '2025-04-28 10:55:43', NULL, 1);
+(8, 1, 7, 'Amazing song', '2025-04-28 10:55:43', NULL, 2),
+(9, 3, 6, 'Good palace', '2025-04-28 11:16:50', NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -72,7 +73,11 @@ INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`, `created_at`) VALUES
 (2, 1, 6, '2025-04-28 05:14:44'),
 (3, 1, 4, '2025-04-28 05:22:54'),
 (4, 1, 2, '2025-04-28 05:23:23'),
-(5, 1, 8, '2025-04-28 05:25:53');
+(5, 1, 8, '2025-04-28 05:25:53'),
+(6, 3, 8, '2025-04-28 05:46:27'),
+(7, 3, 5, '2025-04-28 05:46:28'),
+(8, 3, 6, '2025-04-28 05:46:30'),
+(9, 1, 9, '2025-04-28 05:47:30');
 
 -- --------------------------------------------------------
 
@@ -219,7 +224,9 @@ INSERT INTO `likes` (`id`, `user_id`, `video_id`, `created_at`) VALUES
 (11, 1, 3, '2025-04-26 22:05:02'),
 (15, 1, 4, '2025-04-27 16:55:59'),
 (16, 1, 5, '2025-04-27 19:18:25'),
-(17, 1, 7, '2025-04-27 19:21:23');
+(17, 1, 7, '2025-04-27 19:21:23'),
+(18, 3, 7, '2025-04-28 05:46:24'),
+(19, 3, 6, '2025-04-28 05:46:34');
 
 -- --------------------------------------------------------
 
@@ -240,7 +247,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `created_at`) VALUES
-(1, 'root', 'root@gmail.com', '$2y$10$P2PPGMvZxJMvSuKYER89eun6nf/8dTSbrWol.sii0vERfBnhILKMi', '2025-04-26 20:48:55');
+(1, 'root', 'root@gmail.com', '$2y$10$P2PPGMvZxJMvSuKYER89eun6nf/8dTSbrWol.sii0vERfBnhILKMi', '2025-04-26 20:48:55'),
+(2, 'ravi', 'ravi@gmail.com', '$2y$10$u0QMduHBs21fCcHxqoc1UOQ8GfjeWqEZ5.I/2wRnBqymJLe4s.QHe', '2025-04-28 11:02:22'),
+(3, 'rosep', 'rose.p@gmail.com', '$2y$10$RVskGnC7S/PStjUG5JTCeOeuRzDYl0uWJizmPEd8FN7iNqFqjEdEG', '2025-04-28 11:15:42');
 
 -- --------------------------------------------------------
 
@@ -266,10 +275,10 @@ CREATE TABLE `videos` (
 
 INSERT INTO `videos` (`id`, `user_id`, `title`, `description`, `video_file`, `thumbnail_file`, `uploaded_at`, `view_count`, `share_count`) VALUES
 (3, 1, 'Mehendi Tatoo', 'Amazing Design of Mehendi Tatoo', 'video_680d10e01c7f76.84740889.mp4', 'thumb_680d10e01c8019.99983827.png', '2025-04-26 22:29:12', 0, 1),
-(4, 1, 'Sigrid - Mirror', 'Sigrid - Mirror\r\n\"Mirror\" is a song by Norwegian singer-songwriter Sigrid from her second studio album, How to Let Go (2022)', 'video_680d89677336d2.88466596.mp4', 'thumb_680d8967733790.33137399.png', '2025-04-27 07:03:27', 0, 2),
+(4, 1, 'Sigrid - Mirror', 'Sigrid - Mirror is a song by Norwegian singer-songwriter Sigrid from her second studio album,', 'video_680d89677336d2.88466596.mp4', 'thumb_680d8967733790.33137399.png', '2025-04-27 07:03:27', 0, 2),
 (5, 1, 'Nature | Farm', 'Nature views and farm', 'video_680e82f833b179.99706520.mp4', 'thumb_680e82f833b1e7.30486898.png', '2025-04-28 00:48:16', 0, 1),
-(6, 1, 'Home Tour', 'Let me show you my home', 'video_680e833a0a8786.15406396.mp4', 'thumb_680e833a0a87e1.29644312.png', '2025-04-28 00:49:22', 0, 0),
-(7, 1, 'In the Mirror | Sigrid Song', 'Artist: Sigrid\r\nReleased: 2022 | Album: How to Let Go\r\nGenres: Disco, Nigerian R&B, Afropop, Pop', 'video_680e83aba19329.60549494.mp4', 'thumb_680e83aba19362.81882149.png', '2025-04-28 00:51:15', 0, 1);
+(6, 1, 'Palace Tour', 'Let me show you my palace', 'video_680e833a0a8786.15406396.mp4', 'thumb_680e833a0a87e1.29644312.png', '2025-04-28 00:49:22', 0, 0),
+(7, 1, 'In the Mirror | Sigrid Song', 'Artist: Sigrid\r\nReleased: 2022 | Album: How to Let Go\r\nGenres: Disco, Nigerian R&B, Afropop, Pop', 'video_680e83aba19329.60549494.mp4', 'thumb_680e83aba19362.81882149.png', '2025-04-28 00:51:15', 0, 2);
 
 --
 -- Indexes for dumped tables
@@ -356,13 +365,13 @@ ALTER TABLE `videos`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `comment_likes`
 --
 ALTER TABLE `comment_likes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `contact_messages`
@@ -398,13 +407,13 @@ ALTER TABLE `forum_topics`
 -- AUTO_INCREMENT for table `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `videos`
