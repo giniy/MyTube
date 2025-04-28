@@ -58,4 +58,85 @@ function formatUserDate($datetime) {
         return date('F j, Y, g:i A', strtotime($datetime)) . " (UTC)";
     }
 }
+
+function getUserData($userId) {
+    global $conn;
+    $query = "SELECT id, username, email, bio, profile_picture, created_at, 
+              twitter, instagram, youtube, other 
+              FROM users WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc();
+}
+
+function getUserVideos($userId) {
+    global $conn;
+    $query = "SELECT * FROM videos WHERE user_id = ? ORDER BY uploaded_at DESC";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+}
+
+function getUserComments($userId) {
+    global $conn;
+    $query = "SELECT c.*, v.title as video_title 
+              FROM comments c 
+              JOIN videos v ON c.video_id = v.id 
+              WHERE c.user_id = ? 
+              ORDER BY c.created_at DESC 
+              LIMIT 20";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+}
+
+function getUserLikes($userId) {
+    global $conn;
+    $query = "SELECT v.* 
+              FROM likes l 
+              JOIN videos v ON l.video_id = v.id 
+              WHERE l.user_id = ? 
+              ORDER BY l.created_at DESC";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+}
+
+function getProfilePicture($userId) {
+    $default = 'static/images/default-profile.png';
+    $custom = 'uploads/profile_pictures/' . $userId . '.jpg';
+    
+    return file_exists($custom) ? $custom : $default;
+}
+
+function formatDuration($seconds) {
+    $hours = floor($seconds / 3600);
+    $minutes = floor(($seconds % 3600) / 60);
+    $seconds = $seconds % 60;
+    
+    if ($hours > 0) {
+        return sprintf("%d:%02d:%02d", $hours, $minutes, $seconds);
+    } else {
+        return sprintf("%d:%02d", $minutes, $seconds);
+    }
+}
+
+function timeElapsedString($datetime) {
+    $now = new DateTime;
+    $ago = new DateTime($datetime);
+    $diff = $now->diff($ago);
+    
+    if ($diff->y > 0) return $diff->y . ' year' . ($diff->y > 1 ? 's' : '') . ' ago';
+    if ($diff->m > 0) return $diff->m . ' month' . ($diff->m > 1 ? 's' : '') . ' ago';
+    if ($diff->d > 0) return $diff->d . ' day' . ($diff->d > 1 ? 's' : '') . ' ago';
+    if ($diff->h > 0) return $diff->h . ' hour' . ($diff->h > 1 ? 's' : '') . ' ago';
+    if ($diff->i > 0) return $diff->i . ' minute' . ($diff->i > 1 ? 's' : '') . ' ago';
+    return 'just now';
+}
+
 ?>
+

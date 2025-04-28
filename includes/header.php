@@ -8,6 +8,7 @@
     <title>MyTube</title>
     <link href="static/css/vid.css" rel="stylesheet">
     <link href="static/css/auth.css" rel="stylesheet">
+    <link href="static/css/profile.css" rel="stylesheet">
     <script src="static/js/script.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -31,8 +32,9 @@
 
     <nav class="user-menu">
         <?php if (isLoggedIn()): ?>
-            <a href="upload.php">Upload</a>
+            <a href="upload.php">Upload Video</a>
             <a href="auth/logout.php">Logout</a>
+            <a href="profile.php">My Profile</a>
         <?php else: ?>
             <a href="/mytube/auth/login.php">Login</a>
             <a href="/mytube/auth/signup.php">Sign Up</a>

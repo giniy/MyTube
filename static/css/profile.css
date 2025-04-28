@@ -1,0 +1,369 @@
+/* Profile Page Styles */
+.profile-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+.profile-info {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-picture img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ff0000;
+}
+
+.profile-details h1 {
+    color: #020202;
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+}
+
+.profile-email {
+    color: #ccc;
+    margin: 0 0 0.5rem 0;
+}
+
+.profile-join-date {
+    color: #aaa;
+    margin: 0;
+}
+
+.edit-profile-btn {
+    display: inline-block;
+    background: #ff0000;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-top: 1rem;
+    transition: background 0.3s;
+}
+
+.edit-profile-btn:hover {
+    background: #cc0000;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.5rem;
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.stat-label {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+/* Activity Tabs */
+.activity-tabs {
+    display: flex;
+    border-bottom: 1px solid #444;
+    margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    color: #ccc;
+    padding: 0.5rem 1.5rem;
+    cursor: pointer;
+    position: relative;
+    font-size: 1rem;
+}
+
+.tab-btn.active {
+    color: #fff;
+    font-weight: bold;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: #ff0000;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Video Grid in Profile */
+.profile-activity .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Comments List */
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.profile-comment {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 6px;
+}
+
+.comment-text {
+    color: #fff;
+    margin: 0.5rem 0;
+}
+
+.comment-date {
+    color: #aaa;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.no-content {
+    color: #aaa;
+    text-align: center;
+    padding: 2rem;
+}
+/* Video Card Styles */
+.video-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.video-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.video-thumbnail {
+    position: relative;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    overflow: hidden;
+}
+
+.video-thumbnail img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-duration {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.video-info {
+    padding: 12px;
+}
+
+.video-info h3 {
+    margin: 0 0 6px 0;
+    font-size: 1rem;
+    color: #fff;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #aaa;
+    font-size: 0.8rem;
+}
+
+/* Edit Profile Styles */
+.edit-profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.edit-profile-container h1 {
+    color: #fff;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.error-messages {
+    margin-bottom: 1.5rem;
+}
+
+.error-messages .error {
+    color: #ff6b6b;
+    margin: 0.5rem 0;
+}
+
+.edit-profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.profile-picture-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    border: 3px solid #ff0000;
+}
+
+.profile-picture-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #0b0a0a;
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #000;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+    color: black;
+}
+
+.form-group input[type="file"] {
+    width: 100%;
+    color: #fff;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.save-btn {
+    background: #ff0000;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s;
+}
+
+.save-btn:hover {
+    background: #cc0000;
+}
+
+.cancel-btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #444;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.cancel-btn:hover {
+    background: #555;
+}
+.password-change-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #444;
+}
+
+.password-change-section h3 {
+    color: #000000;
+    margin-bottom: 1rem;
+}
+/* Social Media Section */
+.social-media-section {
+    margin-top: 2rem;
+}
+
+.profile-social-links {
+    margin-top: 1.5rem;
+}
+
+.social-icons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.social-icons a {
+    color: #f400ce;
+    font-size: 1.5rem;
+    transition: color 0.3s;
+}
+
+.social-icons a:hover {
+    color: #ff0000;
+}
+
+.fab {
+    /* Ensures Font Awesome icons are aligned properly */
+    width: 1em;
+    text-align: center;
+}
