@@ -252,27 +252,38 @@ function displayComment($comment, $conn, $depth = 0) {
         </section>
         <?php endif; ?>
 
-        <aside class="video-sidebar">
-            <h3>More Videos</h3>
-            <div class="sidebar-video-list">
-                <?php 
-                // Reset the result pointer to loop through videos again
-                $result->data_seek(0);
-                while ($video = $result->fetch_assoc()): 
-                    if ($featuredVideo && $video['id'] == $featuredVideo['id']) continue; // Skip the currently playing video
-                ?>
-                    <div class="sidebar-video">
-                        <a href="?video_id=<?= $video['id'] ?>">
-                            <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Video Thumbnail">
-                            <div class="sidebar-video-info">
-                                <h4><?= htmlspecialchars($video['title']) ?></h4>
-                                <p><?= htmlspecialchars($video['username']) ?></p>
-                            </div>
-                        </a>
+<aside class="video-sidebar">
+    <h3>More Videos</h3>
+    <div class="sidebar-video-list">
+        <?php 
+        // Reset the result pointer to loop through videos again
+        $result->data_seek(0);
+        while ($video = $result->fetch_assoc()): 
+            if ($featuredVideo && $video['id'] == $featuredVideo['id']) continue;
+        ?>
+            <div class="sidebar-video">
+                <a href="?video_id=<?= $video['id'] ?>">
+                    <!-- Keep your existing thumbnail -->
+                    <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Video Thumbnail" class="video-thumb">
+                    
+                    <!-- Add hidden video element (same dimensions as thumbnail) -->
+                    <video class="video-hover" 
+                           muted 
+                           loop 
+                           playsinline 
+                           preload="none"
+                           style="display:none; border-radius: 5px; width:50%; height:auto;">
+                        <source src="<?= VIDEO_UPLOAD_PATH . $video['video_file'] ?>" type="video/mp4">
+                    </video>
+                    <div class="sidebar-video-info">
+                        <h4><?= htmlspecialchars($video['title']) ?></h4>
+                        <p><?= htmlspecialchars($video['username']) ?></p>
                     </div>
-                <?php endwhile; ?>
+                </a>
             </div>
-        </aside>
+        <?php endwhile; ?>
+    </div>
+</aside>
     </div>
     <section class="video-list">
         <?php 
@@ -580,5 +591,27 @@ function confirmCommentDelete(commentId) {
         });
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const videoItems = document.querySelectorAll('.sidebar-video');
+    
+    videoItems.forEach(item => {
+        const thumb = item.querySelector('.video-thumb');
+        const video = item.querySelector('.video-hover');
+        
+        item.addEventListener('mouseenter', function() {
+            thumb.style.display = 'none';
+            video.style.display = 'block';
+            video.play().catch(e => console.log('Autoplay prevented:', e));
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            thumb.style.display = 'block';
+            video.style.display = 'none';
+            video.pause();
+            video.currentTime = 0;
+        });
+    });
+});
 </script>
 <?php require_once 'includes/footer.php'; ?>
