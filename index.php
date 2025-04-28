@@ -285,6 +285,7 @@ function displayComment($comment, $conn, $depth = 0) {
     </div>
 </aside>
     </div>
+    <h3>EARLIER</h3>
     <section class="video-list">
         <?php 
         // Reset the result pointer again for the bottom grid

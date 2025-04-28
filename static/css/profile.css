@@ -181,7 +181,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height:  60%
     object-fit: cover;
 }
 
@@ -203,7 +203,7 @@
 .video-info h3 {
     margin: 0 0 6px 0;
     font-size: 1rem;
-    color: #fff;
+    color:#000;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
