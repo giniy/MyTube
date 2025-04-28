@@ -226,6 +226,7 @@ p {
 textarea.app-form-control {
     min-height: 150px;
     resize: vertical;
+    color: #514545;
 }
 
 .buttons {
