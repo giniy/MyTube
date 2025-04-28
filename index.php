@@ -284,7 +284,6 @@ function displayComment($comment, $conn, $depth = 0) {
 
 <script>
 function likeVideo(videoId) {
-    // Make AJAX request to like the video
     fetch('like_video.php', {
         method: 'POST',
         headers: {
@@ -300,6 +299,16 @@ function likeVideo(videoId) {
             likeButton.innerText = "Liked";
             likeButton.disabled = true;
             likeButton.classList.add("liked");
+
+            // UPDATE LIKES COUNT IN PAGE
+            const likeShareText = document.querySelector(".like_share");
+            if (likeShareText) {
+                const parts = likeShareText.textContent.split('|');
+                const likesPart = parts[0].trim();
+                let currentLikes = parseInt(likesPart.replace('Likes:', '').trim());
+                currentLikes += 1;
+                likeShareText.innerHTML = `Likes: ${currentLikes} | ${parts[1].trim()}`;
+            }
         }
     });
 }
@@ -307,7 +316,7 @@ function likeVideo(videoId) {
 function shareVideo(videoId) {
     const shareLink = window.location.href.split('?')[0] + "?video_id=" + videoId;
     document.getElementById("share-link").value = shareLink;
-    
+
     fetch('share_video.php', {
         method: 'POST',
         headers: {
@@ -322,14 +331,23 @@ function shareVideo(videoId) {
             if (shareButton) {
                 shareButton.style.backgroundColor = "#008CBA";
                 shareButton.innerText = "Shared";
-                shareButton.disabled = true;
-                shareButton.classList.add("shared");
+            }
+
+            // UPDATE SHARES COUNT IN PAGE
+            const likeShareText = document.querySelector(".like_share");
+            if (likeShareText) {
+                const parts = likeShareText.textContent.split('|');
+                const sharesPart = parts[1].trim();
+                let currentShares = parseInt(sharesPart.replace('Shares:', '').trim());
+                currentShares += 1;
+                likeShareText.innerHTML = `${parts[0].trim()} | Shares: ${currentShares}`;
             }
         }
     });
 
     document.getElementById("share-modal").style.display = "block";
 }
+
 
 function confirmDelete(videoId) {
     if (confirm('Permanently delete this video?')) {
@@ -355,6 +373,15 @@ function confirmDelete(videoId) {
 
 function closeModal() {
     document.getElementById("share-modal").style.display = "none";
+
+    // Re-enable the share button for the current video
+    const shareButton = document.querySelector('.shared'); // Find the shared button
+    if (shareButton) {
+        shareButton.disabled = false;
+        shareButton.innerText = "🔗 Share"; // Reset the text
+        shareButton.classList.remove("shared"); // Remove shared class
+        shareButton.style.backgroundColor = ""; // Reset background color
+    }
 }
 
 function copyLink() {
