@@ -7,10 +7,9 @@ require_once 'includes/functions.php';
 // Add this after require statements
 if (isset($_GET['deleted'])) {
     $deletedId = intval($_GET['deleted']);
-    // echo '<div class="deletion-message">Video #'.$deletedId.' was deleted successfully.</div>';
     // Force refresh of video list
     $query = "SELECT v.*, u.username FROM videos v JOIN users u ON v.user_id = u.id ORDER BY uploaded_at DESC";
-    $result = $conn->query($query); // Re-query fresh data
+    $result = $conn->query($query);
 }
 
 // Get all videos
@@ -43,7 +42,84 @@ if (isLoggedIn() && $featuredVideo) {
     // Allow deletion if user is owner or admin
     $canDelete = ($user_id == $featuredVideo['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
 }
+
+
+// Comments pagination
+$commentsPerPage = 5;
+$currentPage = isset($_GET['comments_page']) ? max(1, (int)$_GET['comments_page']) : 1;
+$offset = ($currentPage - 1) * $commentsPerPage;
+
+if ($featuredVideo) {
+    // Get top-level comments count for pagination
+    $countQuery = "SELECT COUNT(*) as total FROM comments WHERE video_id = ? AND parent_id IS NULL";
+    $stmt = $conn->prepare($countQuery);
+    $stmt->bind_param("i", $featuredVideo['id']);
+    $stmt->execute();
+    $countResult = $stmt->get_result();
+    $totalComments = $countResult->fetch_assoc()['total'];
+    $totalPages = ceil($totalComments / $commentsPerPage);
+
+    // Get paginated top-level comments for this video
+    $commentsQuery = "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id 
+                     WHERE c.video_id = ? AND c.parent_id IS NULL ORDER BY c.created_at DESC
+                     LIMIT ? OFFSET ?";
+    $stmt = $conn->prepare($commentsQuery);
+    $stmt->bind_param("iii", $featuredVideo['id'], $commentsPerPage, $offset);
+    $stmt->execute();
+    $commentsResult = $stmt->get_result();
+}
+
+function displayComment($comment, $conn, $depth = 0) {
+    // Get comment likes count
+    $likesQuery = "SELECT COUNT(*) as like_count FROM comment_likes WHERE comment_id = ?";
+    $stmt = $conn->prepare($likesQuery);
+    $stmt->bind_param("i", $comment['id']);
+    $stmt->execute();
+    $likesResult = $stmt->get_result();
+    $likeData = $likesResult->fetch_assoc();
+    
+    // Get replies (always load all replies for a parent comment)
+    $repliesQuery = "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id 
+                     WHERE c.parent_id = ? ORDER BY c.created_at ASC";
+    $stmt = $conn->prepare($repliesQuery);
+    $stmt->bind_param("i", $comment['id']);
+    $stmt->execute();
+    $repliesResult = $stmt->get_result();
+    
+    $margin = $depth * 20;
+    ?>
+    <div class="comment" style="margin-left: <?= $margin ?>px;">
+        <strong><?= htmlspecialchars($comment['username']) ?></strong>
+        <p><?= htmlspecialchars($comment['comment']) ?></p>
+        <small><?= date('M j, Y g:i a', strtotime($comment['created_at'])) ?></small>
+        
+        <?php if (isLoggedIn()): ?>
+            <div class="comment-actions">
+                <button onclick="toggleReplyForm(<?= $comment['id'] ?>)">Reply</button>
+                <button onclick="likeComment(<?= $comment['id'] ?>)">Like (<?= $likeData['like_count'] ?>)</button>
+            </div>
+            
+            <div id="reply-form-<?= $comment['id'] ?>" class="reply-form" style="display: none;">
+                <form action="comments.php" method="POST">
+                    <input type="hidden" name="video_id" value="<?= $comment['video_id'] ?>">
+                    <input type="hidden" name="parent_id" value="<?= $comment['id'] ?>">
+                    <textarea name="comment" placeholder="Write a reply..." required></textarea>
+                    <button type="submit">Post Reply</button>
+                </form>
+            </div>
+        <?php endif; ?>
+        
+        <?php
+        // Display replies recursively
+        while ($reply = $repliesResult->fetch_assoc()) {
+            displayComment($reply, $conn, $depth + 1);
+        }
+        ?>
+    </div>
+    <?php
+}
 ?>
+
 
 <div class="video-page-background">
     <video id="background-video" autoplay muted loop>
@@ -102,36 +178,39 @@ if (isLoggedIn() && $featuredVideo) {
                     <button onclick="copyLink()">Copy Link</button>
                 </div>
             </div>
-            <!-- Comments Section -->
-            <div class="comments-section">
-                <h4>Comments</h4>
-                <?php if (isLoggedIn()): ?>
-                    <form action="comments.php" method="POST">
-                        <input type="hidden" name="video_id" value="<?= $featuredVideo['id'] ?>">
-                        <textarea name="comment" placeholder="Add a comment..." required></textarea>
-                        <button type="submit">Post Comment</button>
-                    </form>
-                <?php else: ?>
-                    <p><a href="auth/login.php">Login</a> to post comments</p>
-                <?php endif; ?>
-                
+        <!-- Updated Comments Section -->
+        <div class="comments-section">
+            <h4>Comments (<?= $totalComments ?>)</h4>
+            
+            <?php if (isLoggedIn()): ?>
+                <form action="comments.php" method="POST">
+                    <input type="hidden" name="video_id" value="<?= $featuredVideo['id'] ?>">
+                    <textarea name="comment" placeholder="Add a comment..." required></textarea>
+                    <button type="submit">Post Comment</button>
+                </form>
+            <?php else: ?>
+                <p><a href="auth/login.php">Login</a> to post comments</p>
+            <?php endif; ?>
+            
+            <div id="comments-container">
                 <?php
-                // Get comments for this video
-                $commentsQuery = "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id 
-                                 WHERE c.video_id = ? ORDER BY c.created_at DESC";
-                $stmt = $conn->prepare($commentsQuery);
-                $stmt->bind_param("i", $featuredVideo['id']);
-                $stmt->execute();
-                $commentsResult = $stmt->get_result();
-                
-                while ($comment = $commentsResult->fetch_assoc()): ?>
-                    <div class="comment">
-                        <strong><?= htmlspecialchars($comment['username']) ?></strong>
-                        <p><?= htmlspecialchars($comment['comment']) ?></p>
-                        <small><?= date('M j, Y g:i a', strtotime($comment['created_at'])) ?></small>
-                    </div>
-                <?php endwhile; ?>
+                while ($comment = $commentsResult->fetch_assoc()) {
+                    displayComment($comment, $conn);
+                }
+                ?>
             </div>
+            <?php if ($totalPages > 1): ?>
+                <div class="comments-pagination">
+                    <?php if ($currentPage > 1): ?>
+                        <button onclick="loadComments(<?= $currentPage - 1 ?>)">Previous</button>
+                    <?php endif; ?>
+                    
+                    <?php if ($currentPage < $totalPages): ?>
+                        <button onclick="loadComments(<?= $currentPage + 1 ?>)">Load More</button>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </div>
         </section>
         <?php endif; ?>
 
@@ -157,7 +236,6 @@ if (isLoggedIn() && $featuredVideo) {
             </div>
         </aside>
     </div>
-
     <section class="video-list">
         <?php 
         // Reset the result pointer again for the bottom grid
@@ -292,6 +370,77 @@ function adjustBlur(intensity) {
     overlay.style.backdropFilter = `blur(${intensity}px)`;
     overlay.style.webkitBackdropFilter = `blur(${intensity}px)`;
 }
+
+// comments 
+
+
+// Add these new functions to your existing script section
+function toggleReplyForm(commentId) {
+    const form = document.getElementById("reply-form-" + commentId);
+    form.style.display = form.style.display === "none" ? "block" : "none";
+}
+
+function likeComment(commentId) {
+    fetch('comments.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'like_comment=1&comment_id=' + commentId
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data.trim() === "success") {
+            const buttons = document.querySelectorAll(`button[onclick="likeComment(${commentId})"]`);
+            buttons.forEach(button => {
+                const currentText = button.innerText;
+                const currentCount = parseInt(currentText.match(/\((\d+)\)/)[1]) || 0;
+                button.innerText = `Like (${currentCount + 1})`;
+                button.disabled = true;
+            });
+        }
+    });
+}
+
+function loadComments(page) {
+    const videoId = <?= $featuredVideo['id'] ?>;
+    const container = document.getElementById('comments-container');
+    const loadButton = document.querySelector(`.comments-pagination button[onclick="loadComments(${page})"]`);
+    
+    if (loadButton) loadButton.textContent = 'Loading...';
+    
+    fetch(`load_comments.php?video_id=${videoId}&page=${page}`)
+        .then(response => response.text())
+        .then(html => {
+            if (page > 1) {
+                container.insertAdjacentHTML('beforeend', html);
+            } else {
+                container.innerHTML = html;
+            }
+            
+            history.pushState(null, null, `?video_id=${videoId}&comments_page=${page}`);
+            updatePaginationButtons(page);
+        })
+        .finally(() => {
+            if (loadButton) loadButton.textContent = page > <?= $currentPage ?> ? 'Load More' : 'Previous';
+        });
+}
+
+function updatePaginationButtons(currentPage) {
+    const paginationDiv = document.querySelector('.comments-pagination');
+    if (!paginationDiv) return;
+    
+    let html = '';
+    if (currentPage > 1) {
+        html += `<button onclick="loadComments(${currentPage - 1})">Previous</button>`;
+    }
+    if (currentPage < <?= $totalPages ?>) {
+        html += `<button onclick="loadComments(${currentPage + 1})">Load More</button>`;
+    }
+    
+    paginationDiv.innerHTML = html;
+}
+
 </script>
 
 <style>
@@ -322,6 +471,9 @@ function adjustBlur(intensity) {
     to { opacity: 0; height: 0; padding: 0; margin: 0; }
 }
 }
+
+
+
 </style>
 
 <?php require_once 'includes/footer.php'; ?>

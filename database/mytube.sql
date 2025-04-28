@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 27, 2025 at 09:25 PM
+-- Generation Time: Apr 28, 2025 at 07:26 AM
 -- Server version: 8.0.36
 -- PHP Version: 8.0.30
 
@@ -32,17 +32,47 @@ CREATE TABLE `comments` (
   `user_id` int NOT NULL,
   `video_id` int NOT NULL,
   `comment` text NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `parent_id` int DEFAULT NULL,
+  `like_count` int DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `comments`
 --
 
-INSERT INTO `comments` (`id`, `user_id`, `video_id`, `comment`, `created_at`) VALUES
-(2, 1, 3, 'Nice design', '2025-04-26 22:30:05'),
-(3, 1, 3, 'I love it', '2025-04-26 22:30:13'),
-(4, 1, 4, 'Nice song', '2025-04-27 07:07:38');
+INSERT INTO `comments` (`id`, `user_id`, `video_id`, `comment`, `created_at`, `parent_id`, `like_count`) VALUES
+(2, 1, 3, 'Nice design', '2025-04-26 22:30:05', NULL, 1),
+(3, 1, 3, 'I love it', '2025-04-26 22:30:13', NULL, 0),
+(4, 1, 4, 'Nice song', '2025-04-27 07:07:38', NULL, 1),
+(5, 1, 7, 'nice song', '2025-04-28 10:04:43', NULL, 1),
+(6, 1, 7, 'yea!', '2025-04-28 10:44:23', 5, 1),
+(7, 1, 3, 'yes', '2025-04-28 10:53:30', 2, 0),
+(8, 1, 7, 'Amazing song', '2025-04-28 10:55:43', NULL, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `comment_likes`
+--
+
+CREATE TABLE `comment_likes` (
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `comment_id` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `comment_likes`
+--
+
+INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`, `created_at`) VALUES
+(1, 1, 5, '2025-04-28 05:01:24'),
+(2, 1, 6, '2025-04-28 05:14:44'),
+(3, 1, 4, '2025-04-28 05:22:54'),
+(4, 1, 2, '2025-04-28 05:23:23'),
+(5, 1, 8, '2025-04-28 05:25:53');
 
 -- --------------------------------------------------------
 
@@ -254,6 +284,14 @@ ALTER TABLE `comments`
   ADD KEY `video_id` (`video_id`);
 
 --
+-- Indexes for table `comment_likes`
+--
+ALTER TABLE `comment_likes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_id` (`user_id`,`comment_id`),
+  ADD KEY `comment_id` (`comment_id`);
+
+--
 -- Indexes for table `contact_messages`
 --
 ALTER TABLE `contact_messages`
@@ -318,7 +356,13 @@ ALTER TABLE `videos`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `comment_likes`
+--
+ALTER TABLE `comment_likes`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `contact_messages`
@@ -378,6 +422,13 @@ ALTER TABLE `videos`
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`);
+
+--
+-- Constraints for table `comment_likes`
+--
+ALTER TABLE `comment_likes`
+  ADD CONSTRAINT `comment_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `comment_likes_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`);
 
 --
 -- Constraints for table `forum_replies`
