@@ -13,29 +13,32 @@
 </head>
 <body>
     <header>
-        <div class="logo">
-            <!-- <a class="nav-link" href="index.php"><img src="static/images/guitar.png" alt="Logo">MyTube</a> -->
-     <!-- <a class="nav-link" href="./index.php" style="text-decoration: none; color: #ff0000; font-weight: bold;">MyTube</a> -->
-            <a class="nav-link" style="text-decoration: none; color: #ff0000; font-weight: bold;" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" style="...">MyTube</a>
-        </div>
+    <div class="logo">
+        <a class="nav-link" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" 
+           style="text-decoration: none; color: #ff0000; font-weight: bold;">
+            MyTube
+        </a>
+    </div>
+    <div class="search-container">
+        <form action="search.php" method="GET" class="search-form">
+            <input type="text" id="search-input" name="q" placeholder="Search videos..." 
+                   value="<?= isset($_GET['q']) ? htmlspecialchars($_GET['q']) : '' ?>">
+            <button type="submit" id="search-button">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
 
-        <div class="search-bar">
-            <form action="search.php" method="GET">
-                <input type="text" id="search-input" name="q" placeholder="Search videos..." 
-                       value="<?= isset($_GET['q']) ? htmlspecialchars($_GET['q']) : '' ?>">
-                <button type="submit" id="search-button">Search</button>
-            </form>
-        </div>
-
-        <nav class="user-menu">
-            <?php if (isLoggedIn()): ?>
-                <a href="upload.php">Upload Video</a>
-                <a href="auth/logout.php">Logout</a>
-            <?php else: ?>
+    <nav class="user-menu">
+        <?php if (isLoggedIn()): ?>
+            <a href="upload.php">Upload</a>
+            <a href="auth/logout.php">Logout</a>
+        <?php else: ?>
             <a href="/mytube/auth/login.php">Login</a>
             <a href="/mytube/auth/signup.php">Sign Up</a>
-            <?php endif; ?>
-        </nav>
+        <?php endif; ?>
+    </nav>
+
     </header>
 
     <!-- Your existing HTML content -->
