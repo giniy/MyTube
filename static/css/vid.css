@@ -956,3 +956,14 @@ a {
     to { opacity: 0; height: 0; padding: 0; margin: 0; }
 }
 }
+
+.reply-form textarea {
+  width: 100%;
+  padding:10px;
+  border:1px solid #0e0808;
+  border-radius:4px;
+  margin-bottom: 10px;
+  font-family: inherit;
+  min-height: 100px;
+  color: #261818;
+}
