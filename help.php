@@ -115,6 +115,80 @@ if (session_status() === PHP_SESSION_NONE) {
         a{
             color: #493939;
         }
+
+#searchResults {
+    margin-top: 20px;
+    padding: 0;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: none;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.results-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+}
+
+.results-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.results-list {
+    padding: 10px 0;
+}
+
+.search-result {
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-result:hover {
+    background-color: #f9f9f9;
+}
+
+.result-type {
+    font-size: 12px;
+    color: #ff0000;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.result-title {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.result-content {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+}
+
+.highlight {
+    background-color: #fff8e1;
+    font-weight: bold;
+    padding: 0 2px;
+    border-radius: 3px;
+}
+
     </style>
 </head>
 <body>
@@ -138,8 +212,11 @@ if (session_status() === PHP_SESSION_NONE) {
         <p style="text-align: center;">Find answers to common questions or contact our support team</p>
         
         <div class="search-help">
-            <input type="text" placeholder="Search help articles...">
-            <button>Search</button>
+            <form id="helpSearchForm">
+                <input type="text" id="helpSearchInput" placeholder="Search help articles..." autocomplete="off">
+                <button type="submit">Search</button>
+            </form>
+            <div id="searchResults" style="display: none;"></div>
         </div>
         
         <h2>Popular Help Topics</h2>
@@ -326,7 +403,189 @@ if (session_status() === PHP_SESSION_NONE) {
             });
         </script>
     </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // FAQ toggle functionality
+    document.querySelectorAll('.faq-question').forEach(question => {
+        question.addEventListener('click', () => {
+            const answer = question.nextElementSibling;
+            answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+        });
+    });
     
+    // Expand FAQ if linked directly
+    if (window.location.hash) {
+        const target = document.querySelector(window.location.hash);
+        if (target && target.classList.contains('faq-item')) {
+            target.querySelector('.faq-answer').style.display = 'block';
+            target.scrollIntoView();
+        }
+    }
+    
+    // Search functionality
+    const searchInput = document.getElementById('helpSearchInput');
+    const searchResults = document.getElementById('searchResults');
+    
+    if (searchInput) {
+        // Real-time search with debounce
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query === '') {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                performSearch(query);
+            }, 300); // 300ms debounce delay
+        });
+        
+        // Handle form submission
+        document.getElementById('helpSearchForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            performSearch(searchInput.value.trim());
+        });
+    }
+    
+    function performSearch(query) {
+        if (query === '') {
+            searchResults.style.display = 'none';
+            return;
+        }
+        
+        // Get all searchable content
+        const faqItems = document.querySelectorAll('.faq-item');
+        const helpCards = document.querySelectorAll('.help-card li a');
+        const helpSections = document.querySelectorAll('h2, h3');
+        
+        const results = [];
+        const queryLower = query.toLowerCase();
+        
+        // Search FAQ items
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question').textContent.toLowerCase();
+            const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+            const id = item.id;
+            
+            if (question.includes(queryLower)) {
+                results.push({
+                    type: 'FAQ',
+                    title: item.querySelector('.faq-question').textContent,
+                    id: id,
+                    content: highlightText(item.querySelector('.faq-answer').textContent, query),
+                    score: question.indexOf(queryLower) >= 0 ? 2 : 1
+                });
+            } else if (answer.includes(queryLower)) {
+                const answerText = item.querySelector('.faq-answer').textContent;
+                results.push({
+                    type: 'FAQ',
+                    title: item.querySelector('.faq-question').textContent,
+                    id: id,
+                    content: highlightText(answerText, query),
+                    score: 1
+                });
+            }
+        });
+        
+        // Search help card links
+        helpCards.forEach(link => {
+            const text = link.textContent.toLowerCase();
+            if (text.includes(queryLower)) {
+                results.push({
+                    type: 'Help Topic',
+                    title: link.textContent,
+                    id: link.getAttribute('href').substring(1),
+                    content: 'Related help topic',
+                    score: 1
+                });
+            }
+        });
+        
+        // Search section headings
+        helpSections.forEach(section => {
+            const text = section.textContent.toLowerCase();
+            if (text.includes(queryLower)) {
+                let id = section.id;
+                if (!id) {
+                    id = text.trim().toLowerCase().replace(/\s+/g, '-');
+                    section.id = id;
+                }
+                
+                results.push({
+                    type: 'Section',
+                    title: section.textContent,
+                    id: id,
+                    content: 'Jump to this section',
+                    score: text === queryLower ? 3 : 2
+                });
+            }
+        });
+        
+        // Sort results by relevance
+        results.sort((a, b) => b.score - a.score);
+        
+        displayResults(results);
+    }
+    
+    function highlightText(text, query) {
+        if (!query) return text;
+        const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+        return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+    
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    function displayResults(results) {
+        const resultsContainer = document.getElementById('searchResults');
+        
+        if (results.length === 0) {
+            resultsContainer.innerHTML = '<div class="no-results">No results found. Try different keywords.</div>';
+            resultsContainer.style.display = 'block';
+            return;
+        }
+        
+        let html = '<div class="results-header">';
+        html += `<h3>Found ${results.length} ${results.length === 1 ? 'result' : 'results'}</h3>`;
+        html += '</div><div class="results-list">';
+        
+        results.forEach(result => {
+            html += `
+                <div class="search-result" onclick="scrollToResult('${result.id}')">
+                    <div class="result-type">${result.type}</div>
+                    <h4 class="result-title">${highlightText(result.title, searchInput.value.trim())}</h4>
+                    <div class="result-content">${result.content}</div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        resultsContainer.innerHTML = html;
+        resultsContainer.style.display = 'block';
+    }
+});
+
+// Global function for scrolling to results
+function scrollToResult(id) {
+    const target = document.getElementById(id);
+    if (target) {
+        if (target.classList.contains('faq-item')) {
+            target.querySelector('.faq-answer').style.display = 'block';
+        }
+        target.scrollIntoView({ behavior: 'smooth' });
+        target.style.backgroundColor = '#fff8e1';
+        setTimeout(() => {
+            target.style.backgroundColor = '';
+        }, 2000);
+    }
+}
+</script>
     <?php require_once 'includes/footer.php'; ?>
     
     <!-- Font Awesome for icons -->

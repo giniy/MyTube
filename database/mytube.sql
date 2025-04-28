@@ -27,7 +27,7 @@ SET time_zone = "+00:00";
 -- Table structure for table `comments`
 --
 
-CREATE TABLE `comments` (
+CREATE TABLE IF NOT EXISTS `comments` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `video_id` int(11) NOT NULL,
