@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 28, 2025 at 09:14 PM
+-- Generation Time: Apr 28, 2025 at 10:14 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -43,15 +43,15 @@ CREATE TABLE `comments` (
 
 INSERT INTO `comments` (`id`, `user_id`, `video_id`, `comment`, `created_at`, `parent_id`, `like_count`) VALUES
 (4, 1, 4, 'Nice song', '2025-04-27 07:07:38', NULL, 1),
-(5, 1, 7, 'nice song', '2025-04-28 10:04:43', NULL, 2),
+(5, 1, 7, 'nice song', '2025-04-28 10:04:43', NULL, 3),
 (9, 3, 6, 'Good palace', '2025-04-28 11:16:50', NULL, 1),
 (11, 1, 5, 'amazing', '2025-04-28 17:29:14', NULL, 0),
 (13, 1, 5, 'nice', '2025-04-28 17:31:01', NULL, 1),
-(14, 1, 7, 'great', '2025-04-28 17:34:56', NULL, 0),
+(14, 1, 7, 'great', '2025-04-28 17:34:56', NULL, 2),
 (15, 1, 3, 'good', '2025-04-28 17:53:48', NULL, 1),
 (17, 1, 3, 'yea', '2025-04-28 17:54:59', 15, 0),
 (20, 1, 6, 'nice one', '2025-04-28 18:04:24', NULL, 1),
-(24, 1, 7, 'yea', '2025-04-28 10:53:56', 14, 1);
+(28, 1, 4, 'yes', '2025-04-28 15:51:03', 4, 1);
 
 -- --------------------------------------------------------
 
@@ -78,7 +78,10 @@ INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`, `created_at`) VALUES
 (10, 1, 15, '2025-04-28 12:23:53'),
 (11, 1, 13, '2025-04-28 12:25:43'),
 (12, 1, 20, '2025-04-28 12:35:44'),
-(14, 1, 24, '2025-04-28 14:58:43');
+(15, 1, 14, '2025-04-28 19:16:17'),
+(16, 1, 28, '2025-04-28 19:51:07'),
+(17, 2, 14, '2025-04-28 20:09:08'),
+(18, 2, 5, '2025-04-28 20:09:10');
 
 -- --------------------------------------------------------
 
@@ -176,7 +179,8 @@ CREATE TABLE `forum_replies` (
 
 INSERT INTO `forum_replies` (`id`, `topic_id`, `user_id`, `content`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, 'Did you try to upload low size of video?', '2025-04-26 18:47:23', '2025-04-26 18:47:23'),
-(2, 2, 1, 'Yes, we are working on it.', '2025-04-27 17:58:09', '2025-04-27 17:58:09');
+(2, 2, 1, 'Yes, we are working on it.', '2025-04-27 17:58:09', '2025-04-27 17:58:09'),
+(3, 2, 1, 'thanks', '2025-04-28 19:59:30', '2025-04-28 19:59:30');
 
 -- --------------------------------------------------------
 
@@ -202,7 +206,7 @@ CREATE TABLE `forum_topics` (
 
 INSERT INTO `forum_topics` (`id`, `category_id`, `user_id`, `title`, `content`, `is_faq`, `is_closed`, `created_at`, `updated_at`) VALUES
 (1, 2, 1, 'Upload issue', 'I am not able to upload the video on the site.', 0, 0, '2025-04-26 18:46:26', '2025-04-26 18:47:23'),
-(2, 1, 1, 'How to share the video?', 'I am not able to shared the video , there is only copy link option is available.', 0, 0, '2025-04-27 17:57:33', '2025-04-27 17:58:09');
+(2, 1, 1, 'How to share the video?', 'I am not able to shared the video , there is only copy link option is available.', 0, 0, '2025-04-27 17:57:33', '2025-04-28 19:59:30');
 
 -- --------------------------------------------------------
 
@@ -227,7 +231,8 @@ INSERT INTO `likes` (`id`, `user_id`, `video_id`, `created_at`) VALUES
 (18, 3, 7, '2025-04-28 05:46:24'),
 (19, 3, 6, '2025-04-28 05:46:34'),
 (20, 1, 4, '2025-04-28 11:50:59'),
-(21, 1, 3, '2025-04-28 12:14:24');
+(21, 1, 3, '2025-04-28 12:14:24'),
+(22, 2, 7, '2025-04-28 20:09:59');
 
 -- --------------------------------------------------------
 
@@ -254,7 +259,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `bio`, `profile_picture`, `password`, `created_at`, `twitter`, `instagram`, `youtube`, `other`) VALUES
-(1, 'groot', 'root@gmail.com', 'I am groot', '', '$2y$10$P2PPGMvZxJMvSuKYER89eun6nf/8dTSbrWol.sii0vERfBnhILKMi', '2025-04-26 20:48:55', '', 'https://www.instagram.com/gulab_days/', '', ''),
+(1, 'root', 'root@gmail.com', 'I am root', '', '$2y$10$P2PPGMvZxJMvSuKYER89eun6nf/8dTSbrWol.sii0vERfBnhILKMi', '2025-04-26 20:48:55', '', 'https://www.instagram.com/gulab_days/', '', ''),
 (2, 'ravi', 'ravi@gmail.com', NULL, NULL, '$2y$10$u0QMduHBs21fCcHxqoc1UOQ8GfjeWqEZ5.I/2wRnBqymJLe4s.QHe', '2025-04-28 11:02:22', NULL, NULL, NULL, NULL),
 (3, 'rosep', 'rose.p@gmail.com', NULL, NULL, '$2y$10$RVskGnC7S/PStjUG5JTCeOeuRzDYl0uWJizmPEd8FN7iNqFqjEdEG', '2025-04-28 11:15:42', NULL, NULL, NULL, NULL);
 
@@ -372,13 +377,13 @@ ALTER TABLE `videos`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `comment_likes`
 --
 ALTER TABLE `comment_likes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `contact_messages`
@@ -402,7 +407,7 @@ ALTER TABLE `forum_categories`
 -- AUTO_INCREMENT for table `forum_replies`
 --
 ALTER TABLE `forum_replies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `forum_topics`
@@ -414,7 +419,7 @@ ALTER TABLE `forum_topics`
 -- AUTO_INCREMENT for table `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `users`
