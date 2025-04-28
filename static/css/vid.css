@@ -669,22 +669,26 @@ button.liked {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
-    justify-content: center;  /* Horizontally center */
-    align-items: center;      /* Vertically center */
+    justify-content: center;
+    align-items: center;
     z-index: 1000;
+    overflow: auto; /* Enable scrolling if needed */
 }
 
 /* Modal content */
 .modal-content {
-/*    background-color: white;*/
-    padding: 0px;
-    border-radius: 5px;
-    text-align: center;
-    width: 300px;             /* Fixed width */
-    max-width: 90%;           /* Make it responsive on small screens */
-    box-sizing: border-box;   /* Prevent padding from affecting width */
-    margin-left: 491px;
-    margin-top: 324px;
+    background-color: #1e1e1e; /* Dark background */
+    padding: 25px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px; /* Wider for better form display */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    color: #fff; /* Light text for dark mode */
+    border: 1px solid #333; /* Subtle border */
+    margin-left: 450px;
+    margin-top: 135px;
+
 }
 
 /* Close button */
@@ -693,16 +697,72 @@ button.liked {
     font-size: 28px;
     font-weight: bold;
     position: absolute;
-    right: 10px;
+    right: 15px;
     top: 10px;
+    transition: color 0.2s;
 }
 
 .close:hover,
 .close:focus {
-    color: black;
+    color: #fff;
     text-decoration: none;
     cursor: pointer;
 }
+
+/* Form elements */
+.modal-content .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #ddd;
+}
+
+.modal-content input[type="text"],
+.modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background-color: #2d2d2d;
+    color: #fff;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.modal-content input[type="text"]:focus,
+.modal-content textarea:focus {
+    border-color: #ff0000; /* Red accent color */
+    outline: none;
+}
+
+.modal-content textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Submit button */
+.modal-content button[type="submit"] {
+    background-color: #ff0000; /* Red button */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    width: 30%;
+}
+
+.modal-content button[type="submit"]:hover {
+    background-color: #e60000; /* Darker red on hover */
+}
+
+
 
 /* Buttons */
 button {
@@ -736,4 +796,31 @@ button:hover {
 a {
     color: #ffd8d8;
     text-decoration: none;
+}
+.delete-btn {
+    background-color: #ff3333;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-left: 10px;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
+
+.deletion-message {
+    background: #4CAF50;
+    color: white;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 5px;
+    animation: fadeOut 5s forwards;
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; height: 0; padding: 0; margin: 0; }
+}
 }

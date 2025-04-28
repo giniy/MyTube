@@ -20,6 +20,12 @@ if (isLoggedIn()) {
 }
 
 $error = '';
+$success = '';
+
+if (isset($_SESSION['signup_success'])) {
+    $success = $_SESSION['signup_success'];
+    unset($_SESSION['signup_success']); // Clear the message after displaying
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
@@ -54,7 +60,13 @@ require_once '../includes/header.php';
 
 <main class="auth-container">
     <h2>Login</h2>
-    <?php if ($error): ?>
+
+    <?php if ($success): ?>
+         <div class="success"><?= $success ?></div>
+    <?php endif; ?>     
+
+
+     <?php if ($error): ?>
         <div class="error"><?= $error ?></div>
     <?php endif; ?>
     <form method="POST">

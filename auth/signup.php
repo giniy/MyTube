@@ -20,6 +20,7 @@ if (isLoggedIn()) {
 }
 
 $error = '';
+$success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
@@ -49,9 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $insertStmt->bind_param("sss", $username, $email, $hashed_password);
             
             if ($insertStmt->execute()) {
-                $_SESSION['user_id'] = $insertStmt->insert_id;
-                $_SESSION['username'] = $username;
-                header('Location: ../index.php');
+                // Changed from auto-login to success message
+                $_SESSION['signup_success'] = 'Registration successful! Please login.';
+                header('Location: login.php');
                 exit;
             } else {
                 $error = 'Registration failed. Please try again.';

@@ -1,4 +1,3 @@
-
 <?php
 require_once 'includes/config.php';
 require_once 'includes/header.php';
@@ -139,7 +138,9 @@ function displayComment($comment, $conn, $depth = 0) {
             <h3><?= htmlspecialchars($featuredVideo['title']) ?></h3>
             <p><?= htmlspecialchars($featuredVideo['description']) ?></p>
             <p>Uploaded by: <?= htmlspecialchars($featuredVideo['username']) ?></p>  
-        
+            
+            <!-- Actions on Video -->
+    
             <div class="video-actions">
                 <?php if (isLoggedIn()): ?>
                     <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">
@@ -152,11 +153,17 @@ function displayComment($comment, $conn, $depth = 0) {
                         🔗 Share
                     </button>
                 <?php endif; ?>
-
+                <?php if (isLoggedIn() && $canDelete): ?>
+                    <button id="edit-button-<?= $featuredVideo['id'] ?>" onclick="showEditForm(<?= $featuredVideo['id'] ?>)" class="edit-btn">
+                        ✏️ Edit
+                    </button>
+                <?php endif; ?>
+                <?php if (isLoggedIn() && $canDelete): ?>
                 <?php if ($canDelete): ?>
                     <button id="delete-button-<?= $featuredVideo['id'] ?>" onclick="confirmDelete(<?= $featuredVideo['id'] ?>)" class="delete-btn">
                         🗑️ Delete
                     </button>
+                <?php endif; ?>
                 <?php endif; ?>
 
                 <?php
@@ -178,6 +185,27 @@ function displayComment($comment, $conn, $depth = 0) {
                     <button onclick="copyLink()">Copy Link</button>
                 </div>
             </div>
+
+            <!-- EDIT MODAL -->
+            <div id="edit-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" onclick="closeEditModal()">×</span>
+                    <h3>Edit Video Information</h3>
+                    <form id="edit-video-form">
+                        <input type="hidden" id="edit-video-id" name="video_id">
+                        <div class="form-group">
+                            <label for="edit-title">Title</label>
+                            <input type="text" id="edit-title" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-description">Description</label>
+                            <textarea id="edit-description" name="description" required></textarea>
+                        </div>
+                        <button type="submit">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+
         <!-- Updated Comments Section -->
         <div class="comments-section">
             <h4>Comments (<?= $totalComments ?>)</h4>
@@ -441,39 +469,49 @@ function updatePaginationButtons(currentPage) {
     paginationDiv.innerHTML = html;
 }
 
+function showEditForm(videoId) {
+    // Fetch current video info
+    fetch(`get_video_info.php?video_id=${videoId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('edit-video-id').value = videoId;
+            document.getElementById('edit-title').value = data.title;
+            document.getElementById('edit-description').value = data.description;
+            document.getElementById('edit-modal').style.display = 'block';
+        });
+}
+
+function closeEditModal() {
+    document.getElementById('edit-modal').style.display = 'none';
+}
+
+// Handle form submission
+document.getElementById('edit-video-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('update_video.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update the displayed info without page reload
+            document.querySelector('.video-player h3').textContent = data.title;
+            document.querySelector('.video-player p:nth-of-type(1)').textContent = data.description;
+            closeEditModal();
+            alert('Video information updated successfully!');
+        } else {
+            closeEditModal();
+            alert(data.message || 'Update failed');
+        }
+    })
+    .catch(error => {
+        closeEditModal();
+        alert('An error occurred. Please try again.');
+    });
+});
 </script>
-
-<style>
-.delete-btn {
-    background-color: #ff3333;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-left: 10px;
-}
-
-.delete-btn:hover {
-    background-color: #cc0000;
-
-.deletion-message {
-    background: #4CAF50;
-    color: white;
-    padding: 15px;
-    margin: 20px 0;
-    border-radius: 5px;
-    animation: fadeOut 5s forwards;
-}
-
-@keyframes fadeOut {
-    to { opacity: 0; height: 0; padding: 0; margin: 0; }
-}
-}
-
-
-
-</style>
-
 <?php require_once 'includes/footer.php'; ?>
