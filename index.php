@@ -68,6 +68,7 @@ if ($featuredVideo) {
     $commentsResult = $stmt->get_result();
 }
 
+
 function displayComment($comment, $conn, $depth = 0) {
     // Get comment likes count
     $likesQuery = "SELECT COUNT(*) as like_count FROM comment_likes WHERE comment_id = ?";
@@ -86,6 +87,13 @@ function displayComment($comment, $conn, $depth = 0) {
     $repliesResult = $stmt->get_result();
     
     $margin = $depth * 20;
+
+    $canDeleteComment = false;
+    if (isLoggedIn()) {
+        $user_id = $_SESSION['user_id'];
+        // Allow deletion if user is comment author or admin
+        $canDeleteComment = ($user_id == $comment['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
+    }
     ?>
     <div class="comment" style="margin-left: <?= $margin ?>px;">
         <strong><?= htmlspecialchars($comment['username']) ?></strong>
@@ -96,8 +104,10 @@ function displayComment($comment, $conn, $depth = 0) {
             <div class="comment-actions">
                 <button onclick="toggleReplyForm(<?= $comment['id'] ?>)">Reply</button>
                 <button onclick="likeComment(<?= $comment['id'] ?>)">Like (<?= $likeData['like_count'] ?>)</button>
+            <?php if ($canDeleteComment): ?>
+                    <button onclick="confirmCommentDelete(<?= $comment['id'] ?>)" class="delete-comment-btn">Delete</button>
+                <?php endif; ?>
             </div>
-            
             <div id="reply-form-<?= $comment['id'] ?>" class="reply-form" style="display: none;">
                 <form action="comments.php" method="POST">
                     <input type="hidden" name="video_id" value="<?= $comment['video_id'] ?>">
@@ -540,5 +550,35 @@ document.getElementById('edit-video-form').addEventListener('submit', function(e
         alert('An error occurred. Please try again.');
     });
 });
+
+function confirmCommentDelete(commentId) {
+    if (confirm('Are you sure you want to delete this comment?')) {
+        fetch('delete_comment.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'comment_id=' + commentId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Remove the comment from the DOM
+                const commentElement = document.querySelector(`.comment [onclick="confirmCommentDelete(${commentId})"]`).closest('.comment');
+                if (commentElement) {
+                    commentElement.remove();
+                }
+                // Update comments count
+                const commentsCountElement = document.querySelector('.comments-section h4');
+                if (commentsCountElement) {
+                    const currentCount = parseInt(commentsCountElement.textContent.match(/\d+/)[0]) || 0;
+                    commentsCountElement.textContent = commentsCountElement.textContent.replace(/\d+/, currentCount - 1);
+                }
+            } else {
+                alert('Error: ' + (data.message || 'Failed to delete comment'));
+            }
+        });
+    }
+}
 </script>
 <?php require_once 'includes/footer.php'; ?>
