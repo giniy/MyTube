@@ -46,3 +46,10 @@ RESULTS:
 Video deleted: Yes
 Thumbnail deleted: Yes
 DB record deleted: Yes
+[2025-04-29 13:31:07] DELETE PROCESS STARTED
+Video path: uploads/videos/video_6810af2111d344.40525622.mp4
+Thumbnail path: uploads/thumbnails/thumb_6810af2111d385.83298675.png
+RESULTS:
+Video deleted: Yes
+Thumbnail deleted: Yes
+DB record deleted: Yes
