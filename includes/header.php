@@ -29,18 +29,23 @@
             </button>
         </form>
     </div>
-
-    <nav class="user-menu">
-        <?php if (isLoggedIn()): ?>
-            <a href="upload.php">Upload Video</a>
-            <a href="auth/logout.php">Logout</a>
-            <a href="profile.php">My Profile</a>
-        <?php else: ?>
-            <a href="/mytube/auth/login.php">Login</a>
-            <a href="/mytube/auth/signup.php">Sign Up</a>
-        <?php endif; ?>
-    </nav>
-
+<?php require_once 'includes/functions.php'; ?>
+<nav class="user-menu">
+    <?php if (isLoggedIn()): ?>
+        <a href="upload.php">Upload Video</a>
+        <a href="profile.php" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+            <img src="<?= htmlspecialchars(getProfilePicture(getUserId())) ?>" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; vertical-align: middle;">
+            <span>
+                <!-- username Display -->
+                <!-- <?= htmlspecialchars(getUsername(getUserId())) ?> -->
+            </span>
+        </a>
+        <a href="auth/logout.php">Logout</a>
+    <?php else: ?>
+        <a href="/mytube/auth/login.php">Login</a>
+        <a href="/mytube/auth/signup.php">Sign Up</a>
+    <?php endif; ?>
+</nav>
     </header>
 
     <!-- Your existing HTML content -->

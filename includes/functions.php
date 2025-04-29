@@ -105,14 +105,28 @@ function getUserLikes($userId) {
     $stmt->execute();
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
-
 function getProfilePicture($userId) {
     $default = 'static/images/default-profile.png';
     $custom = 'uploads/profile_pictures/' . $userId . '.jpg';
-    
     return file_exists($custom) ? $custom : $default;
+    global $conn;
+    $stmt = $conn->prepare("SELECT profile_picture FROM users WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    return $user['profile_picture'] ?? 'default.jpg'; // Fallback to a default image
 }
 
+function getUsername($userId) {
+    global $conn;
+    $stmt = $conn->prepare("SELECT username FROM users WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    return $user['username'] ?? 'User'; // Fallback if username not found
+}
 function formatDuration($seconds) {
     $hours = floor($seconds / 3600);
     $minutes = floor(($seconds % 3600) / 60);
@@ -137,6 +151,4 @@ function timeElapsedString($datetime) {
     if ($diff->i > 0) return $diff->i . ' minute' . ($diff->i > 1 ? 's' : '') . ' ago';
     return 'just now';
 }
-
-?>
 
