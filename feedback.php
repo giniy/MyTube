@@ -1,6 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - MyTube</title>
+    <link href="static/css/vid.css" rel="stylesheet">
+    <link href="static/css/terms.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a class="nav-link" href="index.php" style="text-decoration: none; color: #ff0000; font-weight: bold;">MyTube</a>
+        </div>
+        <nav class="user-menu">
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="upload.php">Upload Video</a>
+                <a href="auth/logout.php">Logout</a>
+            <?php else: ?>
+                <a href="auth/login.php">Login</a>
+                <a href="auth/signup.php">Sign Up</a>
+            <?php endif; ?>
+        </nav>
+    </header>
+</body>
 <?php
 require_once 'includes/config.php';
-require_once 'includes/header.php';
+// require_once 'includes/header.php';
 
 // Initialize variables
 $errors = [];
@@ -132,7 +157,7 @@ $conn->query("
 
                 <div class="form-group">
                     <label for="message">Your Feedback *</label>
-                    <textarea id="message" name="message" class="form-control" rows="6" required><?= 
+                    <textarea id="message" style="color: #524f4f;" name="message" class="form-control" rows="6" required><?= 
                         isset($_POST['message']) ? htmlspecialchars($_POST['message']) : '' 
                     ?></textarea>
                 </div>

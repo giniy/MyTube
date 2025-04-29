@@ -12,7 +12,7 @@ if (!isset($video)) return;
         </div>
         <div class="video-info">
             <h3><?= htmlspecialchars($video['title']) ?></h3>
-            <h5><?= htmlspecialchars($video['description']) ?></h5>
+            <h4><?= htmlspecialchars($video['description']) ?><h4>
             <div class="video-meta">
                 <span class="upload-date"><?= timeElapsedString($video['uploaded_at']) ?></span>
             </div>
