@@ -11,6 +11,18 @@
     <!-- OR using absolute path (better) -->
     <!-- <link href="/static/css/auth.css" rel="stylesheet"> -->
 </head>
+    <header>
+    <div class="logo">
+        <a class="nav-link" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" 
+           style="text-decoration: none; color: #ff0000; font-weight: bold;">
+            MyTube
+        </a>
+    </div>
+        <nav class="user-menu">
+        <!--  -->
+        </nav>
+    </header>
+
 <?php
 require_once '../includes/config.php';
 
@@ -55,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-require_once '../includes/header.php';
+// require_once '../includes/header.php';
 ?>
 
 <main class="auth-container">
