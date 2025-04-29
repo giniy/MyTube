@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $targetFile)) {
                 $profilePicture = $targetFile;
-                resizeImage($targetFile, 300, 300);
+                // resizeImage($targetFile, 300, 300);
             } else {
                 $errors[] = "Failed to upload profile picture";
             }
