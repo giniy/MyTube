@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="favicon/play.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Giniy</title>
+    <title>Login - MyTube</title>
     <!-- Using relative path -->
     <link href="../static/css/vid.css" rel="stylesheet">
     <link href="../static/css/auth.css" rel="stylesheet">
@@ -22,6 +23,24 @@
         <!--  -->
         </nav>
     </header>
+
+<style type="text/css">
+    
+body{
+
+        background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.5) 30%,
+        rgba(0, 0, 0, 0.3) 60%,
+        rgba(0, 0, 0, 0.1) 80%,
+        rgba(0, 0, 0, 0) 200%
+    );
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+}
+ 
+</style>
 
 <?php
 require_once '../includes/config.php';
