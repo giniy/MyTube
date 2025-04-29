@@ -213,7 +213,7 @@ if (session_status() === PHP_SESSION_NONE) {
         
         <div class="search-help">
             <form id="helpSearchForm">
-                <input type="text" id="helpSearchInput" placeholder="Search help articles..." autocomplete="off">
+                <input type="text" id="searchInput" placeholder="Search help topics..." autocomplete="off">
                 <button type="submit">Search</button>
             </form>
             <div id="searchResults" style="display: none;"></div>
@@ -381,214 +381,126 @@ if (session_status() === PHP_SESSION_NONE) {
                 <p><a href="forum.php" style="color: #ff0303;">Visit our forum</a></p>
             </div>
         </div>
-        
-        <script>
-            // Simple FAQ toggle functionality
-            document.querySelectorAll('.faq-question').forEach(question => {
-                question.addEventListener('click', () => {
-                    const answer = question.nextElementSibling;
-                    answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-                });
-            });
-            
-            // Expand FAQ if linked directly
-            window.addEventListener('load', () => {
-                if (window.location.hash) {
-                    const target = document.querySelector(window.location.hash);
-                    if (target && target.classList.contains('faq-item')) {
-                        target.querySelector('.faq-answer').style.display = 'block';
-                        target.scrollIntoView();
-                    }
-                }
-            });
-        </script>
     </div>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // FAQ toggle functionality
-    document.querySelectorAll('.faq-question').forEach(question => {
-        question.addEventListener('click', () => {
-            const answer = question.nextElementSibling;
-            answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-        });
-    });
-    
-    // Expand FAQ if linked directly
-    if (window.location.hash) {
-        const target = document.querySelector(window.location.hash);
-        if (target && target.classList.contains('faq-item')) {
-            target.querySelector('.faq-answer').style.display = 'block';
-            target.scrollIntoView();
-        }
-    }
-    
-    // Search functionality
-    const searchInput = document.getElementById('helpSearchInput');
-    const searchResults = document.getElementById('searchResults');
-    
-    if (searchInput) {
-        // Real-time search with debounce
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            const query = this.value.trim();
-            
-            if (query === '') {
-                searchResults.style.display = 'none';
-                return;
-            }
-            
-            searchTimeout = setTimeout(() => {
-                performSearch(query);
-            }, 300); // 300ms debounce delay
-        });
-        
-        // Handle form submission
-        document.getElementById('helpSearchForm')?.addEventListener('submit', function(e) {
-            e.preventDefault();
-            performSearch(searchInput.value.trim());
-        });
-    }
-    
-    function performSearch(query) {
-        if (query === '') {
-            searchResults.style.display = 'none';
-            return;
-        }
-        
-        // Get all searchable content
-        const faqItems = document.querySelectorAll('.faq-item');
-        const helpCards = document.querySelectorAll('.help-card li a');
-        const helpSections = document.querySelectorAll('h2, h3');
-        
-        const results = [];
-        const queryLower = query.toLowerCase();
-        
-        // Search FAQ items
-        faqItems.forEach(item => {
-            const question = item.querySelector('.faq-question').textContent.toLowerCase();
-            const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
-            const id = item.id;
-            
-            if (question.includes(queryLower)) {
-                results.push({
-                    type: 'FAQ',
-                    title: item.querySelector('.faq-question').textContent,
-                    id: id,
-                    content: highlightText(item.querySelector('.faq-answer').textContent, query),
-                    score: question.indexOf(queryLower) >= 0 ? 2 : 1
-                });
-            } else if (answer.includes(queryLower)) {
-                const answerText = item.querySelector('.faq-answer').textContent;
-                results.push({
-                    type: 'FAQ',
-                    title: item.querySelector('.faq-question').textContent,
-                    id: id,
-                    content: highlightText(answerText, query),
-                    score: 1
-                });
-            }
-        });
-        
-        // Search help card links
-        helpCards.forEach(link => {
-            const text = link.textContent.toLowerCase();
-            if (text.includes(queryLower)) {
-                results.push({
-                    type: 'Help Topic',
-                    title: link.textContent,
-                    id: link.getAttribute('href').substring(1),
-                    content: 'Related help topic',
-                    score: 1
-                });
-            }
-        });
-        
-        // Search section headings
-        helpSections.forEach(section => {
-            const text = section.textContent.toLowerCase();
-            if (text.includes(queryLower)) {
-                let id = section.id;
-                if (!id) {
-                    id = text.trim().toLowerCase().replace(/\s+/g, '-');
-                    section.id = id;
-                }
-                
-                results.push({
-                    type: 'Section',
-                    title: section.textContent,
-                    id: id,
-                    content: 'Jump to this section',
-                    score: text === queryLower ? 3 : 2
-                });
-            }
-        });
-        
-        // Sort results by relevance
-        results.sort((a, b) => b.score - a.score);
-        
-        displayResults(results);
-    }
-    
-    function highlightText(text, query) {
-        if (!query) return text;
-        const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
-        return text.replace(regex, '<span class="highlight">$1</span>');
-    }
-    
-    function escapeRegExp(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-    
-    function displayResults(results) {
-        const resultsContainer = document.getElementById('searchResults');
-        
-        if (results.length === 0) {
-            resultsContainer.innerHTML = '<div class="no-results">No results found. Try different keywords.</div>';
-            resultsContainer.style.display = 'block';
-            return;
-        }
-        
-        let html = '<div class="results-header">';
-        html += `<h3>Found ${results.length} ${results.length === 1 ? 'result' : 'results'}</h3>`;
-        html += '</div><div class="results-list">';
-        
-        results.forEach(result => {
-            html += `
-                <div class="search-result" onclick="scrollToResult('${result.id}')">
-                    <div class="result-type">${result.type}</div>
-                    <h4 class="result-title">${highlightText(result.title, searchInput.value.trim())}</h4>
-                    <div class="result-content">${result.content}</div>
-                </div>
-            `;
-        });
-        
-        html += '</div>';
-        resultsContainer.innerHTML = html;
-        resultsContainer.style.display = 'block';
-    }
-});
-
-// Global function for scrolling to results
-function scrollToResult(id) {
-    const target = document.getElementById(id);
-    if (target) {
-        if (target.classList.contains('faq-item')) {
-            target.querySelector('.faq-answer').style.display = 'block';
-        }
-        target.scrollIntoView({ behavior: 'smooth' });
-        target.style.backgroundColor = '#fff8e1';
-        setTimeout(() => {
-            target.style.backgroundColor = '';
-        }, 2000);
-    }
-}
-</script>
     <?php require_once 'includes/footer.php'; ?>
     
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // ✅ FAQ toggle
+    const faqQuestions = document.querySelectorAll(".faq-question");
+    faqQuestions.forEach(question => {
+        question.addEventListener("click", function () {
+            const answer = this.nextElementSibling;
+            const isVisible = answer.style.display === "block";
+            document.querySelectorAll(".faq-answer").forEach(a => a.style.display = "none");
+            answer.style.display = isVisible ? "none" : "block";
+        });
+    });
+
+    // ✅ Real-time Search
+    const searchInput = document.getElementById("searchInput");
+    const resultsContainer = document.getElementById("searchResults");
+
+    if (searchInput && resultsContainer) {
+        searchInput.addEventListener("input", function () {
+            const query = this.value.trim().toLowerCase();
+            performSearch(query);
+        });
+    }
+
+    function performSearch(query) {
+        const results = [];
+        if (!query) {
+            resultsContainer.innerHTML = "";
+            resultsContainer.style.display = "none";
+            return;
+        }
+
+        // Search FAQ
+        document.querySelectorAll(".faq-item").forEach(item => {
+            const question = item.querySelector(".faq-question").textContent.toLowerCase();
+            const answer = item.querySelector(".faq-answer").textContent.toLowerCase();
+            if (question.includes(query) || answer.includes(query)) {
+                const id = item.id || question.replace(/\s+/g, "-");
+                item.id = id;
+                results.push({
+                    type: "FAQ",
+                    title: item.querySelector(".faq-question").textContent,
+                    id: id,
+                    content: item.querySelector(".faq-answer").textContent
+                });
+            }
+        });
+
+        // Search Headings
+        document.querySelectorAll("h2, h3").forEach(section => {
+            const text = section.textContent.toLowerCase();
+            if (text.includes(query)) {
+                const id = section.id || text.replace(/\s+/g, "-");
+                section.id = id;
+                results.push({
+                    type: "Section",
+                    title: section.textContent,
+                    id: id,
+                    content: "Jump to this section"
+                });
+            }
+        });
+
+        displayResults(results);
+    }
+
+    function displayResults(results) {
+        if (results.length === 0) {
+            resultsContainer.innerHTML = '<div class="no-results">No results found.</div>';
+            resultsContainer.style.display = "block";
+            return;
+        }
+
+        let html = '<h3>Search Results:</h3><div class="results-list">';
+        results.forEach(result => {
+            html += `
+                <div class="search-result" onclick="scrollToResult('${result.id}')">
+                    <div class="result-type">${result.type}</div>
+                    <h4 class="result-title">${highlightText(result.title, searchInput.value)}</h4>
+                    <div class="result-content">${highlightText(result.content, searchInput.value)}</div>
+                </div>
+            `;
+        });
+        html += "</div>";
+        resultsContainer.innerHTML = html;
+        resultsContainer.style.display = "block";
+    }
+
+    function highlightText(text, query) {
+        if (!query) return text;
+        const regex = new RegExp(`(${escapeRegExp(query)})`, "gi");
+        return text.replace(regex, "<mark>$1</mark>");
+    }
+
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+});
+
+// ✅ Global scroll function
+function scrollToResult(id) {
+    const target = document.getElementById(id);
+    if (target) {
+        if (target.classList.contains("faq-item")) {
+            const answer = target.querySelector(".faq-answer");
+            if (answer) answer.style.display = "block";
+        }
+        target.scrollIntoView({ behavior: "smooth" });
+        target.style.backgroundColor = "#fff8e1";
+        setTimeout(() => target.style.backgroundColor = "", 2000);
+    }
+}
+</script>
+
+
 </body>
 </html>

@@ -544,11 +544,13 @@ textarea {
     transition: border 0.3s;
     display: block;
     background: none;
+    color: #ff0000;
 }
 
 .comments-section textarea:focus {
     border-color: #ff0000;
     outline: none;
+    color: #ff0000;
     box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
 }
 
@@ -965,5 +967,5 @@ a {
   margin-bottom: 10px;
   font-family: inherit;
   min-height: 100px;
-  color: #261818;
+  color: #8d8d8d;
 }

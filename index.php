@@ -95,7 +95,7 @@ function displayComment($comment, $conn, $depth = 0) {
         $canDeleteComment = ($user_id == $comment['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
     }
     ?>
-    <div class="comment" style="margin-left: <?= $margin ?>px;">
+    <div class="comment" style="margin-left: <?= $margin ?>px; color: #8d8d8d;">
         <strong><?= htmlspecialchars($comment['username']) ?></strong>
         <p><?= htmlspecialchars($comment['comment']) ?></p>
         <small><?= date('M j, Y g:i a', strtotime($comment['created_at'])) ?></small>
@@ -108,7 +108,7 @@ function displayComment($comment, $conn, $depth = 0) {
                     <button onclick="confirmCommentDelete(<?= $comment['id'] ?>)" class="delete-comment-btn">Delete</button>
                 <?php endif; ?>
             </div>
-            <div id="reply-form-<?= $comment['id'] ?>" class="reply-form" style="display: none;">
+            <div id="reply-form-<?= $comment['id'] ?>" class="comment-actions" style="display: none; color: #8d8d8d;">
                 <form action="comments.php" method="POST">
                     <input type="hidden" name="video_id" value="<?= $comment['video_id'] ?>">
                     <input type="hidden" name="parent_id" value="<?= $comment['id'] ?>">
@@ -128,8 +128,6 @@ function displayComment($comment, $conn, $depth = 0) {
     <?php
 }
 ?>
-
-
 <div class="video-page-background">
     <video id="background-video" autoplay muted loop>
         <source src="<?= VIDEO_UPLOAD_PATH . $featuredVideo['video_file'] ?>" type="video/mp4">
