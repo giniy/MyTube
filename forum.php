@@ -1,6 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - MyTube</title>
+    <link href="static/css/vid.css" rel="stylesheet">
+    <link href="static/css/profile.css" rel="stylesheet">
+</head>
+<body>
+
+<header>
+<div class="logo">
+    <a class="nav-link" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" 
+       style="text-decoration: none; color: #ff0000; font-weight: bold;">
+        MyTube
+    </a>
+
+</div>
+</header>
+</body>
+
 <?php
 require_once 'includes/config.php';
-require_once 'includes/header.php';
+// require_once 'includes/header.php';
 
 // Get all categories with their topics
 $categories = [];
@@ -45,10 +67,19 @@ $recentActivity = $conn->query("
         <?php endif; ?>
     </div>
 
+    <!-- Add search form -->
+    <div class="forum-search">
+        <form id="forumSearchForm">
+            <input type="text" id="forumSearchInput" placeholder="Search forum topics..." autocomplete="off">
+            <button type="submit" class="btn">Search</button>
+        </form>
+        <div id="forumSearchResults" style="display: none;"></div>
+    </div>
+
     <div class="forum-layout">
         <div class="forum-main">
             <?php foreach ($categories as $category): ?>
-                <div class="forum-category">
+                <div class="forum-category" id="category-<?= $category['id'] ?>">
                     <h2><?= htmlspecialchars($category['name']) ?></h2>
                     <p><?= htmlspecialchars($category['description']) ?></p>
                     
@@ -57,7 +88,7 @@ $recentActivity = $conn->query("
                             <p>No topics yet. Be the first to post!</p>
                         <?php else: ?>
                             <?php foreach ($category['topics'] as $topic): ?>
-                                <div class="topic-item">
+                                <div class="topic-item" id="topic-<?= $topic['id'] ?>">
                                     <div class="topic-info">
                                         <h3>
                                             <a href="view_topic.php?id=<?= $topic['id'] ?>">
@@ -114,135 +145,262 @@ $recentActivity = $conn->query("
     </div>
 </div>
 
-<?php require_once 'includes/footer.php'; ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('forumSearchInput');
+    const searchResults = document.getElementById('forumSearchResults');
+    
+    if (searchInput) {
+        // Real-time search with debounce
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query === '') {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                performForumSearch(query);
+            }, 300);
+        });
+        
+        // Handle form submission
+        document.getElementById('forumSearchForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            performForumSearch(searchInput.value.trim());
+        });
+    }
+    
+    function performForumSearch(query) {
+        if (query === '') {
+            searchResults.style.display = 'none';
+            return;
+        }
+        
+        const categories = document.querySelectorAll('.forum-category');
+        const topics = document.querySelectorAll('.topic-item');
+        const recentActivities = document.querySelectorAll('.activity-list li');
+        
+        const results = [];
+        const queryLower = query.toLowerCase();
+        
+        // Search categories
+        categories.forEach(category => {
+            const title = category.querySelector('h2').textContent.toLowerCase();
+            const desc = category.querySelector('p').textContent.toLowerCase();
+            const id = category.id;
+            
+            if (title.includes(queryLower) || desc.includes(queryLower)) {
+                results.push({
+                    type: 'Category',
+                    title: category.querySelector('h2').textContent,
+                    id: id,
+                    content: category.querySelector('p').textContent,
+                    score: title.includes(queryLower) ? 2 : 1
+                });
+            }
+        });
+        
+        // Search topics
+        topics.forEach(topic => {
+            const title = topic.querySelector('h3 a').textContent.toLowerCase();
+            const author = topic.querySelector('.topic-info p').textContent.toLowerCase();
+            const id = topic.id;
+            
+            if (title.includes(queryLower)) {
+                results.push({
+                    type: 'Topic',
+                    title: topic.querySelector('h3 a').textContent,
+                    id: id,
+                    content: 'Posted by ' + topic.querySelector('.topic-info p').textContent,
+                    score: 2
+                });
+            } else if (author.includes(queryLower)) {
+                results.push({
+                    type: 'Topic',
+                    title: topic.querySelector('h3 a').textContent,
+                    id: id,
+                    content: 'Posted by ' + topic.querySelector('.topic-info p').textContent,
+                    score: 1
+                });
+            }
+        });
+        
+        // Search recent activity
+        recentActivities.forEach(activity => {
+            const text = activity.textContent.toLowerCase();
+            if (text.includes(queryLower)) {
+                const link = activity.querySelector('a');
+                results.push({
+                    type: 'Activity',
+                    title: link.textContent,
+                    id: 'activity-' + results.length,
+                    content: activity.textContent,
+                    score: 1
+                });
+            }
+        });
+        
+        // Sort results by relevance
+        results.sort((a, b) => b.score - a.score);
+        
+        displayForumResults(results);
+    }
+    
+    function highlightText(text, query) {
+        if (!query) return text;
+        const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+        return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+    
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    function displayForumResults(results) {
+        const resultsContainer = document.getElementById('forumSearchResults');
+        
+        if (results.length === 0) {
+            resultsContainer.innerHTML = '<div class="no-results">No results found. Try different keywords.</div>';
+            resultsContainer.style.display = 'block';
+            return;
+        }
+        
+        let html = '<div class="results-header">';
+        html += `<h3>Found ${results.length} ${results.length === 1 ? 'result' : 'results'}</h3>`;
+        html += '</div><div class="results-list">';
+        
+        results.forEach(result => {
+            // Determine the link URL based on result type
+            let linkUrl = '#';
+            if (result.type === 'Topic') {
+                const topicId = result.id.replace('topic-', '');
+                linkUrl = `view_topic.php?id=${topicId}`;
+            } else if (result.type === 'Category') {
+                linkUrl = `#${result.id}`;
+            } else if (result.type === 'Activity') {
+                // Extract topic ID from activity link if possible
+                const activityLink = result.content.match(/view_topic\.php\?id=(\d+)/);
+                if (activityLink && activityLink[1]) {
+                    linkUrl = `view_topic.php?id=${activityLink[1]}`;
+                }
+            }
+            
+            html += `
+                <div class="search-result">
+                    <a href="${linkUrl}" class="result-link">
+                        <div class="result-type">${result.type}</div>
+                        <h4 class="result-title">${highlightText(result.title, searchInput.value.trim())}</h4>
+                        <div class="result-content">${highlightText(result.content, searchInput.value.trim())}</div>
+                    </a>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        resultsContainer.innerHTML = html;
+        resultsContainer.style.display = 'block';
+    }
+});
+
+// Global function for scrolling to results
+function scrollToForumResult(id) {
+    const target = document.getElementById(id);
+    if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+        target.style.backgroundColor = '#fff8e1';
+        setTimeout(() => {
+            target.style.backgroundColor = '';
+        }, 2000);
+    }
+}
+</script>
 
 <style>
-a {
-    color: #ff0606;
-    text-decoration: none;
-}
-    
-.forum-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.forum-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* Add these styles to your existing CSS */
+.forum-search {
     margin-bottom: 30px;
+    position: relative;
 }
 
-.forum-layout {
-    display: flex;
-    gap: 30px;
+.forum-search input {
+    padding: 12px;
+    width: 70%;
+    max-width: 600px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
 }
 
-.forum-main {
-    flex: 1;
+.forum-search button {
+    padding: 12px 20px;
 }
 
-.forum-sidebar {
-    width: 300px;
+#forumSearchResults {
+    position: absolute;
+    width: 70%;
+    max-width: 600px;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    z-index: 100;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.forum-category {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 30px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+.results-header {
+    padding: 10px 15px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
 }
 
-.topic-list {
-    margin-top: 20px;
+.results-list {
+    max-height: 400px;
+    overflow-y: auto;
 }
 
-.topic-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 15px 0;
+.search-result {
+    padding: 12px 15px;
     border-bottom: 1px solid #eee;
+    cursor: pointer;
 }
 
-.topic-item:last-child {
-    border-bottom: none;
+.search-result:hover {
+    background-color: #f9f9f9;
 }
 
-.topic-info h3 {
+.result-type {
+    font-size: 12px;
+    color: #ff0000;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.result-title {
     margin: 0 0 5px 0;
+    font-size: 16px;
 }
 
-.topic-info p {
-    margin: 0;
-    color: #666;
-    font-size: 0.9em;
-}
-
-.topic-stats {
-    text-align: right;
-    font-size: 0.9em;
+.result-content {
+    font-size: 14px;
     color: #666;
 }
 
-.badge {
-    background: #ff0000;
-    color: white;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.8em;
+.no-results {
+    padding: 15px;
+    text-align: center;
+    color: #666;
 }
 
-.sidebar-section {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.activity-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.activity-list li {
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-}
-
-.activity-list li:last-child {
-    border-bottom: none;
-}
-
-.rules-list {
-    padding-left: 20px;
-}
-
-.btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background: #ff0000;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: background 0.3s;
-}
-
-.btn:hover {
-    background: #cc0000;
-}
-
-@media (max-width: 768px) {
-    .forum-layout {
-        flex-direction: column;
-    }
-    
-    .forum-sidebar {
-        width: 100%;
-    }
+.highlight {
+    background-color: #fff8e1;
+    font-weight: bold;
+    padding: 0 2px;
+    border-radius: 3px;
 }
 </style>
+
+<?php require_once 'includes/footer.php'; ?>

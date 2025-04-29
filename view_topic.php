@@ -1,6 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service - MyTube</title>
+    <link href="static/css/vid.css" rel="stylesheet">
+    <link href="static/css/profile.css" rel="stylesheet">
+</head>
+<body>
+
+<header>
+<div class="logo">
+    <a class="nav-link" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" 
+       style="text-decoration: none; color: #ff0000; font-weight: bold;">
+        MyTube
+    </a>
+
+</div>
+</header>
+</body>
+
 <?php
 require_once 'includes/config.php';
-require_once 'includes/header.php';
+// require_once 'includes/header.php';
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header("Location: forum.php");
