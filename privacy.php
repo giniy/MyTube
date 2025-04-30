@@ -95,7 +95,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <p>We may update this policy from time to time. We'll notify you of significant changes through our platform.</p>
         
         <h2>9. Contact Us</h2>
-        <p>For questions about this Privacy Policy, please contact us at <a href="mailto:privacy@mytube.com">privacy@mytube.com</a>.</p>
+        <p>For questions about this Privacy Policy, please contact us at <a href="mailto:privacy@mytube.com" style="color:red;" >privacy@mytube.com</a>.</p>
     </div>
     
     <?php require_once 'includes/footer.php'; ?>

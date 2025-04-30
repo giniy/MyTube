@@ -76,7 +76,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <p>These Terms shall be governed by the laws of [Your Country/State] without regard to its conflict of law provisions.</p>
         
         <h2>12. Contact Information</h2>
-        <p>For questions about these Terms, please contact us at <a href="mailto:legal@mytube.com">legal@mytube.com</a>.</p>
+        <p>For questions about these Terms, please contact us at <a href="mailto:legal@mytube.com" style="color:red;">legal@mytube.com</a>.</p>
     </div>
     <?php require_once 'includes/footer.php'; ?>
 </body>

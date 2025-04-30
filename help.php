@@ -356,7 +356,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 <i class="fas fa-envelope"></i>
                 <h3>Email Support</h3>
                 <p>For general inquiries</p>
-                <p><a href="mailto:support@mytube.com">support@mytube.com</a></p>
+                <p><a href="mailto:support@mytube.com" style="color:red;" >support@mytube.com</a></p>
                 <p>Response time: 24-48 hours</p>
             </div>
             
@@ -364,14 +364,14 @@ if (session_status() === PHP_SESSION_NONE) {
                 <i class="fas fa-exclamation-triangle"></i>
                 <h3>Copyright Issues</h3>
                 <p>DMCA and copyright claims</p>
-                <p><a href="mailto:copyright@mytube.com">copyright@mytube.com</a></p>
+                <p><a href="mailto:copyright@mytube.com" style="color:red;">copyright@mytube.com</a></p>
             </div>
             
             <div class="contact-card">
                 <i class="fas fa-shield-alt"></i>
                 <h3>Safety Concerns</h3>
                 <p>Reporting abuse or safety issues</p>
-                <p><a href="mailto:abuse@mytube.com">abuse@mytube.com</a></p>
+                <p><a href="mailto:abuse@mytube.com" style="color:red;">abuse@mytube.com</a></p>
             </div>
             
             <div class="contact-card">

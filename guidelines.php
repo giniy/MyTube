@@ -125,7 +125,7 @@ if (session_status() === PHP_SESSION_NONE) {
         </ul>
         
         <h2>5. Reporting Violations</h2>
-        <p>Help us keep MyTube safe by reporting content that violates these guidelines. Use the "Report" button on videos and comments, or email us at <a href="mailto:abuse@mytube.com">abuse@mytube.com</a>.</p>
+        <p>Help us keep MyTube safe by reporting content that violates these guidelines. Use the "Report" button on videos and comments, or email us at <a href="mailto:abuse@mytube.com" style="color:red;">abuse@mytube.com</a>.</p>
         
         <h2>6. Enforcement</h2>
         <p>We may take these actions against violating content/accounts:</p>
@@ -138,7 +138,7 @@ if (session_status() === PHP_SESSION_NONE) {
         </ul>
         
         <h2>7. Appeals</h2>
-        <p>If you believe we made a mistake in enforcing these guidelines, you may appeal by contacting <a href="mailto:appeals@mytube.com">appeals@mytube.com</a>.</p>
+        <p>If you believe we made a mistake in enforcing these guidelines, you may appeal by contacting <a href="mailto:appeals@mytube.com" style="color:red;" >appeals@mytube.com</a>.</p>
     </div>
     
     <?php require_once 'includes/footer.php'; ?>
