@@ -28,6 +28,7 @@ if (!$userData) {
 <div class="profile-container">
     <!-- User Info Section -->
     <section class="profile-info">
+
         <div class="profile-header">
             <div class="profile-picture">
                 <img src="<?= getProfilePicture($userData['id']) ?>" alt="Profile Picture">
@@ -35,6 +36,7 @@ if (!$userData) {
             <div class="profile-details">
                 <h1><?= htmlspecialchars($userData['username']) ?></h1>
                 <p class="profile-email"><?= htmlspecialchars($userData['email']) ?></p>
+                <br>
                 <div class="profile-bio">
                     <p>
                         <?= !empty($userData['bio']) 
@@ -82,6 +84,7 @@ if (!$userData) {
             </div>
         </div>
         
+
         <div class="profile-stats">
             <div class="stat-item">
                 <span class="stat-number"><?= count($videos) ?></span>
