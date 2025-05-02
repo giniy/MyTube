@@ -25,6 +25,16 @@ if (isset($_GET['video_id'])) {
     $stmt->execute();
     $featuredResult = $stmt->get_result();
     $featuredVideo = $featuredResult->fetch_assoc();
+
+    // Record view if user is logged in
+    if (isLoggedIn() && $featuredVideo) {
+        $user_id = $_SESSION['user_id'];
+        $viewQuery = "INSERT INTO video_views (user_id, video_id, viewed_at) VALUES (?, ?, NOW()) 
+                      ON DUPLICATE KEY UPDATE viewed_at = NOW()";
+        $viewStmt = $conn->prepare($viewQuery);
+        $viewStmt->bind_param("ii", $user_id, $video_id);
+        $viewStmt->execute();
+    }
 }
 
 // If no specific video or invalid ID, get the most recent video
@@ -38,10 +48,8 @@ if (!$featuredVideo) {
 $canDelete = false;
 if (isLoggedIn() && $featuredVideo) {
     $user_id = $_SESSION['user_id'];
-    // Allow deletion if user is owner or admin
     $canDelete = ($user_id == $featuredVideo['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
 }
-
 
 // Comments pagination
 $commentsPerPage = 5;
@@ -68,9 +76,39 @@ if ($featuredVideo) {
     $commentsResult = $stmt->get_result();
 }
 
+// Recently watched videos
+$videosPerPage = 4; // Show 4 videos initially
+$watchedVideos = [];
+$totalWatchedVideos = 0;
+
+if (isLoggedIn()) {
+    $user_id = $_SESSION['user_id'];
+    // Get total watched videos count
+    $watchedCountQuery = "SELECT COUNT(*) as total FROM video_views WHERE user_id = ?";
+    $watchedCountStmt = $conn->prepare($watchedCountQuery);
+    $watchedCountStmt->bind_param("i", $user_id);
+    $watchedCountStmt->execute();
+    $watchedCountResult = $watchedCountStmt->get_result();
+    $totalWatchedVideos = $watchedCountResult->fetch_assoc()['total'];
+
+    // Get initial recently watched videos
+    $watchedQuery = "SELECT v.*, u.username, vv.viewed_at 
+                    FROM video_views vv 
+                    JOIN videos v ON vv.video_id = v.id 
+                    JOIN users u ON v.user_id = u.id 
+                    WHERE vv.user_id = ? 
+                    ORDER BY vv.viewed_at DESC 
+                    LIMIT ?";
+    $watchedStmt = $conn->prepare($watchedQuery);
+    $watchedStmt->bind_param("ii", $user_id, $videosPerPage);
+    $watchedStmt->execute();
+    $watchedResult = $watchedStmt->get_result();
+    while ($video = $watchedResult->fetch_assoc()) {
+        $watchedVideos[] = $video;
+    }
+}
 
 function displayComment($comment, $conn, $depth = 0) {
-    // Get comment likes count
     $likesQuery = "SELECT COUNT(*) as like_count FROM comment_likes WHERE comment_id = ?";
     $stmt = $conn->prepare($likesQuery);
     $stmt->bind_param("i", $comment['id']);
@@ -78,7 +116,6 @@ function displayComment($comment, $conn, $depth = 0) {
     $likesResult = $stmt->get_result();
     $likeData = $likesResult->fetch_assoc();
     
-    // Get replies (always load all replies for a parent comment)
     $repliesQuery = "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id 
                      WHERE c.parent_id = ? ORDER BY c.created_at ASC";
     $stmt = $conn->prepare($repliesQuery);
@@ -87,11 +124,9 @@ function displayComment($comment, $conn, $depth = 0) {
     $repliesResult = $stmt->get_result();
     
     $margin = $depth * 20;
-
     $canDeleteComment = false;
     if (isLoggedIn()) {
         $user_id = $_SESSION['user_id'];
-        // Allow deletion if user is comment author or admin
         $canDeleteComment = ($user_id == $comment['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
     }
     ?>
@@ -104,7 +139,7 @@ function displayComment($comment, $conn, $depth = 0) {
             <div class="comment-actions">
                 <button onclick="toggleReplyForm(<?= $comment['id'] ?>)">Reply</button>
                 <button onclick="likeComment(<?= $comment['id'] ?>)">Like (<?= $likeData['like_count'] ?>)</button>
-            <?php if ($canDeleteComment): ?>
+                <?php if ($canDeleteComment): ?>
                     <button onclick="confirmCommentDelete(<?= $comment['id'] ?>)" class="delete-comment-btn">Delete</button>
                 <?php endif; ?>
             </div>
@@ -119,7 +154,6 @@ function displayComment($comment, $conn, $depth = 0) {
         <?php endif; ?>
         
         <?php
-        // Display replies recursively
         while ($reply = $repliesResult->fetch_assoc()) {
             displayComment($reply, $conn, $depth + 1);
         }
@@ -141,41 +175,31 @@ function displayComment($comment, $conn, $depth = 0) {
         <section class="video-player">
             <video id="main-video" controls autoplay muted>
                 <source src="<?= VIDEO_UPLOAD_PATH . $featuredVideo['video_file'] ?>" type="video/mp4">
-                Your browser does not support the video tag.
+               ... (rest of the video player section remains unchanged)
             </video>
             <h3><?= htmlspecialchars($featuredVideo['title']) ?></h3>
             <p><?= htmlspecialchars($featuredVideo['description']) ?></p>
             <p>Uploaded by: <?= htmlspecialchars($featuredVideo['username']) ?></p>  
             
-            <!-- Actions on Video -->
-    
             <div class="video-actions">
                 <?php if (isLoggedIn()): ?>
                     <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">
                         👍 Like
                     </button>
-                <?php endif; ?>
-                
-                <?php if (isLoggedIn()): ?>
                     <button id="share-button-<?= $featuredVideo['id'] ?>" onclick="shareVideo(<?= $featuredVideo['id'] ?>)">
                         🔗 Share
                     </button>
-                <?php endif; ?>
-                <?php if (isLoggedIn() && $canDelete): ?>
-                    <button id="edit-button-<?= $featuredVideo['id'] ?>" onclick="showEditForm(<?= $featuredVideo['id'] ?>)" class="edit-btn">
-                        ✏️ Edit
-                    </button>
-                <?php endif; ?>
-                <?php if (isLoggedIn() && $canDelete): ?>
-                <?php if ($canDelete): ?>
-                    <button id="delete-button-<?= $featuredVideo['id'] ?>" onclick="confirmDelete(<?= $featuredVideo['id'] ?>)" class="delete-btn">
-                        🗑️ Delete
-                    </button>
-                <?php endif; ?>
+                    <?php if ($canDelete): ?>
+                        <button id="edit-button-<?= $featuredVideo['id'] ?>" onclick="showEditForm(<?= $featuredVideo['id'] ?>)" class="edit-btn">
+                            ✏️ Edit
+                        </button>
+                        <button id="delete-button-<?= $featuredVideo['id'] ?>" onclick="confirmDelete(<?= $featuredVideo['id'] ?>)" class="delete-btn">
+                            🗑️ Delete
+                        </button>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <?php
-                // Get likes count
                 $likesQuery = "SELECT COUNT(*) as like_count FROM likes WHERE video_id = ?";
                 $stmt = $conn->prepare($likesQuery);
                 $stmt->bind_param("i", $featuredVideo['id']);
@@ -185,7 +209,7 @@ function displayComment($comment, $conn, $depth = 0) {
                 ?>
                 <p class="like_share">Likes: <?= $likeData['like_count'] ?> | Shares: <?= $featuredVideo['share_count'] ?></p>
             </div>
-            <!-- SHARE MODAL -->
+            
             <div id="share-modal" class="modal" style="display: none;">
                 <div class="modal-content">
                     <span class="close" onclick="closeModal()">×</span>
@@ -194,7 +218,6 @@ function displayComment($comment, $conn, $depth = 0) {
                 </div>
             </div>
 
-            <!-- EDIT MODAL -->
             <div id="edit-modal" class="modal" style="display: none;">
                 <div class="modal-content">
                     <span class="close" onclick="closeEditModal()">×</span>
@@ -214,79 +237,86 @@ function displayComment($comment, $conn, $depth = 0) {
                 </div>
             </div>
 
-        <!-- Updated Comments Section -->
-        <div class="comments-section">
-            <h4>Comments (<?= $totalComments ?>)</h4>
-            
-            <?php if (isLoggedIn()): ?>
-                <form action="comments.php" method="POST">
-                    <input type="hidden" name="video_id" value="<?= $featuredVideo['id'] ?>">
-                    <textarea name="comment" placeholder="Add a comment..." required></textarea>
-                    <button type="submit">Post Comment</button>
-                </form>
-            <?php else: ?>
-                <p><a href="auth/login.php">Login</a> to post comments</p>
-            <?php endif; ?>
-            
-            <div id="comments-container">
-                <?php
-                while ($comment = $commentsResult->fetch_assoc()) {
-                    displayComment($comment, $conn);
-                }
-                ?>
-            </div>
-            <?php if ($totalPages > 1): ?>
-                <div class="comments-pagination">
-                    <?php if ($currentPage > 1): ?>
-                        <button onclick="loadComments(<?= $currentPage - 1 ?>)">Previous</button>
-                    <?php endif; ?>
-                    
-                    <?php if ($currentPage < $totalPages): ?>
-                        <button onclick="loadComments(<?= $currentPage + 1 ?>)">Load More</button>
-                    <?php endif; ?>
+            <div class="comments-section">
+                <h4>Comments (<?= $totalComments ?>)</h4>
+                
+                <?php if (isLoggedIn()): ?>
+                    <form action="comments.php" method="POST">
+                        <input type="hidden" name="video_id" value="<?= $featuredVideo['id'] ?>">
+                        <textarea name="comment" placeholder="Add a comment..." required></textarea>
+                        <button type="submit">Post Comment</button>
+                    </form>
+                <?php else: ?>
+                    <p><a href="auth/login.php">Login</a> to post comments</p>
+                <?php endif; ?>
+                
+                <div id="comments-container">
+                    <?php
+                    while ($comment = $commentsResult->fetch_assoc()) {
+                        displayComment($comment, $conn);
+                    }
+                    ?>
                 </div>
-            <?php endif; ?>
-        </div>
+                <?php if ($totalPages > 1): ?>
+                    <div class="comments-pagination">
+                        <?php if ($currentPage > 1): ?>
+                            <button onclick="loadComments(<?= $currentPage - 1 ?>)">Previous</button>
+                        <?php endif; ?>
+                        <?php if ($currentPage < $totalPages): ?>
+                            <button onclick="loadComments(<?= $currentPage + 1 ?>)">Load More</button>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
         </section>
         <?php endif; ?>
 
-<aside class="video-sidebar">
-    <h3>More Videos</h3>
-    <div class="sidebar-video-list">
-        <?php 
-        // Reset the result pointer to loop through videos again
-        $result->data_seek(0);
-        while ($video = $result->fetch_assoc()): 
-            if ($featuredVideo && $video['id'] == $featuredVideo['id']) continue;
-        ?>
-            <div class="sidebar-video">
-                <a href="?video_id=<?= $video['id'] ?>">
-                    <!-- Keep your existing thumbnail -->
-                    <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Video Thumbnail" class="video-thumb">
-                    
-                    <!-- Add hidden video element (same dimensions as thumbnail) -->
-                    <video class="video-hover" 
-                           muted 
-                           loop 
-                           playsinline 
-                           preload="none"
-                           style="display:none; border-radius: 5px; width:50%; height:auto;">
-                        <source src="<?= VIDEO_UPLOAD_PATH . $video['video_file'] ?>" type="video/mp4">
-                    </video>
-                    <div class="sidebar-video-info">
-                        <h4><?= htmlspecialchars($video['title']) ?></h4>
-                        <p><?= htmlspecialchars($video['username']) ?></p>
+        <aside class="video-sidebar">
+            <h3>More Videos</h3>
+            <div class="sidebar-video-list">
+                <?php 
+                $result->data_seek(0);
+                while ($video = $result->fetch_assoc()): 
+                    if ($featuredVideo && $video['id'] == $featuredVideo['id']) continue;
+                ?>
+                    <div class="sidebar-video">
+                        <a href="?video_id=<?= $video['id'] ?>">
+                            <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Video Thumbnail" class="video-thumb">
+                            <video class="video-hover" muted loop playsinline preload="none" style="display:none; border-radius: 5px; width:50%; height:auto;">
+                                <source src="<?= VIDEO_UPLOAD_PATH . $video['video_file'] ?>" type="video/mp4">
+                            </video>
+                            <div class="sidebar-video-info">
+                                <h4><?= htmlspecialchars($video['title']) ?></h4>
+                                <p><?= htmlspecialchars($video['username']) ?></p>
+                            </div>
+                        </a>
                     </div>
-                </a>
+                <?php endwhile; ?>
             </div>
-        <?php endwhile; ?>
+        </aside>
     </div>
-</aside>
-    </div>
+
+    <?php if (isLoggedIn() && !empty($watchedVideos)): ?>
+    <h3>RECENTLY WATCHED</h3>
+    <section class="video-list watched-videos" data-total="<?= $totalWatchedVideos ?>" data-loaded="<?= count($watchedVideos) ?>">
+        <?php foreach ($watchedVideos as $video): ?>
+            <div class="video-thumbnail">
+                <a href="?video_id=<?= $video['id'] ?>">
+                    <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Video Thumbnail">
+                </a>
+                <h3><?= htmlspecialchars($video['title']) ?></h3>
+                <p><?= htmlspecialchars($video['description']) ?></p>
+                <p>Uploaded by: <?= htmlspecialchars($video['username']) ?></p>
+                <p>Watched: <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['viewed_at']))) ?></p>
+            </div>
+        <?php endforeach; ?>
+        <div class="loading" style="display: none; text-align: center; padding: 20px;">Loading...</div>
+    </section>
+    <?php endif; ?>
+
     <h3>EARLIER</h3>
     <section class="video-list">
         <?php 
-        // Reset the result pointer again for the bottom grid
         $result->data_seek(0);
         while ($video = $result->fetch_assoc()): ?>
             <div class="video-thumbnail">
@@ -320,7 +350,6 @@ function likeVideo(videoId) {
             likeButton.disabled = true;
             likeButton.classList.add("liked");
 
-            // UPDATE LIKES COUNT IN PAGE
             const likeShareText = document.querySelector(".like_share");
             if (likeShareText) {
                 const parts = likeShareText.textContent.split('|');
@@ -336,6 +365,36 @@ function likeVideo(videoId) {
 function shareVideo(videoId) {
     const shareLink = window.location.href.split('?')[0] + "?video_id=" + videoId;
     document.getElementById("share-link").value = shareLink;
+    document.getElementById("share-modal").style.display = "block";
+    
+    fetch('share_video.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'video_id=' + encodeURIComponent(videoId)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success' && data.message === 'Already shared') {
+            const shareButton = document.getElementById("share-button-" + videoId);
+            if (shareButton) {
+                shareButton.style.backgroundColor = "#008CBA";
+                shareButton.innerText = "Shared";
+                shareButton.classList.add("shared");
+            }
+        }
+    });
+}
+
+function copyLink() {
+    const shareLink = document.getElementById("share-link");
+    const videoId = new URLSearchParams(window.location.search).get('video_id') || shareLink.value.match(/video_id=(\d+)/)?.[1];
+    
+    if (!videoId) {
+        alert('Error: Video ID not found');
+        return;
+    }
 
     fetch('share_video.php', {
         method: 'POST',
@@ -344,30 +403,34 @@ function shareVideo(videoId) {
         },
         body: 'video_id=' + encodeURIComponent(videoId)
     })
-    .then(response => response.text())
+    .then(response => response.json())
     .then(data => {
-        if (data.trim() === "success") {
+        if (data.status === 'success') {
             const shareButton = document.getElementById("share-button-" + videoId);
-            if (shareButton) {
+            if (shareButton && !shareButton.classList.contains("shared")) {
                 shareButton.style.backgroundColor = "#008CBA";
                 shareButton.innerText = "Shared";
+                shareButton.classList.add("shared");
             }
 
-            // UPDATE SHARES COUNT IN PAGE
             const likeShareText = document.querySelector(".like_share");
             if (likeShareText) {
                 const parts = likeShareText.textContent.split('|');
-                const sharesPart = parts[1].trim();
-                let currentShares = parseInt(sharesPart.replace('Shares:', '').trim());
-                currentShares += 1;
-                likeShareText.innerHTML = `${parts[0].trim()} | Shares: ${currentShares}`;
+                likeShareText.innerHTML = `${parts[0].trim()} | Shares: ${data.share_count}`;
             }
+
+            shareLink.select();
+            shareLink.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            closeModal();
+        } else {
+            alert('Error: ' + (data.message || 'Failed to process share'));
         }
+    })
+    .catch(error => {
+        alert('An error occurred: ' + error.message);
     });
-
-    document.getElementById("share-modal").style.display = "block";
 }
-
 
 function confirmDelete(videoId) {
     if (confirm('Permanently delete this video?')) {
@@ -382,7 +445,6 @@ function confirmDelete(videoId) {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                // Force complete page reload with cache busting
                 window.location.href = window.location.href.split('?')[0] + '?deleted=' + videoId + '&t=' + Date.now();
             } else {
                 alert('Error: ' + (data.message || 'Deletion failed'));
@@ -393,26 +455,15 @@ function confirmDelete(videoId) {
 
 function closeModal() {
     document.getElementById("share-modal").style.display = "none";
-
-    // Re-enable the share button for the current video
-    const shareButton = document.querySelector('.shared'); // Find the shared button
-    if (shareButton) {
+    const shareButton = document.querySelector('.shared');
+    if (shareButton && !shareButton.classList.contains("shared")) {
         shareButton.disabled = false;
-        shareButton.innerText = "🔗 Share"; // Reset the text
-        shareButton.classList.remove("shared"); // Remove shared class
-        shareButton.style.backgroundColor = ""; // Reset background color
+        shareButton.innerText = "🔗 Share";
+        shareButton.classList.remove("shared");
+        shareButton.style.backgroundColor = "";
     }
 }
 
-function copyLink() {
-    const shareLink = document.getElementById("share-link");
-    shareLink.select();
-    shareLink.setSelectionRange(0, 99999);
-    document.execCommand("copy");
-    closeModal();
-}
-
-// Sync background video with main video
 document.addEventListener('DOMContentLoaded', function() {
     const mainVideo = document.getElementById('main-video');
     const bgVideo = document.getElementById('background-video');
@@ -438,6 +489,64 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     mainVideo.addEventListener('loadedmetadata', syncVideos);
+
+    const videoItems = document.querySelectorAll('.sidebar-video');
+    
+    videoItems.forEach(item => {
+        const thumb = item.querySelector('.video-thumb');
+        const video = item.querySelector('.video-hover');
+        
+        item.addEventListener('mouseenter', function() {
+            thumb.style.display = 'none';
+            video.style.display = 'block';
+            video.play().catch(e => console.log('Autoplay prevented:', e));
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            thumb.style.display = 'block';
+            video.style.display = 'none';
+            video.pause();
+            video.currentTime = 0;
+        });
+    });
+
+    // Infinite scroll for watched videos
+    const watchedSection = document.querySelector('.watched-videos');
+    if (watchedSection) {
+        let isLoading = false;
+        let currentPage = 1;
+        const videosPerPage = 4;
+        const totalVideos = parseInt(watchedSection.dataset.total);
+        const loadedVideos = parseInt(watchedSection.dataset.loaded);
+
+        window.addEventListener('scroll', function() {
+            if (isLoading || loadedVideos >= totalVideos) return;
+
+            const sectionRect = watchedSection.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+
+            if (sectionRect.bottom <= windowHeight + 200) { // Trigger 200px before bottom
+                isLoading = true;
+                const loadingDiv = watchedSection.querySelector('.loading');
+                loadingDiv.style.display = 'block';
+
+                currentPage++;
+                fetch(`load_watched_videos.php?page=${currentPage}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        if (html.trim()) {
+                            watchedSection.insertAdjacentHTML('beforeend', html);
+                            watchedSection.dataset.loaded = parseInt(watchedSection.dataset.loaded) + videosPerPage;
+                        }
+                    })
+                    .catch(error => console.error('Error loading videos:', error))
+                    .finally(() => {
+                        isLoading = false;
+                        loadingDiv.style.display = 'none';
+                    });
+            }
+        });
+    }
 });
 
 function adjustBlur(intensity) {
@@ -446,10 +555,6 @@ function adjustBlur(intensity) {
     overlay.style.webkitBackdropFilter = `blur(${intensity}px)`;
 }
 
-// comments 
-
-
-// Add these new functions to your existing script section
 function toggleReplyForm(commentId) {
     const form = document.getElementById("reply-form-" + commentId);
     form.style.display = form.style.display === "none" ? "block" : "none";
@@ -517,7 +622,6 @@ function updatePaginationButtons(currentPage) {
 }
 
 function showEditForm(videoId) {
-    // Fetch current video info
     fetch(`get_video_info.php?video_id=${videoId}`)
         .then(response => response.json())
         .then(data => {
@@ -532,7 +636,6 @@ function closeEditModal() {
     document.getElementById('edit-modal').style.display = 'none';
 }
 
-// Handle form submission
 document.getElementById('edit-video-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -545,7 +648,6 @@ document.getElementById('edit-video-form').addEventListener('submit', function(e
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            // Update the displayed info without page reload
             document.querySelector('.video-player h3').textContent = data.title;
             document.querySelector('.video-player p:nth-of-type(1)').textContent = data.description;
             closeEditModal();
@@ -573,12 +675,10 @@ function confirmCommentDelete(commentId) {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                // Remove the comment from the DOM
                 const commentElement = document.querySelector(`.comment [onclick="confirmCommentDelete(${commentId})"]`).closest('.comment');
                 if (commentElement) {
                     commentElement.remove();
                 }
-                // Update comments count
                 const commentsCountElement = document.querySelector('.comments-section h4');
                 if (commentsCountElement) {
                     const currentCount = parseInt(commentsCountElement.textContent.match(/\d+/)[0]) || 0;
@@ -590,27 +690,5 @@ function confirmCommentDelete(commentId) {
         });
     }
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    const videoItems = document.querySelectorAll('.sidebar-video');
-    
-    videoItems.forEach(item => {
-        const thumb = item.querySelector('.video-thumb');
-        const video = item.querySelector('.video-hover');
-        
-        item.addEventListener('mouseenter', function() {
-            thumb.style.display = 'none';
-            video.style.display = 'block';
-            video.play().catch(e => console.log('Autoplay prevented:', e));
-        });
-        
-        item.addEventListener('mouseleave', function() {
-            thumb.style.display = 'block';
-            video.style.display = 'none';
-            video.pause();
-            video.currentTime = 0;
-        });
-    });
-});
 </script>
 <?php require_once 'includes/footer.php'; ?>
