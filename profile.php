@@ -23,15 +23,53 @@ if (!$userData) {
     header('Location: index.php');
     exit;
 }
+
+// Function to get proper profile picture path
+function getProfilePicturePath($userId, $profilePicture, $gender) {
+    $imageToShow = '';
+    $cacheBuster = '?v=' . time();
+    
+    // First try the user's actual profile picture
+    if (!empty($profilePicture)) {
+        // Clean the path and ensure it's in the correct directory
+        $cleanFilename = basename($profilePicture);
+        $fullPath = 'uploads/profile_pictures/' . $cleanFilename;
+        
+        // Check if file exists and is readable
+        if (file_exists($fullPath) && is_readable($fullPath)) {
+            return $fullPath . $cacheBuster;
+        }
+    }
+    
+    // If no valid image yet, use gender-based default
+    $gender = strtolower(trim($gender));
+    $defaultImage = 'other.jpg'; // Default neutral image
+    
+    if ($gender === 'female') {
+        $defaultImage = 'she.jpg';
+    } elseif ($gender === 'male') {
+        $defaultImage = 'he.jpg';
+    }
+    
+    $imageToShow = 'uploads/profile_pictures/' . $defaultImage;
+    
+    // Final fallback if default images are missing
+    if (!file_exists($imageToShow)) {
+        $imageToShow = 'uploads/profile_pictures/default.jpg';
+    }
+    
+    return $imageToShow . $cacheBuster;
+}
 ?>
 
 <div class="profile-container">
     <!-- User Info Section -->
     <section class="profile-info">
-
         <div class="profile-header">
             <div class="profile-picture">
-                <img src="<?= getProfilePicture($userData['id']) ?>" alt="Profile Picture">
+                <img src="<?= getProfilePicturePath($userData['id'], $userData['profile_picture'], $userData['gender']) ?>" 
+                     alt="Profile Picture"
+                     onerror="this.onerror=null; this.src='uploads/profile_pictures/default.jpg?v=<?= time() ?>'">
             </div>
             <div class="profile-details">
                 <h1><?= htmlspecialchars($userData['username']) ?></h1>
@@ -43,10 +81,15 @@ if (!$userData) {
                             ? nl2br(htmlspecialchars($userData['bio'])) 
                             : '<em>No bio yet</em>' ?>
                     </p>
+                    <p>
+                        <?= !empty($userData['gender']) 
+                            ? nl2br(htmlspecialchars($userData['gender'])) 
+                            : '<em>No gender</em>' ?>
+                    </p>
                 </div>
                 <p class="profile-join-date">Member since: <?= date('F Y', strtotime($userData['created_at'])) ?></p>
                 
-                <!-- Social Media Links - Updated with Other Link -->
+                <!-- Social Media Links -->
                 <?php if (!empty($userData['twitter']) || !empty($userData['instagram']) || !empty($userData['youtube']) || !empty($userData['other'])): ?>
                     <div class="profile-social-links">
                         <h3>Connect</h3>
@@ -83,7 +126,6 @@ if (!$userData) {
                 <?php endif; ?>
             </div>
         </div>
-        
 
         <div class="profile-stats">
             <div class="stat-item">

@@ -62,8 +62,7 @@ function formatUserDate($datetime) {
 function getUserData($userId) {
     global $conn;
     $query = "SELECT id, username, email, bio, profile_picture, created_at, 
-              twitter, instagram, youtube, other 
-              FROM users WHERE id = ?";
+              twitter, instagram, youtube, other, gender FROM users WHERE id = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $userId);
     $stmt->execute();

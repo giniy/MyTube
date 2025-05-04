@@ -1,9 +1,3 @@
-
-<style type="text/css">
-
-
-  
-</style>
 <?php
 require_once 'includes/config.php';
 require_once 'includes/functions.php';
@@ -32,14 +26,13 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 while ($video = $result->fetch_assoc()): ?>
-    <div class="video-thumbnail">
+    <div class="recent-watched-video">
         <a href="?video_id=<?= $video['id'] ?>">
-            <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Video Thumbnail">
+            <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>">
         </a>
         <h3><?= htmlspecialchars($video['title']) ?></h3>
-        <p><?= htmlspecialchars($video['description']) ?></p>
         <p>Uploaded by: <?= htmlspecialchars($video['username']) ?></p>
-        <p>Watched: <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['viewed_at']))) ?></p>
+        <p class="watched-date">Watched: <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['viewed_at']))) ?></p>
     </div>
 <?php endwhile;
 

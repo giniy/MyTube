@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
     $bio = trim($_POST['bio']);
+    $gender = trim($_POST['gender'] ?? 'other');
 
     // Validate inputs
     if (empty($username)) {
@@ -70,16 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Update database if no errors
     if (empty($errors)) {
         $query = "UPDATE users SET 
-                  username = ?, email = ?, bio = ?, profile_picture = ?,
+                  username = ?, email = ?, bio = ?, gender = ?, profile_picture = ?,
                   twitter = ?, instagram = ?, youtube = ?, other = ?
                   WHERE id = ?";
-        
+
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("ssssssssi", 
-                         $username, $email, $bio, $profilePicture,
+        $stmt->bind_param("sssssssssi", 
+                         $username, $email, $bio, $gender, $profilePicture,
                          $twitter, $instagram, $youtube, $other,
                          $userId);
-        
+
         if ($stmt->execute()) {
             $_SESSION['success'] = "Profile updated successfully!";
             header("Location: profile.php");
@@ -154,7 +155,16 @@ if (!empty($_POST['current_password'])) {
             <label for="bio">Bio</label>
             <textarea id="bio" name="bio" rows="4"><?= htmlspecialchars($userData['bio'] ?? '') ?></textarea>
         </div>
-        
+
+        <div class="form-group">
+            <label for="gender">Gender</label>
+            <select name="gender" id="gender">
+                <option value="male" <?= ($userData['gender'] ?? '') === 'male' ? 'selected' : '' ?>>Male</option>
+                <option value="female" <?= ($userData['gender'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
+                <option value="other" <?= ($userData['gender'] ?? '') === 'other' ? 'selected' : '' ?>>Other</option>
+            </select>
+        </div>
+
         <!-- Social Media Links -->
         <div class="social-media-section">
             <h3>Social Media Links</h3>

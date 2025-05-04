@@ -9,15 +9,29 @@
     <link href="static/css/vid.css" rel="stylesheet">
     <link href="static/css/auth.css" rel="stylesheet">
     <link href="static/css/profile.css" rel="stylesheet">
+    <link href="static/css/watched_video.css" rel="stylesheet">
+    <link href="static/css/user.css" rel="stylesheet">
+    <link href="static/css/logo.css" rel="stylesheet">
     <script src="static/js/script.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <header>
-    <div class="logo">
+    <div class="logo-container" style="display: inline-block; width: 100px; height: 30px;">
         <a class="nav-link" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" 
-           style="text-decoration: none; color: #ff0000; font-weight: bold;">
-            MyTube
+           style="text-decoration: none; display: flex; align-items: center; height: 100%; position: relative;">
+            <!-- Animated Logo -->
+            <img src="/mytube/static/images/play.png" 
+                 alt="MyTube Logo" 
+                 style="height: 24px; width: auto;
+                        position: absolute;
+                        left: 0;
+                        animation: logoSwap 5s infinite ease-in-out;">
+            <!-- Animated Text -->
+            <span style="font-weight: bold; color: #ff0000;
+                        position: absolute;
+                        left: 30px; /* 24px logo + 6px gap */
+                        animation: textSwap 5s infinite ease-in-out;">MyTube</span>
         </a>
     </div>
     <div class="search-container">
@@ -33,13 +47,58 @@
 <nav class="user-menu">
     <?php if (isLoggedIn()): ?>
         <a href="upload.php">Upload Video</a>
-        <a href="profile.php" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
-            <img src="<?= htmlspecialchars(getProfilePicture(getUserId())) ?>" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; vertical-align: middle;">
-            <span>
-                <!-- username Display -->
-                <!-- <?= htmlspecialchars(getUsername(getUserId())) ?> -->
-            </span>
-        </a>
+
+
+<a href="profile.php" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+    <?php
+    // Get current user's data
+    $userId = getUserId();
+    $userData = getUserData($userId);
+    $profilePicture = $userData['profile_picture'] ?? '';
+    $gender = $userData['gender'] ?? '';
+    
+    // Determine profile picture path
+    $profilePicPath = '';
+    if (!empty($profilePicture)) {
+        $cleanFilename = basename($profilePicture);
+        $fullPath = 'uploads/profile_pictures/' . $cleanFilename;
+        if (file_exists($fullPath) && is_readable($fullPath)) {
+            $profilePicPath = $fullPath;
+        }
+    }
+    
+    // Use gender-based default if no valid picture
+    if (empty($profilePicPath)) {
+        $gender = strtolower(trim($gender));
+        if ($gender === 'female') {
+            $defaultImage = 'she.jpg';
+        } elseif ($gender === 'male') {
+            $defaultImage = 'he.jpg';
+        } else {
+            $defaultImage = 'other.jpg';
+        }
+        $profilePicPath = 'uploads/profile_pictures/' . $defaultImage;
+        
+        // Final fallback
+        if (!file_exists($profilePicPath)) {
+            $profilePicPath = 'uploads/profile_pictures/default.jpg';
+        }
+    }
+    
+    // Add cache buster
+    $profilePicPath .= '?v=' . time();
+    ?>
+    
+    <img src="<?= htmlspecialchars($profilePicPath) ?>" 
+         alt="Profile"
+         style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; vertical-align: middle;"
+         onerror="this.onerror=null; this.src='uploads/profile_pictures/default.jpg?v=<?= time() ?>'">
+    <span>
+        <!-- username Display -->
+        <!-- <?= htmlspecialchars(getUsername($userId)) ?> -->
+    </span>
+</a>
+
         <a href="auth/logout.php">Logout</a>
     <?php else: ?>
         <a href="/mytube/auth/login.php">Login</a>

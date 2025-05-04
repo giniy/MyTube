@@ -1,15 +1,22 @@
 <footer class="site-footer">
     <div class="footer-container">
-        <div class="footer-section">
+    <div class="footer-section">
+        <!-- Added logo with text -->
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+            <img src="/mytube/static/images/play.png" 
+                 alt="MyTube Logo" 
+                 style="height: 30px; width: auto;">
             <h3>MyTube</h3>
-            <p>The best platform for sharing your videos with the world.</p>
-            <div class="social-links">
-                <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-            </div>
         </div>
+        
+        <p>The best platform for sharing your videos with the world.</p>
+        <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+    </div>
 
         <div class="footer-section">
             <h4>Navigation</h4>
