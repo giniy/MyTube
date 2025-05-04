@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 02, 2025 at 07:38 PM
+-- Generation Time: May 04, 2025 at 01:35 PM
 -- Server version: 8.0.36
 -- PHP Version: 8.0.30
 
@@ -53,7 +53,8 @@ INSERT INTO `comments` (`id`, `user_id`, `video_id`, `comment`, `created_at`, `p
 (20, 1, 6, 'nice one', '2025-04-28 18:04:24', NULL, 1),
 (28, 1, 4, 'yes', '2025-04-28 15:51:03', 4, 1),
 (29, 2, 10, 'Amazing, I am waiting for the season 5', '2025-04-29 17:32:32', NULL, 1),
-(31, 1, 10, 'Yea, me too!', '2025-04-29 18:08:02', 29, 1);
+(31, 1, 10, 'Yea, me too!', '2025-04-29 18:08:02', 29, 1),
+(32, 3, 10, 'nice', '2025-05-03 16:16:28', NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -241,7 +242,8 @@ INSERT INTO `likes` (`id`, `user_id`, `video_id`, `created_at`) VALUES
 (22, 2, 7, '2025-04-28 20:09:59'),
 (23, 2, 10, '2025-04-29 12:00:33'),
 (24, 1, 10, '2025-04-29 12:38:35'),
-(25, 2, 9, '2025-05-01 10:19:42');
+(25, 2, 9, '2025-05-01 10:19:42'),
+(30, 3, 10, '2025-05-04 09:14:36');
 
 -- --------------------------------------------------------
 
@@ -260,17 +262,18 @@ CREATE TABLE `users` (
   `twitter` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `instagram` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `youtube` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `other` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL
+  `other` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `gender` enum('male','female','other') COLLATE utf8mb4_general_ci DEFAULT 'other'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `email`, `bio`, `profile_picture`, `password`, `created_at`, `twitter`, `instagram`, `youtube`, `other`) VALUES
-(1, 'root', 'root@gmail.com', 'I am root', '', '$2y$10$P2PPGMvZxJMvSuKYER89eun6nf/8dTSbrWol.sii0vERfBnhILKMi', '2025-04-26 20:48:55', '', 'https://www.instagram.com/gulab_days/', '', ''),
-(2, 'ravi', 'ravi@gmail.com', 'She*\r\nI am Raavi Tiwari', 'uploads/profile_pictures/2.jpg', '$2y$10$u0QMduHBs21fCcHxqoc1UOQ8GfjeWqEZ5.I/2wRnBqymJLe4s.QHe', '2025-04-28 11:02:22', '', '', '', ''),
-(3, 'rosep', 'rose.p@gmail.com', NULL, NULL, '$2y$10$RVskGnC7S/PStjUG5JTCeOeuRzDYl0uWJizmPEd8FN7iNqFqjEdEG', '2025-04-28 11:15:42', NULL, NULL, NULL, NULL);
+INSERT INTO `users` (`id`, `username`, `email`, `bio`, `profile_picture`, `password`, `created_at`, `twitter`, `instagram`, `youtube`, `other`, `gender`) VALUES
+(1, 'root', 'root@gmail.com', 'I am root', 'uploads/profile_pictures/1.jpg', '$2y$10$P2PPGMvZxJMvSuKYER89eun6nf/8dTSbrWol.sii0vERfBnhILKMi', '2025-04-26 20:48:55', '', 'https://www.instagram.com/gulab_days/', '', '', 'male'),
+(2, 'ravi', 'ravi@gmail.com', 'She*\r\nI am Raavi Tiwari', 'uploads/profile_pictures/2.jpg', '$2y$10$u0QMduHBs21fCcHxqoc1UOQ8GfjeWqEZ5.I/2wRnBqymJLe4s.QHe', '2025-04-28 11:02:22', '', '', '', '', 'other'),
+(3, 'rosep', 'rose.p@gmail.com', '', 'uploads/profile_pictures/3.jpg', '$2y$10$RVskGnC7S/PStjUG5JTCeOeuRzDYl0uWJizmPEd8FN7iNqFqjEdEG', '2025-04-28 11:15:42', '', '', '', '', 'female');
 
 -- --------------------------------------------------------
 
@@ -300,8 +303,8 @@ INSERT INTO `videos` (`id`, `user_id`, `title`, `description`, `video_file`, `th
 (5, 1, 'Nature | Farm', 'Nature views and farm', 'video_680e82f833b179.99706520.mp4', 'thumb_680e82f833b1e7.30486898.png', '2025-04-28 00:48:16', 0, 3),
 (6, 1, 'Palace Tour', 'Let me show you my palace', 'video_680e833a0a8786.15406396.mp4', 'thumb_680e833a0a87e1.29644312.png', '2025-04-28 00:49:22', 0, 1),
 (7, 1, 'In the Mirror | Sigrid Song', 'Artist: Sigrid\r\nReleased: 2022 | Album: How to Let Go\r\nGenres: Disco, Nigerian R&B, Afropop, Pop', 'video_680e83aba19329.60549494.mp4', 'thumb_680e83aba19362.81882149.png', '2025-04-28 00:51:15', 0, 14),
-(9, 2, 'THE WITCH 2 : THE OTHER ONE Official Trailer ｜ Korean Sci-Fi Horror Thriller ｜ Starring Shin Sia', 'THE OTHER ONE Official Trailer', 'video_6810b78b7833c4.56427866.mp4', 'thumb_6810b78b783432.29803304.jpg', '2025-04-29 16:57:07', 0, 6),
-(10, 2, 'Max’s Song | Running Up That Hill ｜ Stranger Things ｜ Netflix', 'Max’s Song | Kate Bush - Running Up That Hill ｜ Stranger Things ｜ Netflix', 'video_6810b86e22ab50.38263813.mp4', 'thumb_6810b86e22ad95.84477098.jpg', '2025-04-29 17:00:54', 0, 5);
+(9, 2, 'THE WITCH 2 : THE OTHER ONE Official Trailer ｜ Korean Sci-Fi Horror Thriller ｜ Starring Shin Sia', 'THE OTHER ONE Official Trailer', 'video_6810b78b7833c4.56427866.mp4', 'thumb_6810b78b783432.29803304.jpg', '2025-04-29 16:57:07', 1, 6),
+(10, 2, 'Max’s Song | Running Up That Hill ｜ Stranger Things ｜ Netflix', 'Max’s Song | Kate Bush - Running Up That Hill ｜ Stranger Things ｜ Netflix', 'video_6810b86e22ab50.38263813.mp4', 'thumb_6810b86e22ad95.84477098.jpg', '2025-04-29 17:00:54', 1, 6);
 
 -- --------------------------------------------------------
 
@@ -322,7 +325,8 @@ CREATE TABLE `video_shares` (
 
 INSERT INTO `video_shares` (`id`, `user_id`, `video_id`, `shared_at`) VALUES
 (1, 3, 9, '2025-05-01 12:08:00'),
-(2, 3, 4, '2025-05-01 12:08:23');
+(2, 3, 4, '2025-05-01 12:08:23'),
+(3, 3, 10, '2025-05-04 02:12:50');
 
 -- --------------------------------------------------------
 
@@ -342,8 +346,19 @@ CREATE TABLE `video_views` (
 --
 
 INSERT INTO `video_views` (`id`, `user_id`, `video_id`, `viewed_at`) VALUES
-(1, 3, 4, '2025-05-01 12:17:31'),
-(2, 3, 9, '2025-05-02 17:35:03');
+(1, 3, 4, '2025-05-04 02:59:26'),
+(2, 3, 9, '2025-05-03 10:48:52'),
+(28, 3, 6, '2025-05-04 09:25:20'),
+(29, 3, 5, '2025-05-04 03:37:26'),
+(30, 3, 10, '2025-05-04 09:24:30'),
+(31, 3, 3, '2025-05-03 10:45:34'),
+(52, 3, 7, '2025-05-04 07:15:55'),
+(111, 2, 7, '2025-05-04 10:02:46'),
+(115, 2, 10, '2025-05-04 10:03:05'),
+(116, 2, 6, '2025-05-04 10:05:01'),
+(118, 1, 9, '2025-05-04 10:55:33'),
+(119, 1, 7, '2025-05-04 11:09:06'),
+(120, 1, 10, '2025-05-04 11:12:21');
 
 --
 -- Indexes for dumped tables
@@ -436,7 +451,8 @@ ALTER TABLE `video_shares`
 ALTER TABLE `video_views`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_view` (`user_id`,`video_id`),
-  ADD KEY `video_id` (`video_id`);
+  ADD KEY `video_id` (`video_id`),
+  ADD KEY `idx_viewed_at` (`viewed_at`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -446,7 +462,7 @@ ALTER TABLE `video_views`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `comment_likes`
@@ -488,7 +504,7 @@ ALTER TABLE `forum_topics`
 -- AUTO_INCREMENT for table `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -506,13 +522,13 @@ ALTER TABLE `videos`
 -- AUTO_INCREMENT for table `video_shares`
 --
 ALTER TABLE `video_shares`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `video_views`
 --
 ALTER TABLE `video_views`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
 
 --
 -- Constraints for dumped tables
