@@ -15,6 +15,7 @@ if (!isset($video)) return;
             <h4><?= htmlspecialchars($video['description']) ?><h4>
             <div class="video-meta">
                 <span class="upload-date" style="color: #625656;" ><?= timeElapsedString($video['uploaded_at']) ?></span>
+                <span class="views" style="color: #625656;" ><?= htmlspecialchars($video['view_count']) ?> views</span>
             </div>
         </div>
     </a>

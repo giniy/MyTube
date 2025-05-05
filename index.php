@@ -120,7 +120,7 @@ function displayComment($comment, $conn, $depth = 0) {
         $canDeleteComment = ($user_id == $comment['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
     }
     ?>
-    
+
     <div class="comment" style="margin-left: <?= $margin ?>px; color: #8d8d8d;">
         <strong><?= htmlspecialchars($comment['username']) ?></strong>
         <p><?= htmlspecialchars($comment['comment']) ?></p>
@@ -179,14 +179,20 @@ function displayComment($comment, $conn, $depth = 0) {
                     <?php endif; ?>
                 <?php endif; ?>
                 <?php
-                $likesQuery = "SELECT COUNT(*) as like_count FROM likes WHERE video_id = ?";
-                $stmt = $conn->prepare($likesQuery);
-                $stmt->bind_param("i", $featuredVideo['id']);
-                $stmt->execute();
-                $likesResult = $stmt->get_result();
-                $likeData = $likesResult->fetch_assoc();
-                ?>
-                <p class="like_share">Likes: <?= $likeData['like_count'] ?> | Shares: <?= $featuredVideo['share_count'] ?></p>
+                    $likesQuery = "SELECT COUNT(*) as like_count FROM likes WHERE video_id = ?";
+                    $stmt = $conn->prepare($likesQuery);
+                    $stmt->bind_param("i", $featuredVideo['id']);
+                    $stmt->execute();
+                    $likesResult = $stmt->get_result();
+                    $likeData = $likesResult->fetch_assoc();
+                    ?>
+            
+                <p class="like_share">
+                    <?= $likeData['like_count'] ?> Likes |
+                    <?= $featuredVideo['share_count'] ?> Shares |
+                    <?= $featuredVideo['view_count'] ?> Views
+                </p>
+
             </div>
             <div id="share-modal" class="modal" style="display: none;">
                 <div class="modal-content">
@@ -317,7 +323,10 @@ function displayComment($comment, $conn, $depth = 0) {
             <div class="card-content">
                 <h3 class="video-title"><?= htmlspecialchars($video['title']) ?></h3>
                 <p class="video-description"><?= htmlspecialchars($video['description']) ?></p>
-                <p class="video-author">Uploaded by: <?= htmlspecialchars($video['username']) ?></p>
+                <p class="video-author">
+                    <?= htmlspecialchars($video['view_count']) ?> Views |
+                    Uploaded by: <?= htmlspecialchars($video['username']) ?>
+                </p>
                 <p class="video-date"><?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['uploaded_at']))) ?></p>
             </div>
         </div>

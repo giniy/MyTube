@@ -11,11 +11,16 @@ if (!isset($_GET['v']) || !is_numeric($_GET['v'])) {
 $video_id = intval($_GET['v']);
 
 try {
-    // Get video information
+    // Update view count FIRST
+    $updateStmt = $conn->prepare("UPDATE videos SET view_count = view_count + 1 WHERE id = ?");
+    $updateStmt->bind_param("i", $video_id);
+    $updateStmt->execute();
+
+    // Now fetch the updated video info
     $stmt = $conn->prepare("SELECT v.*, u.username, u.profile_picture 
-                           FROM videos v 
-                           JOIN users u ON v.user_id = u.id 
-                           WHERE v.id = ?");
+                            FROM videos v 
+                            JOIN users u ON v.user_id = u.id 
+                            WHERE v.id = ?");
     $stmt->bind_param("i", $video_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -26,11 +31,6 @@ try {
     
     $video = $result->fetch_assoc();
     
-    // Update view count
-    $updateStmt = $conn->prepare("UPDATE videos SET view_count = view_count + 1 WHERE id = ?");
-    $updateStmt->bind_param("i", $video_id);
-    $updateStmt->execute();
-    
     // Handle video file path
     $videoPath = trim($video['video_file']);
     if (strpos($videoPath, 'uploads/videos/') !== 0) {
@@ -40,7 +40,7 @@ try {
     if (!file_exists($videoPath)) {
         throw new Exception("Video file not found.");
     }
-    
+
 } catch (Exception $e) {
     echo "<div class='error-container'><h2>Error</h2><p>" . 
          htmlspecialchars($e->getMessage()) . "</p></div>";
@@ -48,7 +48,6 @@ try {
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
