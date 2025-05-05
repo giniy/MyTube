@@ -384,3 +384,23 @@ body{
     width: 1em;
     text-align: center;
 }
+
+/* Style for watched videos tab */
+#watched-tab .recent-watched-video {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 5px;
+}
+
+#watched-tab .recent-watched-video img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+#watched-tab .watched-date {
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 5px;
+}

@@ -11,10 +11,10 @@ if (!isset($video)) return;
             </div>
         </div>
         <div class="video-info">
-            <h3><?= htmlspecialchars($video['title']) ?></h3>
+            <h3 style="color: white;" ><?= htmlspecialchars($video['title']) ?></h3>
             <h4><?= htmlspecialchars($video['description']) ?><h4>
             <div class="video-meta">
-                <span class="upload-date"><?= timeElapsedString($video['uploaded_at']) ?></span>
+                <span class="upload-date" style="color: #625656;" ><?= timeElapsedString($video['uploaded_at']) ?></span>
             </div>
         </div>
     </a>

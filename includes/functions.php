@@ -151,3 +151,28 @@ function timeElapsedString($datetime) {
     return 'just now';
 }
 
+function getWatchedVideos($userId, $limit = 20) {
+    global $conn;
+    
+    $query = "SELECT v.*, u.username, vv.viewed_at 
+              FROM video_views vv 
+              JOIN videos v ON vv.video_id = v.id 
+              JOIN users u ON v.user_id = u.id 
+              WHERE vv.user_id = ? 
+              ORDER BY vv.viewed_at DESC 
+              LIMIT ?";
+              
+    $stmt = $conn->prepare($query);
+    $limit = (int)$limit;
+    $stmt->bind_param("ii", $userId, $limit);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $watchedVideos = [];
+    while ($row = $result->fetch_assoc()) {
+        $watchedVideos[] = $row;
+    }
+    
+    $stmt->close();
+    return $watchedVideos;
+}

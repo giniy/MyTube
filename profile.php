@@ -17,6 +17,7 @@ $userData = getUserData($profileUserId);
 $videos = getUserVideos($profileUserId);
 $comments = getUserComments($profileUserId);
 $likes = getUserLikes($profileUserId);
+$watchedVideos = getWatchedVideos($profileUserId); // New function to get watched videos
 
 // Check if user exists
 if (!$userData) {
@@ -140,6 +141,11 @@ function getProfilePicturePath($userId, $profilePicture, $gender) {
                 <span class="stat-number"><?= count($likes) ?></span>
                 <span class="stat-label">Likes</span>
             </div>
+            <div class="stat-item">
+                <span class="stat-number"><?= count($watchedVideos) ?></span>
+                <span class="stat-label">Watched</span>
+            </div>
+
         </div>
     </section>
 
@@ -149,6 +155,7 @@ function getProfilePicturePath($userId, $profilePicture, $gender) {
             <button class="tab-btn active" data-tab="videos">Uploaded Videos</button>
             <button class="tab-btn" data-tab="comments">Recent Comments</button>
             <button class="tab-btn" data-tab="likes">Liked Videos</button>
+            <button class="tab-btn" data-tab="watched">Watched Videos</button>
         </div>
         
         <div class="tab-content active" id="videos-tab">
@@ -162,7 +169,6 @@ function getProfilePicturePath($userId, $profilePicture, $gender) {
                 <p class="no-content">No videos uploaded yet.</p>
             <?php endif; ?>
         </div>
-        
         <div class="tab-content" id="comments-tab">
             <?php if (!empty($comments)): ?>
                 <div class="comments-list">
@@ -188,6 +194,25 @@ function getProfilePicturePath($userId, $profilePicture, $gender) {
                 </div>
             <?php else: ?>
                 <p class="no-content">No liked videos yet.</p>
+            <?php endif; ?>
+        </div>
+
+        <div class="tab-content" id="watched-tab">
+            <?php if (!empty($watchedVideos)): ?>
+                <div class="video-grid">
+                    <?php foreach ($watchedVideos as $video): ?>
+                        <div class="recent-watched-video">
+                            <a href="?video_id=<?= $video['id'] ?>">
+                                <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>">
+                            </a>
+                            <h3 style="color: #ffffff;" ><?= htmlspecialchars($video['title']) ?></h3>
+                            <p style="color: #484746;" >Uploaded by: <?= htmlspecialchars($video['username']) ?></p>
+                            <p class="watched-date" style="color: #ffffff;">Watched: <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['viewed_at']))) ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p class="no-content">No watched videos yet.</p>
             <?php endif; ?>
         </div>
     </section>
