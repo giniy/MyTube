@@ -264,6 +264,7 @@ function displayComment($comment, $conn, $depth = 0) {
                                 <div class="sidebar-video-info">
                                     <h4><?= htmlspecialchars($video['title']) ?></h4>
                                     <p><?= htmlspecialchars($video['username']) ?></p>
+                                    <p><?= htmlspecialchars($video['view_count']) ?> Views</p>
                                 </div>
                             </a>
                         </div>
@@ -281,7 +282,11 @@ function displayComment($comment, $conn, $depth = 0) {
                                 <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>">
                             </a>
                             <h3><?= htmlspecialchars($video['title']) ?></h3>
-                            <p>Uploaded by: <?= htmlspecialchars($video['username']) ?></p>
+                            <p>
+                                <?= htmlspecialchars($video['view_count']) ?> Views | 
+                                Uploaded by: <?= htmlspecialchars($video['username']) ?>
+                                
+                            </p>
                             <p class="watched-date">Watched: <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['viewed_at']))) ?></p>
                         </div>
                     <?php endforeach; ?>
