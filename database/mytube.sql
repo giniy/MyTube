@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 04, 2025 at 01:35 PM
+-- Generation Time: May 05, 2025 at 01:22 PM
 -- Server version: 8.0.36
 -- PHP Version: 8.0.30
 
@@ -54,7 +54,7 @@ INSERT INTO `comments` (`id`, `user_id`, `video_id`, `comment`, `created_at`, `p
 (28, 1, 4, 'yes', '2025-04-28 15:51:03', 4, 1),
 (29, 2, 10, 'Amazing, I am waiting for the season 5', '2025-04-29 17:32:32', NULL, 1),
 (31, 1, 10, 'Yea, me too!', '2025-04-29 18:08:02', 29, 1),
-(32, 3, 10, 'nice', '2025-05-03 16:16:28', NULL, 0);
+(32, 3, 10, 'nice', '2025-05-03 16:16:28', NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -87,7 +87,8 @@ INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`, `created_at`) VALUES
 (18, 2, 5, '2025-04-28 20:09:10'),
 (19, 1, 29, '2025-04-29 12:07:55'),
 (20, 1, 31, '2025-04-30 08:14:42'),
-(21, 2, 13, '2025-05-01 11:31:02');
+(21, 2, 13, '2025-05-01 11:31:02'),
+(22, 1, 32, '2025-05-05 10:55:36');
 
 -- --------------------------------------------------------
 
@@ -241,9 +242,9 @@ INSERT INTO `likes` (`id`, `user_id`, `video_id`, `created_at`) VALUES
 (21, 1, 3, '2025-04-28 12:14:24'),
 (22, 2, 7, '2025-04-28 20:09:59'),
 (23, 2, 10, '2025-04-29 12:00:33'),
-(24, 1, 10, '2025-04-29 12:38:35'),
 (25, 2, 9, '2025-05-01 10:19:42'),
-(30, 3, 10, '2025-05-04 09:14:36');
+(30, 3, 10, '2025-05-04 09:14:36'),
+(31, 1, 10, '2025-05-05 10:04:22');
 
 -- --------------------------------------------------------
 
@@ -303,8 +304,8 @@ INSERT INTO `videos` (`id`, `user_id`, `title`, `description`, `video_file`, `th
 (5, 1, 'Nature | Farm', 'Nature views and farm', 'video_680e82f833b179.99706520.mp4', 'thumb_680e82f833b1e7.30486898.png', '2025-04-28 00:48:16', 0, 3),
 (6, 1, 'Palace Tour', 'Let me show you my palace', 'video_680e833a0a8786.15406396.mp4', 'thumb_680e833a0a87e1.29644312.png', '2025-04-28 00:49:22', 0, 1),
 (7, 1, 'In the Mirror | Sigrid Song', 'Artist: Sigrid\r\nReleased: 2022 | Album: How to Let Go\r\nGenres: Disco, Nigerian R&B, Afropop, Pop', 'video_680e83aba19329.60549494.mp4', 'thumb_680e83aba19362.81882149.png', '2025-04-28 00:51:15', 0, 14),
-(9, 2, 'THE WITCH 2 : THE OTHER ONE Official Trailer ｜ Korean Sci-Fi Horror Thriller ｜ Starring Shin Sia', 'THE OTHER ONE Official Trailer', 'video_6810b78b7833c4.56427866.mp4', 'thumb_6810b78b783432.29803304.jpg', '2025-04-29 16:57:07', 1, 6),
-(10, 2, 'Max’s Song | Running Up That Hill ｜ Stranger Things ｜ Netflix', 'Max’s Song | Kate Bush - Running Up That Hill ｜ Stranger Things ｜ Netflix', 'video_6810b86e22ab50.38263813.mp4', 'thumb_6810b86e22ad95.84477098.jpg', '2025-04-29 17:00:54', 1, 6);
+(9, 2, 'THE WITCH 2 : THE OTHER ONE Official Trailer ｜ Korean Sci-Fi Horror Thriller ｜ Starring Shin Sia', 'THE OTHER ONE Official Trailer', 'video_6810b78b7833c4.56427866.mp4', 'thumb_6810b78b783432.29803304.jpg', '2025-04-29 16:57:07', 2, 6),
+(10, 2, 'Max’s Song | Running Up That Hill ｜ Stranger Things ｜ Netflix', 'Max’s Song | Kate Bush - Running Up That Hill ｜ Stranger Things ｜ Netflix', 'video_6810b86e22ab50.38263813.mp4', 'thumb_6810b86e22ad95.84477098.jpg', '2025-04-29 17:00:54', 1, 7);
 
 -- --------------------------------------------------------
 
@@ -326,7 +327,8 @@ CREATE TABLE `video_shares` (
 INSERT INTO `video_shares` (`id`, `user_id`, `video_id`, `shared_at`) VALUES
 (1, 3, 9, '2025-05-01 12:08:00'),
 (2, 3, 4, '2025-05-01 12:08:23'),
-(3, 3, 10, '2025-05-04 02:12:50');
+(3, 3, 10, '2025-05-04 02:12:50'),
+(4, 1, 10, '2025-05-05 10:04:06');
 
 -- --------------------------------------------------------
 
@@ -356,9 +358,11 @@ INSERT INTO `video_views` (`id`, `user_id`, `video_id`, `viewed_at`) VALUES
 (111, 2, 7, '2025-05-04 10:02:46'),
 (115, 2, 10, '2025-05-04 10:03:05'),
 (116, 2, 6, '2025-05-04 10:05:01'),
-(118, 1, 9, '2025-05-04 10:55:33'),
-(119, 1, 7, '2025-05-04 11:09:06'),
-(120, 1, 10, '2025-05-04 11:12:21');
+(118, 1, 9, '2025-05-05 11:21:28'),
+(119, 1, 7, '2025-05-05 10:56:07'),
+(120, 1, 10, '2025-05-05 10:36:41'),
+(122, 1, 5, '2025-05-05 11:21:02'),
+(124, 1, 4, '2025-05-05 10:36:28');
 
 --
 -- Indexes for dumped tables
@@ -462,13 +466,13 @@ ALTER TABLE `video_views`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `comment_likes`
 --
 ALTER TABLE `comment_likes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `contact_messages`
@@ -504,7 +508,7 @@ ALTER TABLE `forum_topics`
 -- AUTO_INCREMENT for table `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -522,13 +526,13 @@ ALTER TABLE `videos`
 -- AUTO_INCREMENT for table `video_shares`
 --
 ALTER TABLE `video_shares`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `video_views`
 --
 ALTER TABLE `video_views`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 
 --
 -- Constraints for dumped tables
