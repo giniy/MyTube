@@ -99,20 +99,34 @@ if (isLoggedIn()) {
 }
 
 function displayComment($comment, $conn, $depth = 0) {
+    // Get like count
     $likesQuery = "SELECT COUNT(*) as like_count FROM comment_likes WHERE comment_id = ?";
     $stmt = $conn->prepare($likesQuery);
     $stmt->bind_param("i", $comment['id']);
     $stmt->execute();
     $likesResult = $stmt->get_result();
     $likeData = $likesResult->fetch_assoc();
-    
+
+    // Get users who liked the comment (limit to 5 for performance)
+    $likersQuery = "SELECT u.username FROM comment_likes cl JOIN users u ON cl.user_id = u.id 
+                    WHERE cl.comment_id = ? ORDER BY cl.created_at DESC LIMIT 5";
+    $likerStmt = $conn->prepare($likersQuery);
+    $likerStmt->bind_param("i", $comment['id']);
+    $likerStmt->execute();
+    $likersResult = $likerStmt->get_result();
+    $likers = [];
+    while ($liker = $likersResult->fetch_assoc()) {
+        $likers[] = $liker['username'];
+    }
+
+    // Get replies
     $repliesQuery = "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id 
                      WHERE c.parent_id = ? ORDER BY c.created_at ASC";
     $stmt = $conn->prepare($repliesQuery);
     $stmt->bind_param("i", $comment['id']);
     $stmt->execute();
     $repliesResult = $stmt->get_result();
-    
+
     $margin = $depth * 20;
     $canDeleteComment = false;
     if (isLoggedIn()) {
@@ -122,9 +136,25 @@ function displayComment($comment, $conn, $depth = 0) {
     ?>
 
     <div class="comment" style="margin-left: <?= $margin ?>px; color: #8d8d8d;">
-        <strong><?= htmlspecialchars($comment['username']) ?></strong>
+        <strong><a href="user.php?username=<?= urlencode($comment['username']) ?>" style="color: #007bff; text-decoration: none;"><?= htmlspecialchars($comment['username']) ?></a></strong>
         <p><?= htmlspecialchars($comment['comment']) ?></p>
         <small><?= date('M j, Y g:i a', strtotime($comment['created_at'])) ?></small>
+        <?php if ($likeData['like_count'] > 0): ?>
+            <p class="likers" style="font-size: 0.85rem; color: #6b6b6b;">
+                Liked by: 
+                <?php 
+                $likersCount = $likeData['like_count'];
+                $displayedLikers = array_slice($likers, 0, 3); // Show up to 3 likers
+                $remainingCount = $likersCount - count($displayedLikers);
+                echo implode(', ', array_map(function($username) {
+                    return '<a href="user.php?username=' . urlencode($username) . '" style="color: #007bff; text-decoration: none;">' . htmlspecialchars($username) . '</a>';
+                }, $displayedLikers));
+                if ($remainingCount > 0) {
+                    echo ' and ' . $remainingCount . ' other' . ($remainingCount > 1 ? 's' : '');
+                }
+                ?>
+            </p>
+        <?php endif; ?>
         <?php if (isLoggedIn()): ?>
             <div class="comment-actions">
                 <button onclick="toggleReplyForm(<?= $comment['id'] ?>)">Reply</button>
@@ -159,14 +189,12 @@ function displayComment($comment, $conn, $depth = 0) {
     <div class="video-container">
         <?php if ($featuredVideo): ?>
         <section class="video-player">
-
             <video id="main-video" controls autoplay muted>
                 <source src="<?= VIDEO_UPLOAD_PATH . $featuredVideo['video_file'] ?>" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
             <h3><?= htmlspecialchars($featuredVideo['title']) ?></h3>
             <p><?= htmlspecialchars($featuredVideo['description']) ?></p>
-            
             <p>Uploaded by: <a href="user.php?username=<?= urlencode($featuredVideo['username']) ?>"><?= htmlspecialchars($featuredVideo['username']) ?></a></p>
 
             <div class="video-actions">
@@ -185,14 +213,12 @@ function displayComment($comment, $conn, $depth = 0) {
                     $stmt->execute();
                     $likesResult = $stmt->get_result();
                     $likeData = $likesResult->fetch_assoc();
-                    ?>
-            
+                ?>
                 <p class="like_share">
                     <?= $likeData['like_count'] ?> Likes |
                     <?= $featuredVideo['share_count'] ?> Shares |
                     <?= $featuredVideo['view_count'] ?> Views
                 </p>
-
             </div>
             <div id="share-modal" class="modal" style="display: none;">
                 <div class="modal-content">
@@ -285,7 +311,6 @@ function displayComment($comment, $conn, $depth = 0) {
                             <p>
                                 <?= htmlspecialchars($video['view_count']) ?> Views | 
                                 Uploaded by: <?= htmlspecialchars($video['username']) ?>
-                                
                             </p>
                             <p class="watched-date">Watched: <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['viewed_at']))) ?></p>
                         </div>
@@ -293,7 +318,6 @@ function displayComment($comment, $conn, $depth = 0) {
                     <div class="loading">Loading...</div>
                 </div>
             </div>
-
             <?php endif; ?>
         </aside>
     </div>
@@ -612,6 +636,8 @@ function likeComment(commentId) {
                 button.innerText = `Like (${currentCount + 1})`;
                 button.disabled = true;
             });
+            // Reload the page to update the likers list
+            window.location.reload();
         }
     });
 }
@@ -742,6 +768,5 @@ function confirmCommentDelete(commentId) {
         }
     }
 }
-
 </script>
 <?php require_once 'includes/footer.php'; ?>

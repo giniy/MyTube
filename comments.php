@@ -56,3 +56,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 header("Location: index.php?video_id=" . (isset($_POST['video_id']) ? (int)$_POST['video_id'] : ''));
 exit;
 ?>
+<?php
+if (isset($_POST['like_comment']) && isLoggedIn()) {
+    $comment_id = intval($_POST['comment_id']);
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("INSERT INTO comment_likes (user_id, comment_id, created_at) VALUES (?, ?, NOW())");
+    $stmt->bind_param("ii", $user_id, $comment_id);
+    if ($stmt->execute()) {
+        echo "success";
+    } else {
+        echo "error";
+    }
+    exit;
+}
+?>
