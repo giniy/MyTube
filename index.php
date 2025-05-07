@@ -75,19 +75,23 @@ $totalWatchedVideos = 0;
 
 if (isLoggedIn()) {
     $user_id = $_SESSION['user_id'];
-    $watchedCountQuery = "SELECT COUNT(*) as total FROM video_views WHERE user_id = ?";
+
+    // Get total count of unique watched videos
+    $watchedCountQuery = "SELECT COUNT(DISTINCT video_id) as total FROM video_views WHERE user_id = ?";
     $watchedCountStmt = $conn->prepare($watchedCountQuery);
     $watchedCountStmt->bind_param("i", $user_id);
     $watchedCountStmt->execute();
     $watchedCountResult = $watchedCountStmt->get_result();
     $totalWatchedVideos = $watchedCountResult->fetch_assoc()['total'];
 
-    $watchedQuery = "SELECT v.*, u.username, vv.viewed_at 
+    // Get watched videos with view counts
+    $watchedQuery = "SELECT v.*, u.username, COUNT(*) as view_count, MAX(vv.viewed_at) as last_viewed 
                     FROM video_views vv 
                     JOIN videos v ON vv.video_id = v.id 
                     JOIN users u ON v.user_id = u.id 
                     WHERE vv.user_id = ? 
-                    ORDER BY vv.viewed_at DESC 
+                    GROUP BY vv.video_id 
+                    ORDER BY last_viewed DESC 
                     LIMIT ?";
     $watchedStmt = $conn->prepare($watchedQuery);
     $watchedStmt->bind_param("ii", $user_id, $videosPerPage);
@@ -312,17 +316,24 @@ function displayComment($comment, $conn, $depth = 0) {
                                 <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>">
                             </a>
                             <h3><?= htmlspecialchars($video['title']) ?></h3>
-                            <p>
+                            <p style="
+                            font-size: 0.85rem;
+                            color: #6b6b6b;
+                            margin-top: 5px;
+                            font-style: italic;
+                            " >
                                 <?= htmlspecialchars($video['view_count']) ?> Views | 
-                                Uploaded by: <?= htmlspecialchars($video['username']) ?>
+                                Uploaded by:
+                                <a href="user.php?username=<?= urlencode($featuredVideo['username']) ?>"><?= htmlspecialchars($featuredVideo['username']) ?></a>
                             </p>
-                            <p class="watched-date">Watched: <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['viewed_at']))) ?></p>
+                            <p class="watched-date">Last watched: <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['last_viewed']))) ?></p>
                         </div>
                     <?php endforeach; ?>
                     <div class="loading">Loading...</div>
                 </div>
             </div>
             <?php endif; ?>
+
         </aside>
     </div>
     <h3>EARLIER</h3>
