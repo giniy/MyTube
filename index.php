@@ -245,31 +245,35 @@ function displayComment($comment, $conn, $depth = 0) {
                     </form>
                 </div>
             </div>
-            <div class="comments-section">
-                <h4>Comments (<?= $totalComments ?>)</h4>
-                <?php if (isLoggedIn()): ?>
-                    <form action="comments.php" method="POST">
-                        <input type="hidden" name="video_id" value="<?= $featuredVideo['id'] ?>">
-                        <textarea name="comment" placeholder="Add a comment..." required></textarea>
-                        <button type="submit">Post Comment</button>
-                    </form>
-                <?php else: ?>
-                    <p><a href="auth/login.php">Login</a> to post comments</p>
-                <?php endif; ?>
+         <div class="comments-section">
+            <h4>Comments (<?= $totalComments ?>)</h4>
+            <?php if (isLoggedIn()): ?>
+                <form action="comments.php" method="POST">
+                    <input type="hidden" name="video_id" value="<?= $featuredVideo['id'] ?>">
+                    <textarea name="comment" placeholder="Add a comment..." required></textarea>
+                    <button type="submit">Post Comment</button>
+                </form>
+            <?php else: ?>
+                <p><a href="auth/login.php">Login</a> to post comments</p>
+            <?php endif; ?>
+            
+            <div class="comments-container-wrapper" style="max-height: 400px; overflow-y: auto; border: 0px solid #ddd; padding: 10px; margin: 10px 0;">
                 <div id="comments-container">
                     <?php while ($comment = $commentsResult->fetch_assoc()) { displayComment($comment, $conn); } ?>
                 </div>
-                <?php if ($totalPages > 1): ?>
-                    <div class="comments-pagination">
-                        <?php if ($currentPage > 1): ?>
-                            <button onclick="loadComments(<?= $currentPage - 1 ?>)">Previous</button>
-                        <?php endif; ?>
-                        <?php if ($currentPage < $totalPages): ?>
-                            <button onclick="loadComments(<?= $currentPage + 1 ?>)">Load More</button>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
             </div>
+            
+            <?php if ($totalPages > 1): ?>
+                <div class="comments-pagination">
+                    <?php if ($currentPage > 1): ?>
+                        <button onclick="loadComments(<?= $currentPage - 1 ?>)">Previous</button>
+                    <?php endif; ?>
+                    <?php if ($currentPage < $totalPages): ?>
+                        <button onclick="loadComments(<?= $currentPage + 1 ?>)">Load More</button>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </div>
         </section>
         <?php endif; ?>
         <aside class="video-sidebar">
