@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2025 at 01:22 PM
--- Server version: 8.0.36
+-- Generation Time: May 07, 2025 at 08:10 PM
+-- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -28,13 +28,13 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `comments` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `video_id` int NOT NULL,
-  `comment` text COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `parent_id` int DEFAULT NULL,
-  `like_count` int DEFAULT '0'
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `video_id` int(11) NOT NULL,
+  `comment` text NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `parent_id` int(11) DEFAULT NULL,
+  `like_count` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -52,9 +52,16 @@ INSERT INTO `comments` (`id`, `user_id`, `video_id`, `comment`, `created_at`, `p
 (17, 1, 3, 'yea', '2025-04-28 17:54:59', 15, 0),
 (20, 1, 6, 'nice one', '2025-04-28 18:04:24', NULL, 1),
 (28, 1, 4, 'yes', '2025-04-28 15:51:03', 4, 1),
-(29, 2, 10, 'Amazing, I am waiting for the season 5', '2025-04-29 17:32:32', NULL, 1),
-(31, 1, 10, 'Yea, me too!', '2025-04-29 18:08:02', 29, 1),
-(32, 3, 10, 'nice', '2025-05-03 16:16:28', NULL, 1);
+(29, 2, 10, 'Amazing, I am waiting for the season 5', '2025-04-29 17:32:32', NULL, 2),
+(31, 1, 10, 'Yea, me too!', '2025-04-29 18:08:02', 29, 2),
+(32, 3, 10, 'nice', '2025-05-03 16:16:28', NULL, 2),
+(39, 2, 10, 'ok', '2025-05-07 12:29:02', 29, 0),
+(43, 2, 10, 'ok', '2025-05-07 12:38:20', NULL, 1),
+(47, 2, 10, 'omg', '2025-05-07 12:57:35', NULL, 0),
+(48, 2, 10, 'omg', '2025-05-07 12:57:40', NULL, 0),
+(49, 2, 10, 'omg', '2025-05-07 12:57:54', 43, 0),
+(50, 2, 10, 'omg', '2025-05-07 12:58:06', 43, 0),
+(52, 2, 10, 'okay good', '2025-05-07 13:03:30', NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -63,10 +70,10 @@ INSERT INTO `comments` (`id`, `user_id`, `video_id`, `comment`, `created_at`, `p
 --
 
 CREATE TABLE `comment_likes` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `comment_id` int NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -88,7 +95,11 @@ INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`, `created_at`) VALUES
 (19, 1, 29, '2025-04-29 12:07:55'),
 (20, 1, 31, '2025-04-30 08:14:42'),
 (21, 2, 13, '2025-05-01 11:31:02'),
-(22, 1, 32, '2025-05-05 10:55:36');
+(22, 1, 32, '2025-05-05 10:55:36'),
+(24, 2, 29, '2025-05-07 14:46:38'),
+(26, 2, 31, '2025-05-07 15:11:16'),
+(28, 2, 32, '2025-05-07 15:23:01'),
+(30, 2, 43, '2025-05-07 16:43:44');
 
 -- --------------------------------------------------------
 
@@ -97,12 +108,12 @@ INSERT INTO `comment_likes` (`id`, `user_id`, `comment_id`, `created_at`) VALUES
 --
 
 CREATE TABLE `contact_messages` (
-  `id` int NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `message` text COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `is_read` tinyint(1) DEFAULT '0'
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `message` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `is_read` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -124,14 +135,14 @@ INSERT INTO `contact_messages` (`id`, `name`, `email`, `message`, `created_at`, 
 --
 
 CREATE TABLE `feedback` (
-  `id` int NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `feedback_type` enum('suggestion','bug','compliment','general') COLLATE utf8mb4_general_ci NOT NULL,
-  `message` text COLLATE utf8mb4_general_ci NOT NULL,
-  `rating` tinyint DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `is_processed` tinyint(1) DEFAULT '0'
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `feedback_type` enum('suggestion','bug','compliment','general') NOT NULL,
+  `message` text NOT NULL,
+  `rating` tinyint(4) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `is_processed` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -149,10 +160,10 @@ INSERT INTO `feedback` (`id`, `name`, `email`, `feedback_type`, `message`, `rati
 --
 
 CREATE TABLE `forum_categories` (
-  `id` int NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text COLLATE utf8mb4_general_ci,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -173,12 +184,12 @@ INSERT INTO `forum_categories` (`id`, `name`, `description`, `created_at`) VALUE
 --
 
 CREATE TABLE `forum_replies` (
-  `id` int NOT NULL,
-  `topic_id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `content` text COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `id` int(11) NOT NULL,
+  `topic_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -197,15 +208,15 @@ INSERT INTO `forum_replies` (`id`, `topic_id`, `user_id`, `content`, `created_at
 --
 
 CREATE TABLE `forum_topics` (
-  `id` int NOT NULL,
-  `category_id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `content` text COLLATE utf8mb4_general_ci NOT NULL,
-  `is_faq` tinyint(1) DEFAULT '0',
-  `is_closed` tinyint(1) DEFAULT '0',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `is_faq` tinyint(1) DEFAULT 0,
+  `is_closed` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -223,10 +234,10 @@ INSERT INTO `forum_topics` (`id`, `category_id`, `user_id`, `title`, `content`, 
 --
 
 CREATE TABLE `likes` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `video_id` int NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `video_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -241,7 +252,6 @@ INSERT INTO `likes` (`id`, `user_id`, `video_id`, `created_at`) VALUES
 (20, 1, 4, '2025-04-28 11:50:59'),
 (21, 1, 3, '2025-04-28 12:14:24'),
 (22, 2, 7, '2025-04-28 20:09:59'),
-(23, 2, 10, '2025-04-29 12:00:33'),
 (25, 2, 9, '2025-05-01 10:19:42'),
 (30, 3, 10, '2025-05-04 09:14:36'),
 (31, 1, 10, '2025-05-05 10:04:22');
@@ -253,18 +263,18 @@ INSERT INTO `likes` (`id`, `user_id`, `video_id`, `created_at`) VALUES
 --
 
 CREATE TABLE `users` (
-  `id` int NOT NULL,
-  `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `bio` text COLLATE utf8mb4_general_ci,
-  `profile_picture` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `twitter` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `instagram` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `youtube` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `other` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `gender` enum('male','female','other') COLLATE utf8mb4_general_ci DEFAULT 'other'
+  `id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `bio` text DEFAULT NULL,
+  `profile_picture` varchar(255) DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `twitter` varchar(255) DEFAULT NULL,
+  `instagram` varchar(255) DEFAULT NULL,
+  `youtube` varchar(255) DEFAULT NULL,
+  `other` varchar(255) DEFAULT NULL,
+  `gender` enum('male','female','other') DEFAULT 'other'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -283,15 +293,15 @@ INSERT INTO `users` (`id`, `username`, `email`, `bio`, `profile_picture`, `passw
 --
 
 CREATE TABLE `videos` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text COLLATE utf8mb4_general_ci,
-  `video_file` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `thumbnail_file` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `uploaded_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `view_count` int DEFAULT '0',
-  `share_count` int DEFAULT '0'
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `video_file` varchar(255) NOT NULL,
+  `thumbnail_file` varchar(255) NOT NULL,
+  `uploaded_at` datetime DEFAULT current_timestamp(),
+  `view_count` int(11) DEFAULT 0,
+  `share_count` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -314,11 +324,11 @@ INSERT INTO `videos` (`id`, `user_id`, `title`, `description`, `video_file`, `th
 --
 
 CREATE TABLE `video_shares` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `video_id` int NOT NULL,
-  `shared_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `video_id` int(11) NOT NULL,
+  `shared_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `video_shares`
@@ -337,11 +347,11 @@ INSERT INTO `video_shares` (`id`, `user_id`, `video_id`, `shared_at`) VALUES
 --
 
 CREATE TABLE `video_views` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `video_id` int NOT NULL,
-  `viewed_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `video_id` int(11) NOT NULL,
+  `viewed_at` timestamp NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `video_views`
@@ -362,7 +372,58 @@ INSERT INTO `video_views` (`id`, `user_id`, `video_id`, `viewed_at`) VALUES
 (119, 1, 7, '2025-05-05 10:56:07'),
 (120, 1, 10, '2025-05-05 10:36:41'),
 (122, 1, 5, '2025-05-05 11:21:02'),
-(124, 1, 4, '2025-05-05 10:36:28');
+(124, 1, 4, '2025-05-05 10:36:28'),
+(0, 1, 7, '2025-05-06 15:25:08'),
+(0, 1, 10, '2025-05-06 15:26:29'),
+(0, 1, 7, '2025-05-07 13:56:26'),
+(0, 1, 7, '2025-05-07 14:02:05'),
+(0, 1, 10, '2025-05-07 14:45:42'),
+(0, 1, 10, '2025-05-07 14:45:54'),
+(0, 2, 10, '2025-05-07 14:47:26'),
+(0, 2, 10, '2025-05-07 14:47:43'),
+(0, 2, 10, '2025-05-07 15:10:44'),
+(0, 2, 10, '2025-05-07 15:11:11'),
+(0, 2, 10, '2025-05-07 15:11:16'),
+(0, 2, 10, '2025-05-07 15:12:42'),
+(0, 2, 10, '2025-05-07 15:13:04'),
+(0, 2, 10, '2025-05-07 15:16:22'),
+(0, 2, 10, '2025-05-07 15:16:26'),
+(0, 2, 10, '2025-05-07 15:23:01'),
+(0, 2, 10, '2025-05-07 15:23:23'),
+(0, 2, 10, '2025-05-07 15:23:28'),
+(0, 2, 10, '2025-05-07 16:25:20'),
+(0, 2, 10, '2025-05-07 16:29:02'),
+(0, 2, 10, '2025-05-07 16:37:20'),
+(0, 2, 10, '2025-05-07 16:38:06'),
+(0, 2, 10, '2025-05-07 16:42:25'),
+(0, 2, 10, '2025-05-07 16:42:32'),
+(0, 2, 10, '2025-05-07 16:43:03'),
+(0, 2, 10, '2025-05-07 16:43:19'),
+(0, 2, 10, '2025-05-07 16:43:33'),
+(0, 2, 10, '2025-05-07 16:43:55'),
+(0, 2, 10, '2025-05-07 16:44:48'),
+(0, 2, 10, '2025-05-07 16:45:01'),
+(0, 2, 10, '2025-05-07 16:46:10'),
+(0, 2, 10, '2025-05-07 16:46:42'),
+(0, 2, 10, '2025-05-07 16:47:19'),
+(0, 2, 10, '2025-05-07 16:48:04'),
+(0, 2, 10, '2025-05-07 16:57:13'),
+(0, 2, 10, '2025-05-07 17:02:23'),
+(0, 2, 10, '2025-05-07 17:02:48'),
+(0, 2, 10, '2025-05-07 17:04:01'),
+(0, 2, 10, '2025-05-07 17:14:34'),
+(0, 2, 10, '2025-05-07 17:14:47'),
+(0, 2, 10, '2025-05-07 17:26:50'),
+(0, 2, 10, '2025-05-07 17:28:05'),
+(0, 2, 10, '2025-05-07 17:28:47'),
+(0, 2, 5, '2025-05-07 17:29:25'),
+(0, 2, 5, '2025-05-07 17:30:06'),
+(0, 2, 5, '2025-05-07 17:33:03'),
+(0, 2, 5, '2025-05-07 17:33:11'),
+(0, 2, 5, '2025-05-07 17:33:37'),
+(0, 2, 10, '2025-05-07 17:34:02'),
+(0, 2, 10, '2025-05-07 17:34:16'),
+(0, 2, 10, '2025-05-07 18:09:12');
 
 --
 -- Indexes for dumped tables
@@ -382,6 +443,7 @@ ALTER TABLE `comments`
 ALTER TABLE `comment_likes`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `user_id` (`user_id`,`comment_id`),
+  ADD UNIQUE KEY `user_id_2` (`user_id`,`comment_id`),
   ADD KEY `comment_id` (`comment_id`);
 
 --
@@ -450,15 +512,6 @@ ALTER TABLE `video_shares`
   ADD KEY `video_id` (`video_id`);
 
 --
--- Indexes for table `video_views`
---
-ALTER TABLE `video_views`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_view` (`user_id`,`video_id`),
-  ADD KEY `video_id` (`video_id`),
-  ADD KEY `idx_viewed_at` (`viewed_at`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -466,119 +519,49 @@ ALTER TABLE `video_views`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `comment_likes`
 --
 ALTER TABLE `comment_likes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `contact_messages`
 --
 ALTER TABLE `contact_messages`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `forum_categories`
 --
 ALTER TABLE `forum_categories`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `forum_replies`
 --
 ALTER TABLE `forum_replies`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `forum_topics`
 --
 ALTER TABLE `forum_topics`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `likes`
 --
 ALTER TABLE `likes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `videos`
---
-ALTER TABLE `videos`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT for table `video_shares`
---
-ALTER TABLE `video_shares`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `video_views`
---
-ALTER TABLE `video_views`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `comments`
---
-ALTER TABLE `comments`
-  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`);
-
---
--- Constraints for table `comment_likes`
---
-ALTER TABLE `comment_likes`
-  ADD CONSTRAINT `comment_likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `comment_likes_ibfk_2` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`);
-
---
--- Constraints for table `forum_replies`
---
-ALTER TABLE `forum_replies`
-  ADD CONSTRAINT `forum_replies_ibfk_1` FOREIGN KEY (`topic_id`) REFERENCES `forum_topics` (`id`),
-  ADD CONSTRAINT `forum_replies_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `forum_topics`
---
-ALTER TABLE `forum_topics`
-  ADD CONSTRAINT `forum_topics_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `forum_categories` (`id`),
-  ADD CONSTRAINT `forum_topics_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `video_shares`
---
-ALTER TABLE `video_shares`
-  ADD CONSTRAINT `video_shares_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `video_shares_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `video_views`
---
-ALTER TABLE `video_views`
-  ADD CONSTRAINT `video_views_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `video_views_ibfk_2` FOREIGN KEY (`video_id`) REFERENCES `videos` (`id`) ON DELETE CASCADE;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
