@@ -91,6 +91,8 @@ if (isLoggedIn()) {
                     JOIN users u ON v.user_id = u.id 
                     WHERE vv.user_id = ? 
                     GROUP BY vv.video_id 
+
+
                     ORDER BY last_viewed DESC 
                     LIMIT ?";
     $watchedStmt = $conn->prepare($watchedQuery);
@@ -123,7 +125,7 @@ function displayComment($comment, $conn, $depth = 0) {
         $likers[] = $liker['username'];
     }
 
-    // Get replies
+    // Get rmseplies
     $repliesQuery = "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id 
                      WHERE c.parent_id = ? ORDER BY c.created_at ASC";
     $stmt = $conn->prepare($repliesQuery);
@@ -188,7 +190,6 @@ function displayComment($comment, $conn, $depth = 0) {
     </video>
     <div class="blur-overlay"></div>
 </div>
-
 <main>
     <div class="video-container">
         <?php if ($featuredVideo): ?>
@@ -446,9 +447,120 @@ function displayComment($comment, $conn, $depth = 0) {
     margin: 0;
     color: #6b6b6b;
 }
-</style>
 
-</main>
+/* Hamburger Menu Button */
+.hamburger-menu {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 40px;
+    height: 30px;
+}
+
+.hamburger-menu span {
+    width: 100%;
+    height: 4px;
+    background-color: #ffffff; /* Changed to white */
+    transition: all 0.3s ease;
+}
+
+.hamburger-menu.active span:nth-child(1) {
+    transform: rotate(45deg) translate(10px, 10px);
+}
+
+.hamburger-menu.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(10px, -10px);
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+    position: fixed;
+    top: 0;
+    left: -300px; /* Hidden by default */
+    width: 143px;
+    background: #ffffff;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    transition: left 0.3s ease;
+}
+
+.sidebar-menu.active {
+    left: 0; /* Slide in */
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #1a1a1a;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav li {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.sidebar-nav a {
+    display: block;
+    padding: 15px 20px;
+    color: #1a1a1a;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.sidebar-nav a:hover {
+    background: #f5f5f5;
+}
+
+/* Overlay for when sidebar is open */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    display: none;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+@media (max-width: 600px) {
+    .sidebar-menu {
+        width: 250px;
+    }
+    .sidebar-menu.active {
+        left: 0;
+    }
+}
+</style>
 
 <script>
 function likeVideo(videoId) {
@@ -562,6 +674,21 @@ function closeModal() {
     }
 }
 
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebarMenu');
+    const hamburger = document.querySelector('.hamburger-menu');
+    const overlay = document.querySelector('.sidebar-overlay') || document.createElement('div');
+
+    if (!overlay.classList.contains('sidebar-overlay')) {
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+    }
+
+    sidebar.classList.toggle('active');
+    hamburger.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const mainVideo = document.getElementById('main-video');
     const bgVideo = document.getElementById('background-video');
@@ -622,6 +749,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Close sidebar when clicking overlay
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('sidebar-overlay')) {
+            toggleSidebar();
+        }
+    });
 });
 
 function adjustBlur(intensity) {

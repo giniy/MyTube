@@ -12,11 +12,42 @@
     <link href="static/css/watched_video.css" rel="stylesheet">
     <link href="static/css/user.css" rel="stylesheet">
     <link href="static/css/logo.css" rel="stylesheet">
+    <link href="static/css/hamburger_menu.css" rel="stylesheet">
     <script src="static/js/script.js"></script>
+    <script src="static/js/side_menu.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <header>
+    <!-- Hamburger Menu Button -->
+    <button class="hamburger-menu" onclick="toggleSidebar()" style="text-decoration: none; background: none; border: none; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; width: 15px; height: 25px; padding: 8px 0;">
+    <span style="width: 100%; height: 1px; background-color: #ffffff; transition: all 0.3s ease;"></span>
+    <span style="width: 100%; height: 1px; background-color: #ffffff; transition: all 0.3s ease;"></span>
+    <span style="width: 100%; height: 1px; background-color: #ffffff; transition: all 0.3s ease;"></span>
+    </button>
+    <!-- Sidebar Menu -->
+    <div class="sidebar-menu" id="sidebarMenu">
+        <br>
+        <br>
+        <div class="sidebar-header">
+            <!-- <h2>MyTube</h2> -->
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="upload.php">Upload Video</a></li>
+                <?php if (isLoggedIn()): ?>
+                    <li><a href="profile.php?username=<?= urlencode($_SESSION['username']) ?>">My Profile</a></li>
+                    <li><a href="auth/logout.php">Logout</a></li>
+                <?php else: ?>
+                    <li><a href="auth/login.php">Login</a></li>
+                    <li><a href="auth/signup.php">Register</a></li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+    </div>
+
+
     <div class="logo-container" style="display: inline-block; width: 100px; height: 30px;">
         <a class="nav-link" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" 
            style="text-decoration: none; display: flex; align-items: center; height: 100%; position: relative;">
@@ -26,10 +57,12 @@
                  style="height: 24px; width: auto;
                         position: absolute;
                         left: 0;
+                        margin-left: 70px;
                         animation: logoSwap 5s infinite ease-in-out;">
             <!-- Animated Text -->
             <span style="font-weight: bold; color: #ff0000;
                         position: absolute;
+                        margin-left: 70px;
                         left: 30px; /* 24px logo + 6px gap */
                         animation: textSwap 5s infinite ease-in-out;">MyTube</span>
         </a>
