@@ -20,13 +20,25 @@
 <body>
     <header>
     <!-- Hamburger Menu Button -->
-    <button class="hamburger-menu" onclick="toggleSidebar()" style="text-decoration: none; background: none; border: none; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; width: 15px; height: 25px; padding: 8px 0;">
+    <button class="hamburger-menu" onclick="toggleSidebar()" 
+    style="
+    text-decoration: none; 
+    background: none; 
+    border: none; 
+    cursor: pointer; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    width: 15px; 
+    height: 25px; 
+    padding: 8px 0;
+    ">
     <span style="width: 100%; height: 1px; background-color: #ffffff; transition: all 0.3s ease;"></span>
     <span style="width: 100%; height: 1px; background-color: #ffffff; transition: all 0.3s ease;"></span>
     <span style="width: 100%; height: 1px; background-color: #ffffff; transition: all 0.3s ease;"></span>
     </button>
     <!-- Sidebar Menu -->
-    <div class="sidebar-menu" id="sidebarMenu">
+    <div class="sidebar-menu" id="sidebarMenu" style="width:50px">
         <br>
         <br>
         <div class="sidebar-header">
@@ -34,14 +46,14 @@
         </div>
         <nav class="sidebar-nav">
             <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="upload.php">Upload Video</a></li>
+                <li><a href="index.php"><i class="fa fa-home" aria-hidden="true"></i></a></li>
+                <li><a href="upload.php"><i class="fa-solid fa-cloud-arrow-up"></i></a></li>
                 <?php if (isLoggedIn()): ?>
                     <li><a href="profile.php?username=<?= urlencode($_SESSION['username']) ?>">My Profile</a></li>
-                    <li><a href="auth/logout.php">Logout</a></li>
+                    <li><a href="auth/logout.php"><i class="fa fa-sign-out" aria-hidden="true"></i></a></li>
                 <?php else: ?>
-                    <li><a href="auth/login.php">Login</a></li>
-                    <li><a href="auth/signup.php">Register</a></li>
+                    <li><a href="auth/login.php"><i class="fa fa-sign-in" aria-hidden="true"></i></a></li>
+                    <li><a href="auth/signup.php"><i class="fa fa-user-plus" aria-hidden="true"></i></a></li>
                 <?php endif; ?>
             </ul>
         </nav>
