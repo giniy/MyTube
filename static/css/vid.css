@@ -514,7 +514,7 @@ button:hover {
     margin-top: 2.5rem;
     padding: 1.5rem;
 /*    background: #f8f8f8;*/
-    border-radius: 8px;
+    border-radius: px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
@@ -969,4 +969,23 @@ a {
   font-family: inherit;
   min-height: 100px;
   color: #8d8d8d;
+}
+.comments-container-wrapper {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 10px 0;
+}
+
+/* Remove any existing scrollbar styling if present */
+.comments-container-wrapper::-webkit-scrollbar {
+    width: 8px; /* This keeps the default scrollbar width */
+}
+
+.comments-container-wrapper::-webkit-scrollbar-track {
+    background: transparent; /* Default track color */
+}
+
+.comments-container-wrapper::-webkit-scrollbar-thumb {
+    background: #888; /* Default thumb color */
+    border-radius: 0; /* Remove if you want default browser style */
 }

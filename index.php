@@ -260,8 +260,7 @@ function displayComment($comment, $conn, $depth = 0) {
             <?php else: ?>
                 <p><a href="auth/login.php">Login</a> to post comments</p>
             <?php endif; ?>
-            
-            <div class="comments-container-wrapper" style="max-height: 400px; overflow-y: auto; border: 0px solid #ddd; padding: 10px; margin: 10px 0;">
+                <div class="comments-container-wrapper" style="max-height: 400px; overflow-y: auto;">
                 <div id="comments-container">
                     <?php while ($comment = $commentsResult->fetch_assoc()) { displayComment($comment, $conn); } ?>
                 </div>
