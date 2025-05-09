@@ -32,7 +32,13 @@ while ($video = $result->fetch_assoc()): ?>
             <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>">
         </a>
         <h3><?= htmlspecialchars($video['title']) ?></h3>
-        <p>
+        <p style="
+            font-size: 0.85rem;
+            color: #6b6b6b;
+            margin-top: 5px;
+            font-style: italic;
+            " 
+          >
             <?= htmlspecialchars($video['view_count']) ?> Views | 
             Uploaded by: <?= htmlspecialchars($video['username']) ?>
         </p>
