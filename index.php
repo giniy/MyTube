@@ -185,10 +185,16 @@ function displayComment($comment, $conn, $depth = 0) {
         <?php endif; ?>
         <?php if (isLoggedIn()): ?>
             <div class="comment-actions">
-                <button onclick="toggleReplyForm(<?= $comment['id'] ?>)">Reply</button>
-                <button onclick="likeComment(<?= $comment['id'] ?>)">Like (<?= $likeData['like_count'] ?>)</button>
+                <button onclick="toggleReplyForm(<?= $comment['id'] ?>)">
+                <i class="fa fa-reply" aria-hidden="true"></i>
+                </button>
+                <button onclick="likeComment(<?= $comment['id'] ?>)">
+                    <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+                 (<?= $likeData['like_count'] ?>)</button>
                 <?php if ($canDeleteComment): ?>
-                    <button onclick="confirmCommentDelete(<?= $comment['id'] ?>)" class="delete-comment-btn">Delete</button>
+                    <button onclick="confirmCommentDelete(<?= $comment['id'] ?>)" class="delete-comment-btn">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
                 <?php endif; ?>
             </div>
             <div id="reply-form-<?= $comment['id'] ?>" class="comment-actions" style="display: none; color: #8d8d8d;">
@@ -233,14 +239,24 @@ function displayComment($comment, $conn, $depth = 0) {
             </p>
             <div class="video-actions">
                 <?php if (isLoggedIn()): ?>
-                    <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">👍 Like</button>
-                    <button id="share-button-<?= $featuredVideo['id'] ?>" onclick="shareVideo(<?= $featuredVideo['id'] ?>)">🔗 Share</button>
+                    <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">
+                    <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+                    </button>
+                    <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="dislikeVideo(<?= $featuredVideo['id'] ?>)">
+                    <i class="fa fa-thumbs-down" aria-hidden="true"></i>
+                    </button>
+                    <button id="share-button-<?= $featuredVideo['id'] ?>" onclick="shareVideo(<?= $featuredVideo['id'] ?>)">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                    </button>
                     <?php if ($canDelete): ?>
-                        <button id="edit-button-<?= $featuredVideo['id'] ?>" onclick="showEditForm(<?= $featuredVideo['id'] ?>)" class="edit-btn">✏️ Edit</button>
-                        <button id="delete-button-<?= $featuredVideo['id'] ?>" onclick="confirmDelete(<?= $featuredVideo['id'] ?>)" class="delete-btn">🗑️ Delete</button>
+                        <button id="edit-button-<?= $featuredVideo['id'] ?>" onclick="showEditForm(<?= $featuredVideo['id'] ?>)" class="edit-btn">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button id="delete-button-<?= $featuredVideo['id'] ?>" onclick="confirmDelete(<?= $featuredVideo['id'] ?>)" class="delete-btn">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>
                     <?php endif; ?>
                 <?php endif; ?>
-        
             <p class="like_share" id="video-stats-<?= $featuredVideo['id'] ?>" data-video-id="<?= $featuredVideo['id'] ?>">
                 <?= $likeData['like_count'] ?> Likes |
                 <?= $featuredVideo['share_count'] ?> Shares |

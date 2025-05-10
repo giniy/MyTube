@@ -16,6 +16,7 @@
     <script src="static/js/script.js"></script>
     <script src="static/js/live_count.js"></script>
     <script src="static/js/side_menu.js"></script>
+    <script src="static/js/dislike.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
