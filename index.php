@@ -3,7 +3,7 @@ require_once 'includes/config.php';
 require_once 'includes/header.php';
 require_once 'includes/functions.php';
 
-// Add this after require statements
+// Handle deleted video redirect
 if (isset($_GET['deleted'])) {
     $deletedId = intval($_GET['deleted']);
     $query = "SELECT v.*, u.username FROM videos v JOIN users u ON v.user_id = u.id ORDER BY uploaded_at DESC";
@@ -42,9 +42,17 @@ if (!$featuredVideo) {
 }
 
 $canDelete = false;
+$isSubscribed = false;
 if (isLoggedIn() && $featuredVideo) {
     $user_id = $_SESSION['user_id'];
     $canDelete = ($user_id == $featuredVideo['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
+    
+    // Check if current user is subscribed to the video's uploader
+    $subscribeCheckQuery = "SELECT 1 FROM followers WHERE follower_id = ? AND following_id = ?";
+    $subscribeCheckStmt = $conn->prepare($subscribeCheckQuery);
+    $subscribeCheckStmt->bind_param("ii", $user_id, $featuredVideo['user_id']);
+    $subscribeCheckStmt->execute();
+    $isSubscribed = $subscribeCheckStmt->get_result()->num_rows > 0;
 }
 
 $commentsPerPage = 5;
@@ -72,6 +80,7 @@ if ($featuredVideo) {
 $videosPerPage = 4;
 $watchedVideos = [];
 $totalWatchedVideos = 0;
+$subscribedVideos = [];
 
 if (isLoggedIn()) {
     $user_id = $_SESSION['user_id'];
@@ -91,8 +100,6 @@ if (isLoggedIn()) {
                     JOIN users u ON v.user_id = u.id 
                     WHERE vv.user_id = ? 
                     GROUP BY vv.video_id 
-
-
                     ORDER BY last_viewed DESC 
                     LIMIT ?";
     $watchedStmt = $conn->prepare($watchedQuery);
@@ -101,6 +108,22 @@ if (isLoggedIn()) {
     $watchedResult = $watchedStmt->get_result();
     while ($video = $watchedResult->fetch_assoc()) {
         $watchedVideos[] = $video;
+    }
+
+    // Get latest videos from subscribed users
+    $subscribedQuery = "SELECT v.*, u.username 
+                       FROM videos v 
+                       JOIN users u ON v.user_id = u.id 
+                       JOIN followers f ON v.user_id = f.following_id 
+                       WHERE f.follower_id = ? 
+                       ORDER BY v.uploaded_at DESC 
+                       LIMIT 8";
+    $subscribedStmt = $conn->prepare($subscribedQuery);
+    $subscribedStmt->bind_param("i", $user_id);
+    $subscribedStmt->execute();
+    $subscribedResult = $subscribedStmt->get_result();
+    while ($video = $subscribedResult->fetch_assoc()) {
+        $subscribedVideos[] = $video;
     }
 }
 
@@ -125,7 +148,7 @@ function displayComment($comment, $conn, $depth = 0) {
         $likers[] = $liker['username'];
     }
 
-    // Get rmseplies
+    // Get replies
     $repliesQuery = "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id 
                      WHERE c.parent_id = ? ORDER BY c.created_at ASC";
     $stmt = $conn->prepare($repliesQuery);
@@ -140,7 +163,6 @@ function displayComment($comment, $conn, $depth = 0) {
         $canDeleteComment = ($user_id == $comment['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
     }
     ?>
-
     <div class="comment" style="margin-left: <?= $margin ?>px; color: #8d8d8d;">
         <strong><a href="user.php?username=<?= urlencode($comment['username']) ?>" style="color: #007bff; text-decoration: none;"><?= htmlspecialchars($comment['username']) ?></a></strong>
         <p><?= htmlspecialchars($comment['comment']) ?></p>
@@ -150,7 +172,7 @@ function displayComment($comment, $conn, $depth = 0) {
                 Liked by: 
                 <?php 
                 $likersCount = $likeData['like_count'];
-                $displayedLikers = array_slice($likers, 0, 3); // Show up to 3 likers
+                $displayedLikers = array_slice($likers, 0, 3);
                 $remainingCount = $likersCount - count($displayedLikers);
                 echo implode(', ', array_map(function($username) {
                     return '<a href="user.php?username=' . urlencode($username) . '" style="color: #007bff; text-decoration: none;">' . htmlspecialchars($username) . '</a>';
@@ -180,7 +202,6 @@ function displayComment($comment, $conn, $depth = 0) {
         <?php endif; ?>
         <?php while ($reply = $repliesResult->fetch_assoc()) { displayComment($reply, $conn, $depth + 1); } ?>
     </div>
-
     <?php
 }
 ?>
@@ -200,8 +221,16 @@ function displayComment($comment, $conn, $depth = 0) {
             </video>
             <h3><?= htmlspecialchars($featuredVideo['title']) ?></h3>
             <p><?= htmlspecialchars($featuredVideo['description']) ?></p>
-            <p>Uploaded by: <a href="user.php?username=<?= urlencode($featuredVideo['username']) ?>"><?= htmlspecialchars($featuredVideo['username']) ?></a></p>
-
+            <p>Uploaded by: <a href="user.php?username=<?= urlencode($featuredVideo['username']) ?>"><?= htmlspecialchars($featuredVideo['username']) ?></a>
+                <?php if (isLoggedIn() && $user_id != $featuredVideo['user_id']): ?>
+                    <button id="subscribe-button-<?= $featuredVideo['user_id'] ?>" 
+                            class="subscribe-btn" 
+                            onclick="subscribeUser(<?= $featuredVideo['user_id'] ?>)"
+                            style="margin-left: 10px; padding: 5px 10px; font-size: 0.9rem; border-radius: 5px; <?= $isSubscribed ? 'background-color: #28a745; color: white;' : '' ?>">
+                        <?= $isSubscribed ? 'Subscribed' : 'Subscribe' ?>
+                    </button>
+                <?php endif; ?>
+            </p>
             <div class="video-actions">
                 <?php if (isLoggedIn()): ?>
                     <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">👍 Like</button>
@@ -211,19 +240,12 @@ function displayComment($comment, $conn, $depth = 0) {
                         <button id="delete-button-<?= $featuredVideo['id'] ?>" onclick="confirmDelete(<?= $featuredVideo['id'] ?>)" class="delete-btn">🗑️ Delete</button>
                     <?php endif; ?>
                 <?php endif; ?>
-                <?php
-                    $likesQuery = "SELECT COUNT(*) as like_count FROM likes WHERE video_id = ?";
-                    $stmt = $conn->prepare($likesQuery);
-                    $stmt->bind_param("i", $featuredVideo['id']);
-                    $stmt->execute();
-                    $likesResult = $stmt->get_result();
-                    $likeData = $likesResult->fetch_assoc();
-                ?>
-                <p class="like_share">
-                    <?= $likeData['like_count'] ?> Likes |
-                    <?= $featuredVideo['share_count'] ?> Shares |
-                    <?= $featuredVideo['view_count'] ?> Views
-                </p>
+        
+            <p class="like_share" id="video-stats-<?= $featuredVideo['id'] ?>" data-video-id="<?= $featuredVideo['id'] ?>">
+                <?= $likeData['like_count'] ?> Likes |
+                <?= $featuredVideo['share_count'] ?> Shares |
+                <?= $featuredVideo['view_count'] ?> Views
+            </p>
             </div>
             <div id="share-modal" class="modal" style="display: none;">
                 <div class="modal-content">
@@ -250,34 +272,33 @@ function displayComment($comment, $conn, $depth = 0) {
                     </form>
                 </div>
             </div>
-         <div class="comments-section">
-            <h4>Comments (<?= $totalComments ?>)</h4>
-            <?php if (isLoggedIn()): ?>
-                <form action="comments.php" method="POST">
-                    <input type="hidden" name="video_id" value="<?= $featuredVideo['id'] ?>">
-                    <textarea name="comment" placeholder="Add a comment..." required></textarea>
-                    <button type="submit">Post Comment</button>
-                </form>
-            <?php else: ?>
-                <p><a href="auth/login.php">Login</a> to post comments</p>
-            <?php endif; ?>
+            <div class="comments-section">
+                <h4>Comments (<?= $totalComments ?>)</h4>
+                <?php if (isLoggedIn()): ?>
+                    <form action="comments.php" method="POST">
+                        <input type="hidden" name="video_id" value="<?= $featuredVideo['id'] ?>">
+                        <textarea name="comment" placeholder="Add a comment..." required></textarea>
+                        <button type="submit">Post Comment</button>
+                    </form>
+                <?php else: ?>
+                    <p><a href="auth/login.php">Login</a> to post comments</p>
+                <?php endif; ?>
                 <div class="comments-container-wrapper" style="max-height: 400px; overflow-y: auto;">
-                <div id="comments-container">
-                    <?php while ($comment = $commentsResult->fetch_assoc()) { displayComment($comment, $conn); } ?>
+                    <div id="comments-container">
+                        <?php while ($comment = $commentsResult->fetch_assoc()) { displayComment($comment, $conn); } ?>
+                    </div>
                 </div>
+                <?php if ($totalPages > 1): ?>
+                    <div class="comments-pagination">
+                        <?php if ($currentPage > 1): ?>
+                            <button onclick="loadComments(<?= $currentPage - 1 ?>)">Previous</button>
+                        <?php endif; ?>
+                        <?php if ($currentPage < $totalPages): ?>
+                            <button onclick="loadComments(<?= $currentPage + 1 ?>)">Load More</button>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
             </div>
-            
-            <?php if ($totalPages > 1): ?>
-                <div class="comments-pagination">
-                    <?php if ($currentPage > 1): ?>
-                        <button onclick="loadComments(<?= $currentPage - 1 ?>)">Previous</button>
-                    <?php endif; ?>
-                    <?php if ($currentPage < $totalPages): ?>
-                        <button onclick="loadComments(<?= $currentPage + 1 ?>)">Load More</button>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
-        </div>
         </section>
         <?php endif; ?>
         <aside class="video-sidebar">
@@ -316,15 +337,10 @@ function displayComment($comment, $conn, $depth = 0) {
                                 <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>">
                             </a>
                             <h3><?= htmlspecialchars($video['title']) ?></h3>
-                            <p style="
-                            font-size: 0.85rem;
-                            color: #6b6b6b;
-                            margin-top: 5px;
-                            font-style: italic;
-                            " >
+                            <p style="font-size: 0.85rem; color: #6b6b6b; margin-top: 5px; font-style: italic;">
                                 <?= htmlspecialchars($video['view_count']) ?> Views | 
                                 Uploaded by:
-                                <a href="user.php?username=<?= urlencode($featuredVideo['username']) ?>"><?= htmlspecialchars($featuredVideo['username']) ?></a>
+                                <a href="user.php?username=<?= urlencode($video['username']) ?>"><?= htmlspecialchars($video['username']) ?></a>
                             </p>
                             <p class="watched-date">Last watched: <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['last_viewed']))) ?></p>
                         </div>
@@ -333,50 +349,56 @@ function displayComment($comment, $conn, $depth = 0) {
                 </div>
             </div>
             <?php endif; ?>
-
         </aside>
     </div>
-    <h3>EARLIER</h3>
-
-<section class="video-gallery"
-    style="
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(338px, 1fr));
-    gap: 18px;
-    padding: 24px;
-    max-width: 1450px;
-    margin: 0 auto;">
-    <?php 
-    $result->data_seek(0);
-    while ($video = $result->fetch_assoc()): ?>
-        <div class="video-card"
-        style="
-        background: #ffffff;
-        border: 0px solid #e0e0e0;
-        border-radius: 12px;
-        height: 380px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        ">
-            <a href="?video_id=<?= $video['id'] ?>" class="video-link">
-                <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" 
-                     alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>" 
-                     class="thumbnail-img">
-            </a>
-            <div class="card-content">
-                <h3 class="video-title"><?= htmlspecialchars($video['title']) ?></h3>
-                <p class="video-description"><?= htmlspecialchars($video['description']) ?></p>
-                <p class="video-author">
-                    <?= htmlspecialchars($video['view_count']) ?> Views |
-                    Uploaded by: <?= htmlspecialchars($video['username']) ?>
-                </p>
-                <p class="video-date"><?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['uploaded_at']))) ?></p>
+    <?php if (isLoggedIn() && !empty($subscribedVideos)): ?>
+    <h3>FROM PEOPLE YOU SUBSCRIBED</h3>
+    <section class="subscribed-videos video-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(338px, 1fr)); gap: 18px; padding: 24px; max-width: 1450px; margin: 0 auto;">
+        <?php foreach ($subscribedVideos as $video): ?>
+            <div class="video-card" style="background: #ffffff; border: 0px solid #e0e0e0; border-radius: 12px; height: 380px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                <a href="?video_id=<?= $video['id'] ?>" class="video-link">
+                    <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" 
+                         alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>" 
+                         class="thumbnail-img">
+                </a>
+                <div class="card-content">
+                    <h3 class="video-title"><?= htmlspecialchars($video['title']) ?></h3>
+                    <p class="video-description"><?= htmlspecialchars($video['description']) ?></p>
+                    <p class="video-author">
+                        <?= htmlspecialchars($video['view_count']) ?> Views |
+                        Uploaded by: <a href="user.php?username=<?= urlencode($video['username']) ?>"><?= htmlspecialchars($video['username']) ?></a>
+                    </p>
+                    <p class="video-date"><?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['uploaded_at']))) ?></p>
+                </div>
             </div>
-        </div>
-    <?php endwhile; ?>
-</section>
-
+        <?php endforeach; ?>
+    </section>
+<!--     <div class="subscribed-loading" style="display: none; text-align: center; padding: 10px; color: #6b6b6b;">Loading...</div>
+    <button onclick="refreshSubscribedVideos()" class="refresh-btn" style="display: block; margin: 10px auto; padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Refresh Videos</button> -->
+    <?php endif; ?>
+    <h3>EARLIER</h3>
+    <section class="video-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(338px, 1fr)); gap: 18px; padding: 24px; max-width: 1450px; margin: 0 auto;">
+        <?php 
+        $result->data_seek(0);
+        while ($video = $result->fetch_assoc()): ?>
+            <div class="video-card" style="background: #ffffff; border: 0px solid #e0e0e0; border-radius: 12px; height: 380px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                <a href="?video_id=<?= $video['id'] ?>" class="video-link">
+                    <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" 
+                         alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>" 
+                         class="thumbnail-img">
+                </a>
+                <div class="card-content">
+                    <h3 class="video-title"><?= htmlspecialchars($video['title']) ?></h3>
+                    <p class="video-description"><?= htmlspecialchars($video['description']) ?></p>
+                    <p class="video-author">
+                        <?= htmlspecialchars($video['view_count']) ?> Views |
+                        Uploaded by: <?= htmlspecialchars($video['username']) ?>
+                    </p>
+                    <p class="video-date"><?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['uploaded_at']))) ?></p>
+                </div>
+            </div>
+        <?php endwhile; ?>
+    </section>
 <style>
 .video-gallery {
     display: grid;
@@ -448,7 +470,49 @@ function displayComment($comment, $conn, $depth = 0) {
     color: #6b6b6b;
 }
 
-/* Hamburger Menu Button */
+.subscribe-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.subscribe-btn.subscribed {
+    background-color: #28a745;
+}
+
+.subscribe-btn:hover {
+    opacity: 0.9;
+}
+
+.subscribe-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.notification {
+    position: absolute;
+    background-color: #dc3545; /* Red for errors */
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(-10px);
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .hamburger-menu {
     position: fixed;
     top: 20px;
@@ -468,7 +532,7 @@ function displayComment($comment, $conn, $depth = 0) {
 .hamburger-menu span {
     width: 100%;
     height: 4px;
-    background-color: #ffffff; /* Changed to white */
+    background-color: #ffffff;
     transition: all 0.3s ease;
 }
 
@@ -484,11 +548,10 @@ function displayComment($comment, $conn, $depth = 0) {
     transform: rotate(-45deg) translate(10px, -10px);
 }
 
-/* Sidebar Menu */
 .sidebar-menu {
     position: fixed;
     top: 0;
-    left: -300px; /* Hidden by default */
+    left: -300px;
     width: 143px;
     background: #ffffff;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
@@ -497,7 +560,7 @@ function displayComment($comment, $conn, $depth = 0) {
 }
 
 .sidebar-menu.active {
-    left: 0; /* Slide in */
+    left: 0;
 }
 
 .sidebar-header {
@@ -536,7 +599,6 @@ function displayComment($comment, $conn, $depth = 0) {
     background: #f5f5f5;
 }
 
-/* Overlay for when sidebar is open */
 .sidebar-overlay {
     position: fixed;
     top: 0;
@@ -561,8 +623,133 @@ function displayComment($comment, $conn, $depth = 0) {
     }
 }
 </style>
-
 <script>
+function showNotification(button, message) {
+    // Remove any existing notifications
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+
+    // Position below the button
+    const rect = button.getBoundingClientRect();
+    notification.style.left = `${rect.left}px`;
+    notification.style.top = `${rect.bottom + window.scrollY + 5}px`;
+
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+function subscribeUser(followingId) {
+    const button = document.getElementById(`subscribe-button-${followingId}`);
+    if (!button) {
+        console.error(`Subscribe button with ID subscribe-button-${followingId} not found`);
+        return;
+    }
+    
+    button.disabled = true;
+    const isSubscribed = button.classList.contains('subscribed');
+    const action = isSubscribed ? 'unsubscribe' : 'subscribe';
+    
+    fetch('follow_user.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `following_id=${followingId}`,
+        cache: 'no-cache'
+    })
+    .then(response => {
+        console.log('Subscribe response:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.text().then(text => {
+            console.log('Raw response text:', text);
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                throw new Error(`Invalid JSON response: ${text}`);
+            }
+        });
+    })
+    .then(data => {
+        console.log('Parsed response data:', data);
+        if (data.status === 'success') {
+            if (data.action === 'followed') {
+                button.textContent = 'Subscribed';
+                button.classList.add('subscribed');
+                button.style.backgroundColor = '#28a745';
+            } else if (data.action === 'unfollowed') {
+                button.textContent = 'Subscribe';
+                button.classList.remove('subscribed');
+                button.style.backgroundColor = '#007bff';
+            }
+        } else {
+            showNotification(button, data.message || `Unable to ${action} user`);
+        }
+    })
+    .catch(error => {
+        console.error('Subscribe error:', error.message);
+        showNotification(button, `Unable to ${action} user. Click to retry.`);
+        button.onclick = () => {
+            button.disabled = false;
+            subscribeUser(followingId);
+        };
+    })
+    .finally(() => {
+        button.disabled = false;
+    });
+}
+
+function refreshSubscribedVideos() {
+    const subscribedSection = document.querySelector('.subscribed-videos');
+    const loadingIndicator = document.querySelector('.subscribed-loading');
+    if (!subscribedSection || !loadingIndicator) {
+        console.error('Subscribed section or loading indicator not found');
+        return;
+    }
+
+    loadingIndicator.style.display = 'block';
+    fetch('load_followed_videos.php', {
+        cache: 'no-cache'
+    })
+    .then(response => {
+        console.log('Subscribed videos response:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.text();
+    })
+    .then(html => {
+        console.log('Subscribed videos HTML length:', html.length);
+        subscribedSection.innerHTML = html;
+        subscribedSection.style.display = html.trim() ? 'grid' : 'none';
+    })
+    .catch(error => {
+        console.error('Error refreshing subscribed videos:', error.message);
+        showNotification(subscribedSection || document.body, 'Failed to load videos from subscribed users');
+    })
+    .finally(() => {
+        loadingIndicator.style.display = 'none';
+    });
+}
+
 function likeVideo(videoId) {
     fetch('like_video.php', {
         method: 'POST',
@@ -601,9 +788,9 @@ function shareVideo(videoId) {
         if (data.status === 'success' && data.message === 'Already shared') {
             const shareButton = document.getElementById("share-button-" + videoId);
             if (shareButton) {
-                shareButton.style.backgroundColor = "#008CBA";
-                shareButton.innerText = "Shared";
-                shareButton.classList.add("shared");
+                // shareButton.style.backgroundColor = "#008CBA";
+                // shareButton.innerText = "Shared";
+                // shareButton.classList.add("shared");
             }
         }
     });
@@ -750,7 +937,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Close sidebar when clicking overlay
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('sidebar-overlay')) {
             toggleSidebar();
@@ -784,7 +970,6 @@ function likeComment(commentId) {
                 button.innerText = `Like (${currentCount + 1})`;
                 button.disabled = true;
             });
-            // Reload the page to update the likers list
             window.location.reload();
         }
     });
@@ -862,21 +1047,13 @@ document.getElementById('edit-video-form').addEventListener('submit', function(e
 
 function confirmCommentDelete(commentId) {
     if (confirm('Are you sure you want to delete this comment?')) {
-        // Get the comment element
         const commentElement = document.querySelector(`.comment [onclick="confirmCommentDelete(${commentId})"]`).closest('.comment');
-        
-        // Apply magical animation before deletion
         if (commentElement) {
-            // Set initial styles for animation
             commentElement.style.transition = 'all 0.6s ease-in-out';
             commentElement.style.transformOrigin = 'center';
-            
-            // Trigger the magical animation
             commentElement.style.opacity = '0';
             commentElement.style.transform = 'scale(0.3) rotate(10deg)';
             commentElement.style.filter = 'blur(2px)';
-            
-            // Wait for animation to complete before removing
             setTimeout(() => {
                 fetch('delete_comment.php', {
                     method: 'POST',
@@ -886,17 +1063,13 @@ function confirmCommentDelete(commentId) {
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        // Remove the comment after animation
                         if (commentElement) commentElement.remove();
-                        
-                        // Update comments count
                         const commentsCountElement = document.querySelector('.comments-section h4');
                         if (commentsCountElement) {
                             const currentCount = parseInt(commentsCountElement.textContent.match(/\d+/)[0]) || 0;
                             commentsCountElement.textContent = commentsCountElement.textContent.replace(/\d+/, currentCount - 1);
                         }
                     } else {
-                        // Revert animation and show error if deletion fails
                         commentElement.style.opacity = '1';
                         commentElement.style.transform = 'scale(1) rotate(0deg)';
                         commentElement.style.filter = 'none';
@@ -904,13 +1077,12 @@ function confirmCommentDelete(commentId) {
                     }
                 })
                 .catch(error => {
-                    // Revert animation on fetch error
                     commentElement.style.opacity = '1';
                     commentElement.style.transform = 'scale(1) rotate(0deg)';
                     commentElement.style.filter = 'none';
                     alert('Network error: Failed to delete comment');
                 });
-            }, 600); // Match the transition duration
+            }, 600);
         } else {
             alert('Error: Comment element not found');
         }

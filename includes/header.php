@@ -14,6 +14,7 @@
     <link href="static/css/logo.css" rel="stylesheet">
     <link href="static/css/hamburger_menu.css" rel="stylesheet">
     <script src="static/js/script.js"></script>
+    <script src="static/js/live_count.js"></script>
     <script src="static/js/side_menu.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -80,6 +81,7 @@
                         animation: textSwap 5s infinite ease-in-out;">MyTube</span>
         </a>
     </div>
+
     <div class="search-container">
         <form action="search.php" method="GET" class="search-form">
             <input type="text" id="search-input" name="q" placeholder="Search videos..." 

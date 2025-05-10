@@ -9,18 +9,25 @@
 </head>
 <body>
     <header>
-        <div class="logo">
-            <a class="nav-link" href="index.php" style="text-decoration: none; color: #ff0000; font-weight: bold;">MyTube</a>
-        </div>
-        <nav class="user-menu">
-            <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="upload.php">Upload Video</a>
-                <a href="auth/logout.php">Logout</a>
-            <?php else: ?>
-                <a href="auth/login.php">Login</a>
-                <a href="auth/signup.php">Sign Up</a>
-            <?php endif; ?>
-        </nav>
+    <div class="logo-container" style="display: inline-block; width: 100px; height: 30px;">
+        <a class="nav-link" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" 
+           style="text-decoration: none; display: flex; align-items: center; height: 100%; position: relative;">
+            <!-- Animated Logo -->
+            <img src="/mytube/static/images/play.png" 
+                 alt="MyTube Logo" 
+                 style="height: 24px; width: auto;
+                        position: absolute;
+                        left: 0;
+                        margin-left: 70px;
+                        animation: logoSwap 5s infinite ease-in-out;">
+            <!-- Animated Text -->
+            <span style="font-weight: bold; color: #ff0000;
+                        position: absolute;
+                        margin-left: 70px;
+                        left: 30px; /* 24px logo + 6px gap */
+                        animation: textSwap 5s infinite ease-in-out;">MyTube</span>
+        </a>
+    </div>
     </header>
 </body>
 <?php
