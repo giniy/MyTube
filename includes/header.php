@@ -49,7 +49,8 @@
                 <li><a href="index.php"><i class="fa fa-home" aria-hidden="true"></i></a></li>
                 <li><a href="upload.php"><i class="fa-solid fa-cloud-arrow-up"></i></a></li>
                 <?php if (isLoggedIn()): ?>
-                    <li><a href="profile.php?username=<?= urlencode($_SESSION['username']) ?>">My Profile</a></li>
+                    <li><a href="profile.php?username=<?= urlencode($_SESSION['username']) ?>"><i class="fa fa-user" aria-hidden="true"></i>
+</a></li>
                     <li><a href="auth/logout.php"><i class="fa fa-sign-out" aria-hidden="true"></i></a></li>
                 <?php else: ?>
                     <li><a href="auth/login.php"><i class="fa fa-sign-in" aria-hidden="true"></i></a></li>
