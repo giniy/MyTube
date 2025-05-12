@@ -1,10 +1,11 @@
 <?php
+ob_start(); // Start output buffering
 require_once 'includes/config.php';
 require_once 'includes/functions.php';
 require_once 'includes/header.php';
 
 if (!isLoggedIn()) {
-    header('Location: auth/login.php');
+      header("Location: auth/login.php");
     exit;
 }
 
@@ -119,6 +120,7 @@ if (!empty($_POST['current_password'])) {
         $_SESSION['success'] = "Password updated successfully!";
     }
 }
+ob_end_flush(); // Send the output
 ?>
 
 <div class="edit-profile-container">
@@ -193,28 +195,6 @@ if (!empty($_POST['current_password'])) {
                        placeholder="https://example.com">
                 <small class="form-text">Any other website or social media link</small>
             </div>
-        </div>
-
-        <!-- Password Change Section -->
-        <div class="password-change-section">
-            <h3>Change Password (Leave blank if you don't want to change the password)</h3>
-            <div class="form-group">
-                <label for="current_password">Current Password</label>
-                <input type="password" id="current_password" name="current_password">
-            </div>
-            <div class="form-group">
-                <label for="new_password">New Password</label>
-                <input type="password" id="new_password" name="new_password" minlength="8">
-            </div>
-            <div class="form-group">
-                <label for="confirm_password">Confirm New Password</label>
-                <input type="password" id="confirm_password" name="confirm_password">
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="save-btn">Save Changes</button>
-            <a href="profile.php" class="cancel-btn">Cancel</a>
         </div>
     </form>
 </div>

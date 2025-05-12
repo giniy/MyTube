@@ -1,135 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/x-icon" href="favicon/play.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup - MyTube</title>
-    <!-- Using relative path -->
-    <link href="../static/css/vid.css" rel="stylesheet">
-    <link href="../static/css/auth.css" rel="stylesheet">
-    
-    <!-- OR using absolute path (better) -->
-    <!-- <link href="/static/css/auth.css" rel="stylesheet"> -->
-</head>
-    <header>
-    <div class="logo-container" style="display: inline-block; width: 100px; height: 30px;">
-        <a class="nav-link" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" 
-           style="text-decoration: none; display: flex; align-items: center; height: 100%; position: relative;">
-            <!-- Animated Logo -->
-            <img src="/mytube/static/images/play.png" 
-                 alt="MyTube Logo" 
-                 style="height: 24px; width: auto;
-                        position: absolute;
-                        left: 0;
-                        margin-left: 70px;
-                        animation: logoSwap 5s infinite ease-in-out;">
-            <!-- Animated Text -->
-            <span style="font-weight: bold; color: #ff0000;
-                        position: absolute;
-                        margin-left: 70px;
-                        left: 30px; /* 24px logo + 6px gap */
-                        animation: textSwap 5s infinite ease-in-out;">MyTube</span>
-        </a>
-    </div>
-        <nav class="user-menu">
-        <!--  -->
-        </nav>
-    </header>
-
-<style type="text/css">
-   body{
-
-        background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.7) 0%,
-        rgba(0, 0, 0, 0.5) 30%,
-        rgba(0, 0, 0, 0.3) 60%,
-        rgba(0, 0, 0, 0.1) 80%,
-        rgba(0, 0, 0, 0) 200%
-    );
-    backdrop-filter: blur(50px);
-    -webkit-backdrop-filter: blur(50px);
-} 
-</style>
-
 <?php
-require_once '../includes/config.php';
+session_start();
 
-if (isLoggedIn()) {
-    header('Location: ../index.php');
-    exit;
+// Optional message from URL (e.g., logout or error redirect)
+$message = '';
+if (isset($_GET['logout'])) {
+    $message = "You have been successfully logged out.";
+} elseif (isset($_GET['expired'])) {
+    $message = "Your session has expired. Please login again.";
+} elseif (isset($_GET['error'])) {
+    $message = htmlspecialchars($_GET['error']);
 }
-
-$error = '';
-$success = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
-    $confirm_password = trim($_POST['confirm_password']);
-    
-    if (empty($username) || empty($email) || empty($password) || empty($confirm_password)) {
-        $error = 'Please fill in all fields';
-    } elseif ($password !== $confirm_password) {
-        $error = 'Passwords do not match';
-    } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters';
-    } else {
-        // Check if username or email already exists
-        $query = "SELECT id FROM users WHERE username = ? OR email = ?";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("ss", $username, $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows > 0) {
-            $error = 'Username or email already exists';
-        } else {
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $insertQuery = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-            $insertStmt = $conn->prepare($insertQuery);
-            $insertStmt->bind_param("sss", $username, $email, $hashed_password);
-            
-            if ($insertStmt->execute()) {
-                // Changed from auto-login to success message
-                $_SESSION['signup_success'] = 'Registration successful! Please login.';
-                header('Location: login.php');
-                exit;
-            } else {
-                $error = 'Registration failed. Please try again.';
-            }
-        }
-    }
-}
-// require_once '../includes/header.php';
 ?>
-
-<main class="auth-container">
-    <h2>Sign Up</h2>
-    <?php if ($error): ?>
-        <div class="error"><?= $error ?></div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/mytube/static/css/auth2.css">
+</head>
+<body>
+<div class="form-container">
+    <!-- Session-based alert -->
+    <?php if (isset($_SESSION['message'])): ?>
+        <div class="alert alert-<?= $_SESSION['message_type'] ?? 'info' ?> text-center mb-3">
+            <?= $_SESSION['message'] ?>
+        </div>
+        <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
     <?php endif; ?>
-    <form method="POST">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <div class="form-group">
-            <label for="confirm_password">Confirm Password</label>
-            <input type="password" id="confirm_password" name="confirm_password" required>
-        </div>
-        <button type="submit">Sign Up</button>
-    </form>
-    <p class="form_p">Already have an account? <a href="login.php" style="color: #ff0000;" >Login</a></p>
-</main>
 
-<?php require_once '../includes/footer.php'; ?>
+    <!-- URL-based alert -->
+    <?php if (!empty($message)): ?>
+        <div class="alert alert-info text-center mb-3">
+            <?= $message ?>
+        </div>
+    <?php endif; ?>
+
+    <h2>Signup</h2>
+    <form action="send_signup_otp.php" method="post">
+        <label for="name">Name:</label>
+        <input type="text" name="username" class="form-control" required placeholder="Name">
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" class="form-control" required placeholder="Enter your email address">
+
+        <button type="submit" class="btn btn-primary w-100">Send OTP</button>
+    </form>
+
+    <div class="login-footer mt-3">
+        <p>Already have an account? <a href="login.php">Login</a></p>
+    </div>
+</div>
+</body>
+</html>

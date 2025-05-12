@@ -1,15 +1,17 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['login_required'] = 'You must be logged in to upload videos';
+    header('Location: index.php');
+    exit;
+    // die('You must be logged in to upload videos');
+}
 require_once 'includes/config.php';
 
 // Temporarily increase limits (remove in production)
 ini_set('upload_max_filesize', '100M');
 ini_set('post_max_size', '101M');
 ini_set('max_execution_time', 300);
-
-if (!isLoggedIn()) {
-    header('Location: auth/login.php');
-    exit;
-}
 
 $error = '';
 $success = '';
@@ -46,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (move_uploaded_file($videoFile['tmp_name'], $videoPath) && 
                 move_uploaded_file($thumbnailFile['tmp_name'], $thumbnailPath)) {
-                
                 // Insert into database
                 $query = "INSERT INTO videos (user_id, title, description, video_file, thumbnail_file) 
                           VALUES (?, ?, ?, ?, ?)";
@@ -56,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt->execute()) {
                     $success = 'Video uploaded successfully!';
                 } else {
-                    $error = 'Failed to save video details. Please try again.';
+                    $error = 'Failed to save video details. Please try again.' . $stmt->error;
                     // Clean up uploaded files if DB insert failed
                     unlink($videoPath);
                     unlink($thumbnailPath);

@@ -9,6 +9,12 @@ if (!isLoggedIn()) {
     exit;
 }
 
+if (!isset($_GET['user_id'], $_GET['email']) || 
+    $_GET['email'] !== $_SESSION['user_email'] || 
+    $_GET['user_id'] != $_SESSION['user_id']) {
+    // Invalid request
+}
+
 // Get profile user ID (default to current user)
 $profileUserId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : getUserId();
 

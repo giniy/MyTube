@@ -16,6 +16,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['comment_id'])) {
 
 $comment_id = intval($_POST['comment_id']);
 
+// First get the current user's ID from their email
+$current_user_id = null;
+$stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$stmt->bind_param("s", $_SESSION['user_email']);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    $user = $result->fetch_assoc();
+    $current_user_id = $user['id'];
+}
+
+if (!$current_user_id) {
+    header('HTTP/1.1 403 Forbidden');
+    echo json_encode(['status' => 'error', 'message' => 'User not found']);
+    exit;
+}
+
 // Get comment info to verify ownership
 $query = "SELECT user_id FROM comments WHERE id = ?";
 $stmt = $conn->prepare($query);
@@ -31,8 +48,8 @@ if ($result->num_rows === 0) {
 
 $comment = $result->fetch_assoc();
 
-// Check if user is owner or admin
-$canDelete = ($_SESSION['user_id'] == $comment['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
+// Check if user is owner or admin - now comparing IDs
+$canDelete = ($current_user_id == $comment['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
 
 if (!$canDelete) {
     header('HTTP/1.1 403 Forbidden');

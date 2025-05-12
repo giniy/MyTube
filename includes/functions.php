@@ -1,4 +1,17 @@
 <?php
+function isLoggedIn() {
+    // Check if all required session variables exist
+    return isset($_SESSION['user_id'], $_SESSION['user_email'], $_SESSION['login_time'], 
+           $_SESSION['ip_address'], $_SESSION['user_agent']) &&
+           // Verify session hasn't expired (1 hour timeout)
+           (time() - $_SESSION['login_time'] < 3600) &&
+           // Verify IP and User Agent haven't changed
+           ($_SESSION['ip_address'] === $_SERVER['REMOTE_ADDR']) &&
+           ($_SESSION['user_agent'] === $_SERVER['HTTP_USER_AGENT']);
+}
+?>
+
+<?php
 function formatUserDate($datetime) {
     $timezone = $_COOKIE['user_timezone'] ?? 'UTC';
     
@@ -124,8 +137,20 @@ function getUsername($userId) {
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
-    return $user['username'] ?? 'User'; // Fallback if username not found
+    return $user['username'] ?? $_SESSION['user_email'] ?? 'User';
 }
+
+// Add this function to get user by email
+function getUserByEmail($email) {
+    global $conn;
+    $query = "SELECT id, username, email, bio, profile_picture, created_at, 
+              twitter, instagram, youtube, other, gender FROM users WHERE email = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc();
+}
+
 function formatDuration($seconds) {
     $hours = floor($seconds / 3600);
     $minutes = floor(($seconds % 3600) / 60);
