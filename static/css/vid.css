@@ -146,9 +146,11 @@ header {
 
 .search-bar {
 /*  display: flex;*/
-    flex-grow: 1;
-    max-width: 640px;
-    margin: 0 20px;
+    order: 3; /* Moves search to bottom on mobile */
+    flex: 1 1 100%; /* Takes full width on mobile */
+    min-width: 200px; /* Minimum search bar width */
+    max-width: 600px; /* Maximum search bar width */
+    margin: 0 auto; /* Centers the search bar */
 }
 
 .search-container {
@@ -158,30 +160,28 @@ header {
     margin: 0 1rem;
 }
 .search-bar input {
-    width: 100%;
-    padding: 8px 16px;
-    border: 1px solid #ccc;
-    border-radius: 20px 0 0 20px;
-    font-size: 16px;
+    padding: 0.5rem;
+    width: 100%; /* Takes available width */
+    min-width: 150px; /* Minimum width before wrapping */
+    box-sizing: border-box; /* Includes padding in width */
 }
 
 .search-bar button {
-    padding: 8px 20px;
-    background: #f8f8f8;
-    border: 1px solid #ccc;
-    border-left: none;
-    border-radius: 0 20px 20px 0;
-    cursor: pointer;
+/*    padding: 0.5rem 1rem;*/
+    margin-left: 38rem;
+    margin-top: -0.10rem;
+}
 .search-form {
     display: flex;
+    width: 100%;
 }
 
 #search-input {
-    width: 100%;
-    padding: 8px 16px;
-    border: 1px solid #ccc;
-    border-radius: 20px 0 0 20px;
-    font-size: 16px;
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    border-right: none;
 }
 
 #search-button {
@@ -192,8 +192,6 @@ header {
     border-radius: 0 4px 4px 0;
     cursor: pointer;
 }
-
-
 
 .user-menu {
     flex: 0 0 auto;
@@ -213,16 +211,11 @@ header {
     }
     
     .search-bar {
-    margin: 0 10px;
+        order: 3;
+        flex: 1 1 100%;
+        margin-top: 0.5rem;
     }
     
-@media (max-width: 768px) {
-    .yt-videos-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        padding: 16px;
-    }
-}
-
     .user-menu {
         order: 2;
         justify-content: flex-end;
