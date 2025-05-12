@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $_SESSION['message'] = "Signup successful! Welcome!";
             $_SESSION['message_type'] = "success";
-            header("Location: ../index.php");
+            header("Location:login.php");
             exit();
         } else {
             error_log("Signup: Failed to insert user: " . $stmt->error);
