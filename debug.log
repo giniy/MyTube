@@ -1,0 +1,440 @@
+2025-05-13 19:57:35 POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => afcac7177be987fde930bdde82b511503fb5902fa3e40b8cf2dd20c91cd3c8ff
+    [comment] => sdlskf
+)
+
+2025-05-13 20:39:59 POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sdlks
+)
+
+2025-05-13 20:46:35 POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sl;ks;ske
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747161995
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 20:46:44 POST: Array
+(
+    [video_id] => 10
+    [parent_id] => 0
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd;
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747162004
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 20:49:32 POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd;lkls;
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747162172
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 20:49:56 POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sdl;s
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747162196
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 20:52:25 POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => hiiiiii
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747162345
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 20:52:33 POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => hiiiiii
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747162353
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 20:55:09 POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => hiiiiii
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747162509
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:13:25 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => ;dslksl;fk;s
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747163605
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:13:33 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [parent_id] => 52
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sdlksjd;
+
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747163613
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:14:54 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd/slkdf
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747163694
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:16:21 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => oiuououo
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747163781
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:16:37 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => oiuououo
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747163797
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:17:39 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd';
+
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747163859
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:28:17 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd;'dl's
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747164497
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:29:02 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd';sd
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747164542
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:38:16 Request Started
+2025-05-13 21:38:16 REQUEST_METHOD: POST
+POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd;lks;fd
+)
+
+SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747165096
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:38:16 Comment Data: comment=sd;lks;fd, video_id=10, user_id=5, parent_id=null
+2025-05-13 21:38:29 Request Started
+2025-05-13 21:38:29 REQUEST_METHOD: POST
+POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd;lks;fd
+)
+
+SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747161589
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747165109
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:38:29 Comment Data: comment=sd;lks;fd, video_id=10, user_id=5, parent_id=null
+2025-05-13 21:41:23 Request Started
+2025-05-13 21:41:23 REQUEST_METHOD: POST
+POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd;lksd
+)
+
+SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747165274
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747165283
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:41:23 Comment Data: comment=sd;lksd, video_id=10, user_id=5, parent_id=null
+2025-05-13 21:41:33 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd;lksd
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747165274
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747165293
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:45:04 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd;lfks;d
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747165274
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747165504
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:45:19 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [parent_id] => 0
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => sd;ls;fdls
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747165274
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747165519
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:50:47 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => dslk;sd
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747165274
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747165847
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:51:06 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [parent_id] => 1
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => ok
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747165274
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747165866
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+
+2025-05-13 21:51:27 REQUEST_METHOD: POST POST: Array
+(
+    [video_id] => 10
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+    [comment] => ooooooooooooooooooooooook
+)
+ SESSION: Array
+(
+    [user_email] => gpendare@gmail.com
+    [user_id] => 5
+    [login_time] => 1747165274
+    [ip_address] => 127.0.0.1
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+    [last_activity] => 1747165887
+    [csrf_token] => 8caa8c33cd2bc22efb25198a88149f5b316691cf26702a889fd3adb046d0190b
+)
+

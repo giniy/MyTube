@@ -87,7 +87,7 @@
     </div>
 
     <!-- <div class="search-container"> -->
-    <div class="yt-search">
+    <div class="search-container">
         <form action="search.php" method="GET" class="search-form">
             <input type="text" id="search-input" name="q" placeholder="Search" 
                    value="<?= isset($_GET['q']) ? htmlspecialchars($_GET['q']) : '' ?>">

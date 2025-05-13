@@ -1,4 +1,23 @@
 <?php
+require_once 'config.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+function generateCsrfToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+// Call CSRF token generation
+generateCsrfToken();
+?>
+
+<?php
+
 function isLoggedIn() {
     // Check if all required session variables exist
     return isset($_SESSION['user_id'], $_SESSION['user_email'], $_SESSION['login_time'], 

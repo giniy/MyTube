@@ -1,13 +1,18 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    // Handle not logged in case
+// Start session and ensure CSRF token
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 require_once 'includes/config.php';
 require_once 'includes/header.php';
 require_once 'includes/functions.php';
 
-// Add this after require statements
+// Generate CSRF token
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Handle deleted video
 if (isset($_GET['deleted'])) {
     $deletedId = intval($_GET['deleted']);
     $query = "SELECT v.*, u.username FROM videos v JOIN users u ON v.user_id = u.id ORDER BY uploaded_at DESC";
@@ -78,9 +83,8 @@ $watchedVideos = [];
 $totalWatchedVideos = 0;
 
 if (isLoggedIn()) {
-    $user_id = $_SESSION['user_id'] OR $_SESSION['user_email'] ;
+    $user_id = $_SESSION['user_id'];
 
-    // Get total count of unique watched videos
     $watchedCountQuery = "SELECT COUNT(DISTINCT video_id) as total FROM video_views WHERE user_id = ?";
     $watchedCountStmt = $conn->prepare($watchedCountQuery);
     $watchedCountStmt->bind_param("i", $user_id);
@@ -88,15 +92,12 @@ if (isLoggedIn()) {
     $watchedCountResult = $watchedCountStmt->get_result();
     $totalWatchedVideos = $watchedCountResult->fetch_assoc()['total'];
 
-    // Get watched videos with view counts
     $watchedQuery = "SELECT v.*, u.username, COUNT(*) as view_count, MAX(vv.viewed_at) as last_viewed 
                     FROM video_views vv 
                     JOIN videos v ON vv.video_id = v.id 
                     JOIN users u ON v.user_id = u.id 
                     WHERE vv.user_id = ? 
                     GROUP BY vv.video_id 
-
-
                     ORDER BY last_viewed DESC 
                     LIMIT ?";
     $watchedStmt = $conn->prepare($watchedQuery);
@@ -109,7 +110,6 @@ if (isLoggedIn()) {
 }
 
 function displayComment($comment, $conn, $depth = 0) {
-    // Get like count
     $likesQuery = "SELECT COUNT(*) as like_count FROM comment_likes WHERE comment_id = ?";
     $stmt = $conn->prepare($likesQuery);
     $stmt->bind_param("i", $comment['id']);
@@ -117,7 +117,6 @@ function displayComment($comment, $conn, $depth = 0) {
     $likesResult = $stmt->get_result();
     $likeData = $likesResult->fetch_assoc();
 
-    // Get users who liked the comment (limit to 5 for performance)
     $likersQuery = "SELECT u.username FROM comment_likes cl JOIN users u ON cl.user_id = u.id 
                     WHERE cl.comment_id = ? ORDER BY cl.created_at DESC LIMIT 5";
     $likerStmt = $conn->prepare($likersQuery);
@@ -129,7 +128,6 @@ function displayComment($comment, $conn, $depth = 0) {
         $likers[] = $liker['username'];
     }
 
-    // Get rmseplies
     $repliesQuery = "SELECT c.*, u.username FROM comments c JOIN users u ON c.user_id = u.id 
                      WHERE c.parent_id = ? ORDER BY c.created_at ASC";
     $stmt = $conn->prepare($repliesQuery);
@@ -139,22 +137,27 @@ function displayComment($comment, $conn, $depth = 0) {
 
     $margin = $depth * 20;
     $canDeleteComment = false;
+    $canEditComment = false;
     if (isLoggedIn()) {
         $user_id = $_SESSION['user_id'];
         $canDeleteComment = ($user_id == $comment['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
+        $canEditComment = ($user_id == $comment['user_id'] || (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
     }
     ?>
 
     <div class="comment" style="margin-left: <?= $margin ?>px; color: #8d8d8d;">
         <strong><a href="user.php?username=<?= urlencode($comment['username']) ?>" style="color: #007bff; text-decoration: none;"><?= htmlspecialchars($comment['username']) ?></a></strong>
-        <p><?= htmlspecialchars($comment['comment']) ?></p>
+        <p class="comment-text" data-comment-id="<?= $comment['id'] ?>"><?= htmlspecialchars($comment['comment']) ?></p>
         <small><?= date('M j, Y g:i a', strtotime($comment['created_at'])) ?></small>
+        <?php if ($comment['updated_at']): ?>
+            <small>(Edited: <?= date('M j, Y g:i a', strtotime($comment['updated_at'])) ?>)</small>
+        <?php endif; ?>
         <?php if ($likeData['like_count'] > 0): ?>
-            <p class="likers" style="font-size: 0.85rem; color: #6b6b6b;">
+            <p class="likers" style="font-size: 0.85rem; color: #6b6b6b;" data-comment-id="<?= $comment['id'] ?>">
                 Liked by: 
                 <?php 
                 $likersCount = $likeData['like_count'];
-                $displayedLikers = array_slice($likers, 0, 3); // Show up to 3 likers
+                $displayedLikers = array_slice($likers, 0, 3);
                 $remainingCount = $likersCount - count($displayedLikers);
                 echo implode(', ', array_map(function($username) {
                     return '<a href="user.php?username=' . urlencode($username) . '" style="color: #007bff; text-decoration: none;">' . htmlspecialchars($username) . '</a>';
@@ -164,11 +167,18 @@ function displayComment($comment, $conn, $depth = 0) {
                 }
                 ?>
             </p>
+        <?php else: ?>
+            <p class="likers" style="font-size: 0.85rem; color: #6b6b6b; display: none;" data-comment-id="<?= $comment['id'] ?>"></p>
         <?php endif; ?>
         <?php if (isLoggedIn()): ?>
             <div class="comment-actions">
                 <button onclick="toggleReplyForm(<?= $comment['id'] ?>)"><i class="fa-solid fa-reply"></i></button>
-                <button onclick="likeComment(<?= $comment['id'] ?>)"> <i class="fa-solid fa-heart"></i> (<?= $likeData['like_count'] ?>)</button>
+                <button onclick="likeComment(<?= $comment['id'] ?>)" class="like-button" data-comment-id="<?= $comment['id'] ?>"><i class="fa-solid fa-heart"></i> (<?= $likeData['like_count'] ?>)</button>
+                <?php if ($canEditComment): ?>
+                    <button onclick="toggleEditForm(<?= $comment['id'] ?>)" class="edit-comment-btn">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                <?php endif; ?>
                 <?php if ($canDeleteComment): ?>
                     <button onclick="confirmCommentDelete(<?= $comment['id'] ?>)" class="delete-comment-btn">
                         <i class="fa-solid fa-trash"></i>
@@ -176,11 +186,21 @@ function displayComment($comment, $conn, $depth = 0) {
                 <?php endif; ?>
             </div>
             <div id="reply-form-<?= $comment['id'] ?>" class="comment-actions" style="display: none; color: #8d8d8d;">
-                <form action="comments.php" method="POST">
+                <form class="reply-form">
                     <input type="hidden" name="video_id" value="<?= $comment['video_id'] ?>">
                     <input type="hidden" name="parent_id" value="<?= $comment['id'] ?>">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                     <textarea name="comment" placeholder="Write a reply..." required></textarea>
                     <button type="submit">Post Reply</button>
+                </form>
+            </div>
+            <div id="edit-form-<?= $comment['id'] ?>" class="comment-actions" style="display: none; color: #8d8d8d;">
+                <form class="edit-form">
+                    <input type="hidden" name="comment_id" value="<?= $comment['id'] ?>">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                    <textarea name="comment" placeholder="Edit your comment..." required><?= htmlspecialchars($comment['comment']) ?></textarea>
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="toggleEditForm(<?= $comment['id'] ?>)">Cancel</button>
                 </form>
             </div>
         <?php endif; ?>
@@ -210,15 +230,8 @@ function displayComment($comment, $conn, $depth = 0) {
 
             <div class="video-actions">
                 <?php if (isLoggedIn()): ?>
-
-                    <?php 
-                    // Debug output - remove in production
-                    echo "<!-- User ID: {$_SESSION['user_id']}, Video Owner: {$featuredVideo['user_id']} -->";
-                    ?>
-
                     <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">
-
-                    <i class="fa-solid fa-thumbs-up"></i>
+                        <i class="fa-solid fa-thumbs-up"></i>
                     </button>
                     <button id="share-button-<?= $featuredVideo['id'] ?>" onclick="shareVideo(<?= $featuredVideo['id'] ?>)">
                         <i class="fa-solid fa-share-nodes"></i>
@@ -248,12 +261,12 @@ function displayComment($comment, $conn, $depth = 0) {
             </div>
             <!-- Share Modal -->
             <div id="share-modal" class="modal">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
                 <div class="modal-content">
-                    <span class="close" onclick="closeModal()">&times;</span>
+                    <span class="close" onclick="closeModal()">×</span>
                     <h3>Share This Video</h3>
                     <input type="text" id="share-link" readonly>
-                    <button onclick="copyLink()" style="margin-top:18px;" >Copy Link</button>
+                    <button onclick="copyLink()" style="margin-top:18px;">Copy Link</button>
                     <div class="social-share" style="margin-top: 18px;">
                         <button onclick="shareOnFacebook()">
                             <i class="fa fa-facebook" aria-hidden="true"></i>                            
@@ -286,10 +299,11 @@ function displayComment($comment, $conn, $depth = 0) {
                 </div>
             </div>
          <div class="comments-section">
-            <h4>Comments (<?= $totalComments ?>)</h4>
+            <h4>Comments (<span id="comments-count"><?= $totalComments ?></span>)</h4>
             <?php if (isLoggedIn()): ?>
-                <form action="comments.php" method="POST">
+                <form id="comment-form" method="POST">
                     <input type="hidden" name="video_id" value="<?= $featuredVideo['id'] ?>">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                     <textarea name="comment" placeholder="Add a comment..." required></textarea>
                     <button type="submit">Post Comment</button>
                 </form>
@@ -299,7 +313,7 @@ function displayComment($comment, $conn, $depth = 0) {
                 </div>
             <?php endif; ?>
 
-                <div class="comments-container-wrapper" style="max-height: 400px; overflow-y: auto;">
+            <div class="comments-container-wrapper" style="max-height: 400px; overflow-y: auto;">
                 <div id="comments-container">
                     <?php while ($comment = $commentsResult->fetch_assoc()) { displayComment($comment, $conn); } ?>
                 </div>
@@ -354,15 +368,10 @@ function displayComment($comment, $conn, $depth = 0) {
                                 <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>">
                             </a>
                             <h3><?= htmlspecialchars($video['title']) ?></h3>
-                            <p style="
-                            font-size: 0.85rem;
-                            color: #6b6b6b;
-                            margin-top: 5px;
-                            font-style: italic;
-                            " >
+                            <p style="font-size: 0.85rem; color: #6b6b6b; margin-top: 5px; font-style: italic;">
                                 <?= htmlspecialchars($video['view_count']) ?> Views | 
                                 Uploaded by:
-                                <a href="user.php?username=<?= urlencode($featuredVideo['username']) ?>"><?= htmlspecialchars($featuredVideo['username']) ?></a>
+                                <a href="user.php?username=<?= urlencode($video['username']) ?>"><?= htmlspecialchars($video['username']) ?></a>
                             </p>
                             <p class="watched-date">Last watched: <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['last_viewed']))) ?></p>
                         </div>
@@ -371,32 +380,15 @@ function displayComment($comment, $conn, $depth = 0) {
                 </div>
             </div>
             <?php endif; ?>
-
         </aside>
     </div>
     <h3>EARLIER</h3>
 
-<section class="video-gallery"
-    style="
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(338px, 1fr));
-    gap: 18px;
-    padding: 24px;
-    max-width: 1450px;
-    margin: 0 auto;">
+<section class="video-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(338px, 1fr)); gap: 18px; padding: 24px; max-width: 1450px; margin: 0 auto;">
     <?php 
     $result->data_seek(0);
     while ($video = $result->fetch_assoc()): ?>
-        <div class="video-card"
-        style="
-        background: #ffffff;
-        border: 0px solid #e0e0e0;
-        border-radius: 12px;
-        height: 380px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        ">
+        <div class="video-card" style="background: #ffffff; border: 0px solid #e0e0e0; border-radius: 12px; height: 380px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease;">
             <a href="?video_id=<?= $video['id'] ?>" class="video-link">
                 <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" 
                      alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>" 
@@ -458,78 +450,492 @@ document.addEventListener('DOMContentLoaded', function() {
 </style>
 <?php endif; ?>
 <script>
-// Add these functions to your script.js or in the <script> section
+// Load Font Awesome
+document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">');
+
 function likeVideo(videoId) {
-    console.log('Like button clicked for video:', videoId); // Debug log
-    
+    console.log('Like button clicked for video:', videoId);
     fetch('like_video.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'video_id=' + videoId
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'video_id=' + encodeURIComponent(videoId)
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.text();
     })
     .then(data => {
-        console.log('Like response:', data); // Debug log
+        console.log('Like response:', data);
         if (data.trim() === "success") {
             const likeButton = document.getElementById("like-button-" + videoId);
             likeButton.style.backgroundColor = "#ff0000";
             likeButton.innerText = "Liked";
             likeButton.disabled = true;
-            
-            // Update like count display
             const likeCountElement = document.querySelector(".like_share");
             if (likeCountElement) {
                 const parts = likeCountElement.textContent.split('|');
                 const currentLikes = parseInt(parts[0]) || 0;
                 likeCountElement.innerHTML = `${currentLikes + 1} Likes | ${parts[1]} | ${parts[2]}`;
             }
+        } else {
+            alert('Failed to like video: ' + data);
         }
     })
     .catch(error => {
         console.error('Error liking video:', error);
-        alert('Failed to like video. Please try again.');
+        alert('Failed to like video: ' + error.message);
     });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Ensure share modal is hidden on page load
+    // Log CSRF token for debugging
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value;
+    console.log('CSRF Token:', csrfToken || 'Not found');
+
     document.getElementById('share-modal').style.display = 'none';
     
-    // Close modal when clicking outside of it
     window.addEventListener('click', function(event) {
         const modal = document.getElementById('share-modal');
         if (event.target === modal) {
             modal.style.display = 'none';
         }
     });
+
+    const commentForm = document.getElementById('comment-form');
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(commentForm);
+            const submitButton = commentForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Posting...';
+
+            console.log('Posting comment with data:', Object.fromEntries(formData));
+
+            fetch('comments.php', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
+                    });
+                }
+                return response.text();
+            })
+            .then(text => {
+                console.log('Raw response:', text);
+                try {
+                    const data = JSON.parse(text);
+                    if (data.status === 'success') {
+                        appendComment(data.comment);
+                        commentForm.querySelector('textarea').value = '';
+                        const commentsCount = document.getElementById('comments-count');
+                        if (commentsCount) {
+                            const currentCount = parseInt(commentsCount.textContent) || 0;
+                            commentsCount.textContent = currentCount + 1;
+                        }
+                    } else {
+                        alert(data.message || 'Failed to post comment');
+                    }
+                } catch (e) {
+                    console.error('JSON parse error:', e, 'Response text:', text);
+                    alert('Failed to post comment: Invalid server response');
+                }
+            })
+            .catch(error => {
+                console.error('Error posting comment:', error);
+                alert('Failed to post comment: ' + error.message);
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Post Comment';
+            });
+        });
+    }
+
+    document.querySelectorAll('.reply-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const parentId = this.querySelector('input[name="parent_id"]').value;
+            handleReplySubmission(this, parentId);
+        });
+    });
+
+    document.querySelectorAll('.edit-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentId = this.querySelector('input[name="comment_id"]').value;
+            handleEditSubmission(this, commentId);
+        });
+    });
+
+    function appendComment(comment) {
+        const container = document.getElementById('comments-container');
+        if (!container) return;
+
+        const commentDiv = document.createElement('div');
+        commentDiv.className = 'comment';
+        commentDiv.style.marginLeft = '0px';
+
+        commentDiv.innerHTML = `
+            <strong><a href="user.php?username=${encodeURIComponent(comment.username)}" style="color: #007bff; text-decoration: none;">${escapeHtml(comment.username)}</a></strong>
+            <p class="comment-text" data-comment-id="${comment.id}">${escapeHtml(comment.comment)}</p>
+            <small>${formatDate(comment.created_at)}</small>
+            ${comment.updated_at ? `<small>(Edited: ${formatDate(comment.updated_at)})</small>` : ''}
+            <p class="likers" style="font-size: 0.85rem; color: #6b6b6b; display: none;" data-comment-id="${comment.id}"></p>
+            <div class="comment-actions">
+                <button onclick="toggleReplyForm(${comment.id})"><i class="fa-solid fa-reply"></i>
+                </button>
+                <button onclick="likeComment(${comment.id})" class="like-button" data-comment-id="${comment.id}"><i class="fa-solid fa-heart"></i> (0)
+                </button>
+                <button onclick="toggleEditForm(${comment.id})" class="edit-comment-btn">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button onclick="confirmCommentDelete(${comment.id})" class="delete-comment-btn">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+            <div id="reply-form-${comment.id}" class="comment-actions" style="display: none; color: #8d8d8d;">
+                <form class="reply-form">
+                    <input type="hidden" name="video_id" value="${comment.video_id}">
+                    <input type="hidden" name="parent_id" value="${comment.id}">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                    <textarea name="comment" placeholder="Write a reply..." required></textarea>
+                    <button type="submit">Post Reply</button>
+                </form>
+            </div>
+            <div id="edit-form-${comment.id}" class="comment-actions" style="display: none; color: #8d8d8d;">
+                <form class="edit-form">
+                    <input type="hidden" name="comment_id" value="${comment.id}">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                    <textarea name="comment" placeholder="Edit your comment..." required>${escapeHtml(comment.comment)}</textarea>
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="toggleEditForm(${comment.id})">Cancel</button>
+                </form>
+            </div>
+        `;
+
+        container.insertBefore(commentDiv, container.firstChild);
+
+        const replyForm = commentDiv.querySelector(`#reply-form-${comment.id} form`);
+        replyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleReplySubmission(replyForm, comment.id);
+        });
+
+        const editForm = commentDiv.querySelector(`#edit-form-${comment.id} form`);
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleEditSubmission(editForm, comment.id);
+        });
+    }
+
+    function handleReplySubmission(replyForm, parentCommentId) {
+        const formData = new FormData(replyForm);
+        const submitButton = replyForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Posting...';
+
+        console.log('Posting reply with data:', Object.fromEntries(formData));
+
+        fetch('comments.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            console.log('Reply response status:', response.status);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
+                });
+            }
+            return response.text();
+        })
+        .then(text => {
+            console.log('Reply raw response:', text);
+            try {
+                const data = JSON.parse(text);
+                if (data.status === 'success') {
+                    appendReply(data.comment, parentCommentId);
+                    replyForm.querySelector('textarea').value = '';
+                    const replyFormContainer = replyForm.closest('.comment-actions');
+                    replyFormContainer.style.display = 'none';
+                    const commentsCount = document.getElementById('comments-count');
+                    if (commentsCount) {
+                        const currentCount = parseInt(commentsCount.textContent) || 0;
+                        commentsCount.textContent = currentCount + 1;
+                    }
+                } else {
+                    alert(data.message || 'Failed to post reply');
+                }
+            } catch (e) {
+                console.error('Reply JSON parse error:', e, 'Response text:', text);
+                alert('Failed to post reply: Invalid server response');
+            }
+        })
+        .catch(error => {
+            console.error('Error posting reply:', error);
+            alert('Failed to post reply: ' + error.message);
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Post Reply';
+        });
+    }
+
+    function appendReply(reply, parentCommentId) {
+        const parentComment = document.querySelector(`.comment [onclick="toggleReplyForm(${parentCommentId})"]`).closest('.comment');
+        if (!parentComment) return;
+
+        const parentMargin = parseInt(parentComment.style.marginLeft) || 0;
+        const margin = parentMargin + 20;
+
+        const replyDiv = document.createElement('div');
+        replyDiv.className = 'comment';
+        replyDiv.style.marginLeft = `${margin}px`;
+
+        replyDiv.innerHTML = `
+            <strong><a href="user.php?username=${encodeURIComponent(reply.username)}" style="color: #007bff; text-decoration: none;">${escapeHtml(reply.username)}</a></strong>
+            <p class="comment-text" data-comment-id="${reply.id}">${escapeHtml(reply.comment)}</p>
+            <small>${formatDate(reply.created_at)}</small>
+            ${reply.updated_at ? `<small>(Edited: ${formatDate(reply.updated_at)})</small>` : ''}
+            <p class="likers" style="font-size: 0.85rem; color: #6b6b6b; display: none;" data-comment-id="${reply.id}"></p>
+            <div class="comment-actions">
+                <button onclick="toggleReplyForm(${reply.id})"><i class="fa-solid fa-reply"></i></button>
+                <button onclick="likeComment(${reply.id})" class="like-button" data-comment-id="${reply.id}"><i class="fa-solid fa-heart"></i> (0)</button>
+                <button onclick="toggleEditForm(${reply.id})" class="edit-comment-btn">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button onclick="confirmCommentDelete(${reply.id})" class="delete-comment-btn">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+            <div id="reply-form-${reply.id}" class="comment-actions" style="display: none; color: #8d8d8d;">
+                <form class="reply-form">
+                    <input type="hidden" name="video_id" value="${reply.video_id}">
+                    <input type="hidden" name="parent_id" value="${reply.id}">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                    <textarea name="comment" placeholder="Write a reply..." required></textarea>
+                    <button type="submit">Post Reply</button>
+                </form>
+            </div>
+            <div id="edit-form-${reply.id}" class="comment-actions" style="display: none; color: #8d8d8d;">
+                <form class="edit-form">
+                    <input type="hidden" name="comment_id" value="${reply.id}">
+                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                    <textarea name="comment" placeholder="Edit your comment..." required>${escapeHtml(reply.comment)}</textarea>
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="toggleEditForm(${reply.id})">Cancel</button>
+                </form>
+            </div>
+        `;
+
+        parentComment.appendChild(replyDiv);
+
+        const nestedReplyForm = replyDiv.querySelector(`#reply-form-${reply.id} form`);
+        nestedReplyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleReplySubmission(nestedReplyForm, reply.id);
+        });
+
+        const nestedEditForm = replyDiv.querySelector(`#edit-form-${reply.id} form`);
+        nestedEditForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleEditSubmission(nestedEditForm, reply.id);
+        });
+    }
+
+    function handleEditSubmission(editForm, commentId) {
+        const formData = new FormData(editForm);
+        const submitButton = editForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Saving...';
+
+        console.log('Editing comment with data:', Object.fromEntries(formData));
+
+        fetch('comments.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            console.log('Edit response status:', response.status);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
+                });
+            }
+            return response.text();
+        })
+        .then(text => {
+            console.log('Edit raw response:', text);
+            try {
+                const data = JSON.parse(text);
+                if (data.status === 'success') {
+                    updateComment(data.comment);
+                    const editFormContainer = editForm.closest('.comment-actions');
+                    editFormContainer.style.display = 'none';
+                } else {
+                    alert(data.message || 'Failed to edit comment');
+                }
+            } catch (e) {
+                console.error('Edit JSON parse error:', e, 'Response text:', text);
+                alert('Failed to edit comment: Invalid server response');
+            }
+        })
+        .catch(error => {
+            console.error('Error editing comment:', error);
+            alert('Failed to edit comment: ' + error.message);
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Save';
+        });
+    }
+
+    function updateComment(comment) {
+        const commentText = document.querySelector(`.comment-text[data-comment-id="${comment.id}"]`);
+        if (commentText) {
+            commentText.textContent = comment.comment;
+        }
+        const commentDiv = commentText.closest('.comment');
+        if (commentDiv) {
+            const editedLabel = commentDiv.querySelector('small:nth-of-type(2)');
+            if (comment.updated_at) {
+                if (editedLabel) {
+                    editedLabel.textContent = `(Edited: ${formatDate(comment.updated_at)})`;
+                } else {
+                    const createdAt = commentDiv.querySelector('small');
+                    createdAt.insertAdjacentHTML('afterend', `<small>(Edited: ${formatDate(comment.updated_at)})</small>`);
+                }
+            }
+        }
+    }
+
+// like comment
+
+    function likeComment(commentId) {
+        const button = document.querySelector(`button.like-button[data-comment-id="${commentId}"]`);
+        if (!button || button.disabled) {
+            console.log(`Like button for comment ${commentId} is disabled or not found`);
+            return;
+        }
+
+        button.disabled = true;
+        button.innerHTML = `<i class="fa-solid fa-heart"></i> (Loading...)`;
+
+        const formData = new FormData();
+        formData.append('like_comment', '1');
+        formData.append('comment_id', commentId);
+        formData.append('csrf_token', '<?= $_SESSION['csrf_token'] ?>');
+
+        console.log('Liking comment:', commentId, 'with data:', Object.fromEntries(formData));
+
+        fetch('comments.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            console.log('Like response status:', response.status);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
+                });
+            }
+            return response.text();
+        })
+        .then(text => {
+            console.log('Like raw response:', text);
+            try {
+                const data = JSON.parse(text);
+                if (data.status === 'success') {
+                    button.innerHTML = `<i class="fa-solid fa-heart"></i> (${data.like_count})`;
+                    button.style.color = '#ff0000';
+                    const likersElement = document.querySelector(`.likers[data-comment-id="${commentId}"]`);
+                    if (likersElement) {
+                        if (data.likers && data.likers.length > 0) {
+                            const displayedLikers = data.likers.slice(0, 3);
+                            const remainingCount = data.like_count - displayedLikers.length;
+                            const likersHtml = `Liked by: ${displayedLikers.map(username => 
+                                `<a href="user.php?username=${encodeURIComponent(username)}" style="color: #007bff; text-decoration: none;">${escapeHtml(username)}</a>`
+                            ).join(', ')}${remainingCount > 0 ? ` and ${remainingCount} other${remainingCount > 1 ? 's' : ''}` : ''}`;
+                            likersElement.innerHTML = likersHtml;
+                            likersElement.style.display = 'block';
+                        } else {
+                            likersElement.style.display = 'none';
+                        }
+                    }
+                } else {
+                    console.error('Like failed:', data.message);
+                    alert(data.message || 'Failed to like comment');
+                    button.disabled = false;
+                    const currentCount = parseInt(button.innerText.match(/\((\d+)\)/)?.[1]) || 0;
+                    button.innerHTML = `<i class="fa-solid fa-heart"></i> (${currentCount})`;
+                }
+            } catch (e) {
+                console.error('Like JSON parse error:', e, 'Response text:', text);
+                alert('Failed to like comment: Invalid server response');
+                button.disabled = false;
+                const currentCount = parseInt(button.innerText.match(/\((\d+)\)/)?.[1]) || 0;
+                button.innerHTML = `<i class="fa-solid fa-heart"></i> (${currentCount})`;
+            }
+        })
+        .catch(error => {
+            console.error('Error liking comment:', error);
+            alert('Failed to like comment: ' + error.message);
+            button.disabled = false;
+            const currentCount = parseInt(button.innerText.match(/\((\d+)\)/)?.[1]) || 0;
+            button.innerHTML = `<i class="fa-solid fa-heart"></i> (${currentCount})`;
+        });
+    }
+
+// end like comment
+
+    function escapeHtml(unsafe) {
+        return String(unsafe || '')
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
 });
 
 function shareVideo(videoId) {    
     sessionStorage.setItem('modalOpened', 'true');
     const cleanUrl = window.location.href.split('?')[0];
-    // Generate share link    
     const shareLink = cleanUrl + "?video_id=" + videoId;
     document.getElementById("share-link").value = shareLink;
     document.getElementById("share-modal").style.display = "block";
     
-    // Track share in database
     fetch('share_video.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'video_id=' + videoId
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'video_id=' + encodeURIComponent(videoId)
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Share response:', data); // Debug log
+        console.log('Share response:', data);
         if (data.status === 'success') {
             const shareButton = document.getElementById("share-button-" + videoId);
             if (shareButton) {
@@ -541,6 +947,7 @@ function shareVideo(videoId) {
         console.error('Error sharing video:', error);
     });
 }
+
 function copyLink() {
     const shareLink = document.getElementById("share-link");
     const videoId = new URLSearchParams(window.location.search).get('video_id') || shareLink.value.match(/video_id=(\d+)/)?.[1];
@@ -582,7 +989,7 @@ function confirmDelete(videoId) {
         fetch('delete_video.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Cache-Control': 'no-cache' },
-            body: 'video_id=' + videoId
+            body: 'video_id=' + encodeURIComponent(videoId)
         })
         .then(response => response.json())
         .then(data => {
@@ -597,7 +1004,6 @@ function confirmDelete(videoId) {
 
 function closeModal() {
     document.getElementById('share-modal').style.display = 'none';
-    // Clear any URL parameters if needed
     if (window.location.search.includes('video_id')) {
         const cleanUrl = window.location.href.split('?')[0];
         window.history.replaceState({}, document.title, cleanUrl);
@@ -680,7 +1086,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Close sidebar when clicking overlay
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('sidebar-overlay')) {
             toggleSidebar();
@@ -699,25 +1104,9 @@ function toggleReplyForm(commentId) {
     form.style.display = form.style.display === "none" ? "block" : "none";
 }
 
-function likeComment(commentId) {
-    fetch('comments.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'like_comment=1&comment_id=' + commentId
-    })
-    .then(response => response.text())
-    .then(data => {
-        if (data.trim() === "success") {
-            const buttons = document.querySelectorAll(`button[onclick="likeComment(${commentId})"]`);
-            buttons.forEach(button => {
-                const currentCount = parseInt(button.innerText.match(/\((\d+)\)/)[1]) || 0;
-                button.innerText = `Like (${currentCount + 1})`;
-                button.disabled = true;
-            });
-            // Reload the page to update the likers list
-            window.location.reload();
-        }
-    });
+function toggleEditForm(commentId) {
+    const form = document.getElementById("edit-form-" + commentId);
+    form.style.display = form.style.display === "none" ? "block" : "none";
 }
 
 function loadComments(page) {
@@ -735,6 +1124,22 @@ function loadComments(page) {
             }
             history.pushState(null, null, `?video_id=${videoId}&comments_page=${page}`);
             updatePaginationButtons(page);
+            document.querySelectorAll('.reply-form').forEach(form => {
+                form.removeEventListener('submit', handleReplySubmission);
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const parentId = this.querySelector('input[name="parent_id"]').value;
+                    handleReplySubmission(this, parentId);
+                });
+            });
+            document.querySelectorAll('.edit-form').forEach(form => {
+                form.removeEventListener('submit', handleEditSubmission);
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const commentId = this.querySelector('input[name="comment_id"]').value;
+                    handleEditSubmission(this, commentId);
+                });
+            });
         })
         .finally(() => {
             if (loadButton) loadButton.textContent = page > <?= $currentPage ?> ? 'Load More' : 'Previous';
@@ -792,41 +1197,31 @@ document.getElementById('edit-video-form').addEventListener('submit', function(e
 
 function confirmCommentDelete(commentId) {
     if (confirm('Are you sure you want to delete this comment?')) {
-        // Get the comment element
         const commentElement = document.querySelector(`.comment [onclick="confirmCommentDelete(${commentId})"]`).closest('.comment');
         
-        // Apply magical animation before deletion
         if (commentElement) {
-            // Set initial styles for animation
             commentElement.style.transition = 'all 0.6s ease-in-out';
             commentElement.style.transformOrigin = 'center';
-            
-            // Trigger the magical animation
             commentElement.style.opacity = '0';
             commentElement.style.transform = 'scale(0.3) rotate(10deg)';
             commentElement.style.filter = 'blur(2px)';
             
-            // Wait for animation to complete before removing
             setTimeout(() => {
                 fetch('delete_comment.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'comment_id=' + commentId
+                    body: 'comment_id=' + encodeURIComponent(commentId)
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        // Remove the comment after animation
                         if (commentElement) commentElement.remove();
-                        
-                        // Update comments count
                         const commentsCountElement = document.querySelector('.comments-section h4');
                         if (commentsCountElement) {
                             const currentCount = parseInt(commentsCountElement.textContent.match(/\d+/)[0]) || 0;
                             commentsCountElement.textContent = commentsCountElement.textContent.replace(/\d+/, currentCount - 1);
                         }
                     } else {
-                        // Revert animation and show error if deletion fails
                         commentElement.style.opacity = '1';
                         commentElement.style.transform = 'scale(1) rotate(0deg)';
                         commentElement.style.filter = 'none';
@@ -834,13 +1229,12 @@ function confirmCommentDelete(commentId) {
                     }
                 })
                 .catch(error => {
-                    // Revert animation on fetch error
                     commentElement.style.opacity = '1';
                     commentElement.style.transform = 'scale(1) rotate(0deg)';
                     commentElement.style.filter = 'none';
-                    alert('Network error: Failed to delete comment');
+                    alert('Failed to delete comment: ' + error.message);
                 });
-            }, 600); // Match the transition duration
+            }, 600);
         } else {
             alert('Error: Comment element not found');
         }

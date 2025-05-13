@@ -1,0 +1,33 @@
+2025-05-13 20:46:35 Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 20:46:45 Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 20:49:32 Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 20:49:56 Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 20:52:25 Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 20:52:33 Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 20:55:09 Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 21:13:25 Comment Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 21:13:33 Comment Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 21:14:54 Comment Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 21:16:21 Comment Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 21:16:37 Comment Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 21:17:39 Comment Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 21:28:17 Comment Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 21:29:02 Comment Error: Duplicate entry '0' for key 'PRIMARY'
+[13-May-2025 21:38:16 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Duplicate entry '0' for key 'PRIMARY' in C:\xampp\htdocs\MyTube\comments.php:83
+Stack trace:
+#0 C:\xampp\htdocs\MyTube\comments.php(83): mysqli_stmt->execute()
+#1 {main}
+  thrown in C:\xampp\htdocs\MyTube\comments.php on line 83
+[13-May-2025 21:38:29 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Duplicate entry '0' for key 'PRIMARY' in C:\xampp\htdocs\MyTube\comments.php:83
+Stack trace:
+#0 C:\xampp\htdocs\MyTube\comments.php(83): mysqli_stmt->execute()
+#1 {main}
+  thrown in C:\xampp\htdocs\MyTube\comments.php on line 83
+[13-May-2025 21:41:23 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Duplicate entry '0' for key 'PRIMARY' in C:\xampp\htdocs\MyTube\comments.php:83
+Stack trace:
+#0 C:\xampp\htdocs\MyTube\comments.php(83): mysqli_stmt->execute()
+#1 {main}
+  thrown in C:\xampp\htdocs\MyTube\comments.php on line 83
+2025-05-13 21:41:33 Comment Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 21:45:04 Comment Error: Duplicate entry '0' for key 'PRIMARY'
+2025-05-13 21:45:19 Comment Error: Duplicate entry '0' for key 'PRIMARY'
