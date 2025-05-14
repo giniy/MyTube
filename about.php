@@ -124,7 +124,7 @@ require_once 'includes/config.php';
                 <p class="bio">User experience expert focused on making MyTube intuitive and enjoyable.</p>
             </div>
             <div class="team-member">
-                <img src="static/images/team2.png" alt="Mr Singh">
+                <img src="static/images/team1.jpeg" alt="Mr Singh">
                 <h3>Mr Singh</h3>
                 <p class="position">Head of Community</p>
                 <p class="bio">Connects with creators and ensures MyTube remains a positive space for all.</p>
