@@ -43,7 +43,7 @@ require_once 'includes/config.php';
             <p class="tagline">Redefining video sharing for creators and viewers alike</p>
         </div>
         <div class="hero-image">
-            <img src="static/images/team1.jpg" alt="MyTube Platform">
+            <img src="static/images/anurag.jpeg" alt="MyTube Platform">
         </div>
     </section>
 
@@ -72,28 +72,28 @@ require_once 'includes/config.php';
         <h2>Our Story</h2>
         <div class="timeline">
             <div class="timeline-item">
-                <div class="timeline-date">2020</div>
+                <div class="timeline-date">2022</div>
                 <div class="timeline-content">
                     <h3>Founded in a Dorm Room</h3>
                     <p>MyTube began as a college project between three friends who wanted to create a better video sharing platform.</p>
                 </div>
             </div>
             <div class="timeline-item">
-                <div class="timeline-date">2021</div>
+                <div class="timeline-date">2023</div>
                 <div class="timeline-content">
                     <h3>First 1,000 Users</h3>
                     <p>We hit our first major milestone with 1,000 active users and 10,000 video uploads.</p>
                 </div>
             </div>
             <div class="timeline-item">
-                <div class="timeline-date">2022</div>
+                <div class="timeline-date">2024</div>
                 <div class="timeline-content">
                     <h3>New Features Launched</h3>
                     <p>Introduced creator monetization, 4K streaming, and our mobile apps.</p>
                 </div>
             </div>
             <div class="timeline-item">
-                <div class="timeline-date">2023</div>
+                <div class="timeline-date">2025</div>
                 <div class="timeline-content">
                     <h3>1 Million Users</h3>
                     <p>Celebrated reaching 1 million active users worldwide with a complete platform redesign.</p>
@@ -106,20 +106,20 @@ require_once 'includes/config.php';
         <h2>Meet The Team</h2>
         <div class="team-grid">
             <div class="team-member">
-                <img src="static/images/team1.jpg" alt="Mr Gulab">
-                <h3>Mr Gulab</h3>
+                <img src="static/images/anurag.jpeg" alt="Mr Anurag Tiwari">
+                <h3>Mr Anurag Tiwari</h3>
                 <p class="position">CEO & Co-Founder</p>
                 <p class="bio">Visionary leader with a passion for video technology and creator empowerment.</p>
             </div>
             <div class="team-member">
-                <img src="static/images/team2.png" alt="Mr Gulab">
-                <h3>Mr Gulab</h3>
+                <img src="static/images/varun.jpeg" alt="Mr Varun">
+                <h3>Mr Varun</h3>
                 <p class="position">CTO & Co-Founder</p>
                 <p class="bio">Tech wizard who built our core streaming infrastructure from scratch.</p>
             </div>
             <div class="team-member">
-                <img src="static/images/team1.jpg" alt="Mr Gulab">
-                <h3>Mr Gulab</h3>
+                <img src="static/images/prince.jpeg" alt="Mr Prince">
+                <h3>Mr Prince</h3>
                 <p class="position">CPO & Co-Founder</p>
                 <p class="bio">User experience expert focused on making MyTube intuitive and enjoyable.</p>
             </div>
