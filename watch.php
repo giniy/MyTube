@@ -11,16 +11,11 @@ if (!isset($_GET['v']) || !is_numeric($_GET['v'])) {
 $video_id = intval($_GET['v']);
 
 try {
-    // Update view count FIRST
-    $updateStmt = $conn->prepare("UPDATE videos SET view_count = view_count + 1 WHERE id = ?");
-    $updateStmt->bind_param("i", $video_id);
-    $updateStmt->execute();
-
-    // Now fetch the updated video info
+    // First fetch the video info
     $stmt = $conn->prepare("SELECT v.*, u.username, u.profile_picture 
-                            FROM videos v 
-                            JOIN users u ON v.user_id = u.id 
-                            WHERE v.id = ?");
+                           FROM videos v 
+                           JOIN users u ON v.user_id = u.id 
+                           WHERE v.id = ?");
     $stmt->bind_param("i", $video_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -30,6 +25,25 @@ try {
     }
     
     $video = $result->fetch_assoc();
+    
+    // Check private video access - MOVED AFTER FETCHING VIDEO DATA
+    if ($video['is_private']) {
+        if (!isLoggedIn() || ($_SESSION['user_id'] != $video['user_id'] && !(isset($_SESSION['is_admin']) && $_SESSION['is_admin']))) {
+            die('This video is private');
+        }
+    }
+
+    // Check age restriction
+    if ($video['age_restricted']) {
+        if (!isLoggedIn() || !isset($_SESSION['age_verified']) || !$_SESSION['age_verified']) {
+            die('This video is age-restricted. Please verify your age in account settings.');
+        }
+    }
+
+    // Update view count AFTER access checks
+    $updateStmt = $conn->prepare("UPDATE videos SET view_count = view_count + 1 WHERE id = ?");
+    $updateStmt->bind_param("i", $video_id);
+    $updateStmt->execute();
     
     // Handle video file path
     $videoPath = trim($video['video_file']);
@@ -58,8 +72,23 @@ try {
 </head>
 <body>
     <div class="video-container">
+        <?php if ($video['age_restricted'] || $video['content_warning']): ?>
+        <div class="content-warning-overlay">
+            <div class="warning-box">
+                <h3>Content Warning</h3>
+                <?php if ($video['age_restricted']): ?>
+                    <p>🔞 Age-Restricted Content</p>
+                <?php endif; ?>
+                <?php if ($video['content_warning']): ?>
+                    <p>⚠️ <?= htmlspecialchars($video['content_warning']) ?></p>
+                <?php endif; ?>
+                <button onclick="this.parentNode.parentNode.style.display='none'">Continue</button>
+            </div>
+        </div>
+        <?php endif; ?>
+        
         <div class="video-player">
-            <video controls autoplay width="100%">
+            <video id="main-video" controls autoplay muted width="100%">
                 <source src="<?= htmlspecialchars($videoPath) ?>" type="video/mp4">
                 Your browser does not support the video tag.
             </video>

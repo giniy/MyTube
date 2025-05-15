@@ -20,8 +20,21 @@ if (isset($_GET['deleted'])) {
 }
 
 // Get all videos
-$query = "SELECT v.*, u.username FROM videos v JOIN users u ON v.user_id = u.id ORDER BY uploaded_at DESC";
-$result = $conn->query($query);
+// $query = "SELECT v.*, u.username FROM videos v JOIN users u ON v.user_id = u.id ORDER BY uploaded_at DESC";
+// $result = $conn->query($query);
+
+
+// Replace your current video query with this:
+$query = "SELECT v.*, u.username FROM videos v 
+          JOIN users u ON v.user_id = u.id 
+          WHERE (v.is_private = 0 OR v.user_id = ? OR ? = 1)
+          ORDER BY uploaded_at DESC";
+$stmt = $conn->prepare($query);
+$user_id = isLoggedIn() ? $_SESSION['user_id'] : 0;
+$is_admin = isLoggedIn() && isset($_SESSION['is_admin']) ? 1 : 0;
+$stmt->bind_param("ii", $user_id, $is_admin);
+$stmt->execute();
+$result = $stmt->get_result();
 
 // Check if a specific video ID was requested
 $featuredVideo = null;
@@ -48,6 +61,15 @@ if (!$featuredVideo) {
     $featuredQuery = "SELECT v.*, u.username FROM videos v JOIN users u ON v.user_id = u.id ORDER BY uploaded_at DESC LIMIT 1";
     $featuredResult = $conn->query($featuredQuery);
     $featuredVideo = $featuredResult->fetch_assoc();
+    
+    // Check if the fetched video is private AFTER we have the video
+    if ($featuredVideo && $featuredVideo['is_private']) {
+        if (!isLoggedIn() || ($_SESSION['user_id'] != $featuredVideo['user_id'] && !(isset($_SESSION['is_admin']) && $_SESSION['is_admin']))) {
+            // Redirect or show error for unauthorized access
+            $featuredVideo = null; // Remove the video from display
+            echo '<div class="error">This video is private</div>';
+        }
+    }
 }
 
 $canDelete = false;
@@ -222,14 +244,57 @@ function displayComment($comment, $conn, $depth = 0) {
     <div class="video-container">
         <?php if ($featuredVideo): ?>
         <section class="video-player">
-            <video id="main-video" controls autoplay muted>
-                <source src="<?= VIDEO_UPLOAD_PATH . $featuredVideo['video_file'] ?>" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            <h3><?= htmlspecialchars($featuredVideo['title']) ?></h3>
-            <p><?= htmlspecialchars($featuredVideo['description']) ?></p>
-            <p>Uploaded by: <a href="user.php?username=<?= urlencode($featuredVideo['username']) ?>"><?= htmlspecialchars($featuredVideo['username']) ?></a></p>
+            <!-- Keep your existing video player exactly as is -->
+<video id="main-video" controls autoplay muted>
+    <source src="<?= VIDEO_UPLOAD_PATH . $featuredVideo['video_file'] ?>" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
 
+<!-- Add this overlay container after the video tag -->
+<?php if ($featuredVideo['age_restricted'] || $featuredVideo['content_warning']): ?>
+<div style="position: absolute; 
+            top: 0;
+            left: 0;
+            margin-left: 20px;
+            width: 98%;
+            height: 33.3%;
+            margin-left: 24px;
+            border-radius: 6px;
+            max-height: 480px;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;">
+    <div style="
+                border-left: 0px solid #ffc107;
+                padding: 20px;
+                max-width: 80%;
+                color: #856404;">
+        <strong style="font-size: 1.2em;">CONTENT WARNING</strong>
+        <?php if ($featuredVideo['age_restricted']): ?>
+            <div>🔞 Age-Restricted Content</div>
+        <?php endif; ?>
+        <?php if ($featuredVideo['content_warning']): ?>
+            <div>⚠️ <?= htmlspecialchars($featuredVideo['content_warning']) ?></div>
+        <?php endif; ?>
+        <button onclick="this.parentNode.parentNode.remove()" 
+                style="margin-top: 15px;
+                       padding: 8px 16px;
+                       background: #ffc107;
+                       border: none;
+                       border-radius: 4px;
+                       cursor: pointer;">
+            Continue to Video
+        </button>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Keep your existing video info/meta data -->
+<h3><?= htmlspecialchars($featuredVideo['title']) ?></h3>
+<p><?= htmlspecialchars($featuredVideo['description']) ?></p>
+<p>Uploaded by: <a href="user.php?username=<?= urlencode($featuredVideo['username']) ?>"><?= htmlspecialchars($featuredVideo['username']) ?></a></p>
             <div class="video-actions">
                 <?php if (isLoggedIn()): ?>
                     <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">
@@ -392,25 +457,60 @@ function displayComment($comment, $conn, $depth = 0) {
 
 <section class="video-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(338px, 1fr)); gap: 18px; padding: 24px; max-width: 1450px; margin: 0 auto;">
     <?php 
-    $result->data_seek(0);
-    while ($video = $result->fetch_assoc()): ?>
-        <div class="video-card" style="background: #ffffff; border: 0px solid #e0e0e0; border-radius: 12px; height: 380px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease;">
-            <a href="?video_id=<?= $video['id'] ?>" class="video-link">
-                <img src="<?= THUMBNAIL_UPLOAD_PATH . $video['thumbnail_file'] ?>" 
+    if ($result) {
+        $result->data_seek(0);
+        while ($video = $result->fetch_assoc()): 
+            // Skip if $video is null or doesn't have required keys
+            if (!$video || !isset($video['is_private'], $video['id'], $video['user_id'])) {
+                continue;
+            }
+            
+            // Skip private videos that the user shouldn't see
+            $is_authorized = false;
+            if ($video['is_private']) {
+                $is_authorized = isLoggedIn() && 
+                               ($_SESSION['user_id'] == $video['user_id'] || 
+                                (isset($_SESSION['is_admin']) && $_SESSION['is_admin']));
+                
+                if (!$is_authorized) {
+                    continue;
+                }
+            }
+    ?>
+        <div class="video-card" style="background: #ffffff; border: 0px solid #e0e0e0; border-radius: 12px; height: 380px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative;">
+            <?php if ($video['is_private'] && $is_authorized): ?>
+                <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; z-index: 2;">
+                    🔒 Private
+                </div>
+            <?php endif; ?>
+            
+            <a href="?video_id=<?= htmlspecialchars($video['id']) ?>" class="video-link">
+                <img src="<?= THUMBNAIL_UPLOAD_PATH . htmlspecialchars($video['thumbnail_file']) ?>" 
                      alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>" 
-                     class="thumbnail-img">
+                     style="width: 100%; height: 200px; object-fit: cover;">
             </a>
-            <div class="card-content">
-                <h3 class="video-title"><?= htmlspecialchars($video['title']) ?></h3>
-                <p class="video-description"><?= htmlspecialchars($video['description']) ?></p>
-                <p class="video-author">
+            <div style="padding: 12px;">
+                <h3 style="margin: 0 0 8px 0; font-size: 16px; line-height: 1.3; height: 40px; overflow: hidden;">
+                    <?= htmlspecialchars($video['title']) ?>
+                </h3>
+                <p style="margin: 0 0 8px 0; color: #666; font-size: 14px; height: 40px; overflow: hidden;">
+                    <?= htmlspecialchars($video['description']) ?>
+                </p>
+                <p style="margin: 0 0 4px 0; font-size: 12px; color: #888;">
                     <?= htmlspecialchars($video['view_count']) ?> Views |
                     Uploaded by: <?= htmlspecialchars($video['username']) ?>
                 </p>
-                <p class="video-date"><?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['uploaded_at']))) ?></p>
+                <p style="margin: 0; font-size: 12px; color: #aaa;">
+                    <?= htmlspecialchars(date('F j, Y, g:i A', strtotime($video['uploaded_at']))) ?>
+                </p>
             </div>
         </div>
-    <?php endwhile; ?>
+    <?php 
+        endwhile; 
+    } else {
+        echo '<p>No videos found</p>';
+    }
+    ?>
 </section>
 <?php if (isset($_SESSION['login_required'])): ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

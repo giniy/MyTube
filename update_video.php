@@ -12,6 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isLoggedIn()) {
 $video_id = intval($_POST['video_id']);
 $title = trim($_POST['title']);
 $description = trim($_POST['description']);
+$is_private = isset($_POST['is_private']) ? 1 : 0;
+$age_restricted = isset($_POST['age_restricted']) ? 1 : 0;
+$content_warning = !empty($_POST['content_warning']) ? trim($_POST['content_warning']) : null;
 
 // Get video info including owner
 $query = "SELECT user_id FROM videos WHERE id = ?";
@@ -42,15 +45,18 @@ if (empty($title) || empty($description)) {
 }
 
 // Update video info
-$updateQuery = "UPDATE videos SET title = ?, description = ? WHERE id = ?";
+$updateQuery = "UPDATE videos SET title = ?, description = ?, is_private = ?, age_restricted = ?, content_warning = ? WHERE id = ?";
 $updateStmt = $conn->prepare($updateQuery);
-$updateStmt->bind_param("ssi", $title, $description, $video_id);
+$updateStmt->bind_param("ssiisi", $title, $description, $is_private, $age_restricted, $content_warning, $video_id);
 
 if ($updateStmt->execute()) {
     echo json_encode([
         'status' => 'success',
         'title' => htmlspecialchars($title),
-        'description' => htmlspecialchars($description)
+        'description' => htmlspecialchars($description),
+        'is_private' => $is_private,
+        'age_restricted' => $age_restricted,
+        'content_warning' => $content_warning ? htmlspecialchars($content_warning) : null
     ]);
 } else {
     echo json_encode(['status' => 'error', 'message' => 'Update failed']);

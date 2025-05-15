@@ -4,7 +4,6 @@ if (!isset($_SESSION['user_id'])) {
     $_SESSION['login_required'] = 'You must be logged in to upload videos';
     header('Location: index.php');
     exit;
-    // die('You must be logged in to upload videos');
 }
 require_once 'includes/config.php';
 
@@ -19,6 +18,9 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title']);
     $description = trim($_POST['description']);
+    $is_private = isset($_POST['is_private']) ? 1 : 0;
+    $age_restricted = isset($_POST['age_restricted']) ? 1 : 0;
+    $content_warning = !empty($_POST['content_warning']) ? trim($_POST['content_warning']) : null;
     
     // Validate inputs
     if (empty($title) || empty($_FILES['video']['name']) || empty($_FILES['thumbnail']['name'])) {
@@ -49,10 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (move_uploaded_file($videoFile['tmp_name'], $videoPath) && 
                 move_uploaded_file($thumbnailFile['tmp_name'], $thumbnailPath)) {
                 // Insert into database
-                $query = "INSERT INTO videos (user_id, title, description, video_file, thumbnail_file) 
-                          VALUES (?, ?, ?, ?, ?)";
+                $query = "INSERT INTO videos (user_id, title, description, video_file, thumbnail_file, is_private, age_restricted, content_warning) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $conn->prepare($query);
-                $stmt->bind_param("issss", $_SESSION['user_id'], $title, $description, $videoFileName, $thumbnailFileName);
+                $stmt->bind_param("issssiis", $_SESSION['user_id'], $title, $description, $videoFileName, $thumbnailFileName, $is_private, $age_restricted, $content_warning);
                 
                 if ($stmt->execute()) {
                     $success = 'Video uploaded successfully!';
@@ -96,6 +98,18 @@ require_once 'includes/header.php';
         <div class="form-group">
             <label for="thumbnail">Thumbnail Image (JPG, PNG, GIF)</label>
             <input type="file" id="thumbnail" name="thumbnail" accept="image/*" required>
+        </div>
+        <div class="form-group checkbox">
+            <input type="checkbox" id="is_private" name="is_private">
+            <label for="is_private">Make this video private (only visible to you)</label>
+        </div>
+        <div class="form-group checkbox">
+            <input type="checkbox" id="age_restricted" name="age_restricted">
+            <label for="age_restricted">This video contains age-restricted content</label>
+        </div>
+        <div class="form-group">
+            <label for="content_warning">Content Warning (optional)</label>
+            <input type="text" id="content_warning" name="content_warning" placeholder="E.g. 'Violence, Nudity, etc.'">
         </div>
         <button type="submit">Upload</button>
     </form>
