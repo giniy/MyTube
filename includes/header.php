@@ -43,29 +43,34 @@
     <span style="width: 100%; height: 1px; background-color: #ffffff; transition: all 0.3s ease;"></span>
     </button>
     <!-- Sidebar Menu -->
-    <div class="sidebar-menu" id="sidebarMenu" style="width:50px">
-        <br>
-        <br>
-        <div class="sidebar-header">
-            <!-- <h2>MyTube</h2> -->
-        </div>
-        <nav class="sidebar-nav">
-            <ul>
-                <li><a href="index.php"><i class="fa fa-home" aria-hidden="true"></i></a></li>
-                <li><a href="upload.php"><i class="fa-solid fa-cloud-arrow-up"></i></a></li>
-                    <li>
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="profile.php?username=<?= urlencode($_SESSION['user_id']) ?>">
-                            <i class="fa fa-user" aria-hidden="true"></i>
-                        </a>
-                    <?php endif; ?>
-                    </li>
-                    <li><a href="auth/logout.php"><i class="fa fa-sign-out" aria-hidden="true"></i></a></li>
-                    <li><a href="auth/login.php"><i class="fa fa-sign-in" aria-hidden="true"></i></a></li>
-                    <li><a href="auth/signup.php"><i class="fa fa-user-plus" aria-hidden="true"></i></a></li>
-            </ul>
-        </nav>
+
+<div class="sidebar-menu" id="sidebarMenu" style="width:50px">
+    <br>
+    <br>
+    <div class="sidebar-header">
+        <!-- <h2>MyTube</h2> -->
     </div>
+    <nav class="sidebar-nav">
+        <ul>
+            <li><a href="index.php"><i class="fa fa-home" aria-hidden="true"></i></a></li>
+            <li><a href="upload.php"><i class="fa-solid fa-cloud-arrow-up"></i></a></li>
+            <li>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="profile.php?username=<?= urlencode($_SESSION['user_id']) ?>">
+                        <i class="fa fa-user" aria-hidden="true"></i>
+                    </a>
+                <?php endif; ?>
+            </li>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <li><a href="auth/logout.php"><i class="fa fa-sign-out" aria-hidden="true"></i></a></li>
+            <?php else: ?>
+                <li><a href="auth/login.php"><i class="fa fa-sign-in" aria-hidden="true"></i></a></li>
+                <li><a href="auth/signup.php"><i class="fa fa-user-plus" aria-hidden="true"></i></a></li>
+            <?php endif; ?>
+        </ul>
+    </nav>
+</div>
+
     <div class="logo-container" style="display: inline-block; width: 100px; height: 30px;">
         <a class="nav-link" href="<?= $_SERVER['REQUEST_SCHEME'] ?>://<?= $_SERVER['HTTP_HOST'] ?>/mytube/index.php" 
            style="text-decoration: none; display: flex; align-items: center; height: 100%; position: relative;">
