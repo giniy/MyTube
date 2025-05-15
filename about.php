@@ -33,17 +33,17 @@
 
 <?php
 require_once 'includes/config.php';
-// require_once 'includes/header.php';
+require_once 'includes/header2.php';
 ?>
 
 <div class="about-container">
-    <section class="hero-section">
+    <section class="hero-section" style="margin-right: 100px;" >
         <div class="hero-content">
             <h1>About MyTube</h1>
-            <p class="tagline">Redefining video sharing for creators and viewers alike</p>
+            <p class="tagline" style="color:#d7cebe;" >Redefining video sharing for creators and viewers alike</p>
         </div>
         <div class="hero-image">
-            <img src="static/images/anurag.jpeg" alt="MyTube Platform">
+            <img src="static/images/anurag.jpg" alt="MyTube Platform" style="width: 330px; height:400px;" >
         </div>
     </section>
 
@@ -106,7 +106,7 @@ require_once 'includes/config.php';
         <h2>Meet The Team</h2>
         <div class="team-grid">
             <div class="team-member">
-                <img src="static/images/anurag.jpeg" alt="Mr Anurag Tiwari">
+                <img src="static/images/anurag.jpg" alt="Mr Anurag Tiwari">
                 <h3>Mr Anurag Tiwari</h3>
                 <p class="position">CEO & Co-Founder</p>
                 <p class="bio">Visionary leader with a passion for video technology and creator empowerment.</p>
@@ -233,15 +233,15 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .hero-image {
-    flex: 1;
+/*    flex: 1;*/
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .hero-image img {
-    width: 100%;
-    height: auto;
+/*    width: 100%;*/
+/*    height: auto;*/
     display: block;
 }
 
