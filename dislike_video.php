@@ -39,7 +39,8 @@ if ($dislikeResult->num_rows > 0) {
 }
 
 // Check if the user had previously liked the video and remove the like
-$likeDeleteQuery = "DELETE FROM video_likes WHERE user_id = ? AND video_id = ?";
+$likeDeleteQuery = "DELETE FROM likes WHERE user_id = ? AND video_id = ?";
+// $likeDeleteQuery = "DELETE FROM video_likes WHERE user_id = ? AND video_id = ?";
 $likeDeleteStmt = $conn->prepare($likeDeleteQuery);
 $likeDeleteStmt->bind_param("ii", $user_id, $video_id);
 $likeDeleteStmt->execute();
@@ -57,17 +58,28 @@ $updateStmt->bind_param("i", $video_id);
 $updateStmt->execute();
 
 // Get the updated dislike count
-$dislikeCountQuery = "SELECT dislike_count FROM videos WHERE id = ?";
-$dislikeCountStmt = $conn->prepare($dislikeCountQuery);
-$dislikeCountStmt->bind_param("i", $video_id);
-$dislikeCountStmt->execute();
-$dislikeCountResult = $dislikeCountStmt->get_result();
-$dislike_count = $dislikeCountResult->fetch_assoc()['dislike_count'];
+
+// At the end of dislike_video.php, replace the response code with this:
 
 if ($success) {
-    echo json_encode(['status' => 'success', 'dislike_count' => $dislike_count]);
+    // Get the FINAL dislike count after all operations
+    $finalCountQuery = "SELECT dislike_count FROM videos WHERE id = ?";
+    $finalStmt = $conn->prepare($finalCountQuery);
+    $finalStmt->bind_param("i", $video_id);
+    $finalStmt->execute();
+    $finalResult = $finalStmt->get_result();
+    $finalDislikeCount = $finalResult->fetch_assoc()['dislike_count'];
+
+    echo json_encode([
+        'status' => 'success',
+        'dislike_count' => (int)$finalDislikeCount,
+        'message' => 'Video disliked successfully'
+    ]);
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'Failed to dislike video']);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Failed to dislike video'
+    ]);
 }
 
 $conn->close();

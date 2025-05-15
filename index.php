@@ -153,20 +153,22 @@ function displayComment($comment, $conn, $depth = 0) {
             <small>(Edited: <?= date('M j, Y g:i a', strtotime($comment['updated_at'])) ?>)</small>
         <?php endif; ?>
         <?php if ($likeData['like_count'] > 0): ?>
-            <p class="likers" style="font-size: 0.85rem; color: #6b6b6b;" data-comment-id="<?= $comment['id'] ?>">
-                Liked by: 
-                <?php 
-                $likersCount = $likeData['like_count'];
-                $displayedLikers = array_slice($likers, 0, 3);
-                $remainingCount = $likersCount - count($displayedLikers);
-                echo implode(', ', array_map(function($username) {
-                    return '<a href="user.php?username=' . urlencode($username) . '" style="color: #007bff; text-decoration: none;">' . htmlspecialchars($username) . '</a>';
-                }, $displayedLikers));
-                if ($remainingCount > 0) {
-                    echo ' and ' . $remainingCount . ' other' . ($remainingCount > 1 ? 's' : '');
+        <p class="likers" style="font-size: 0.85rem; color: #6b6b6b;" data-comment-id="<?= $comment['id'] ?>">
+            Liked by: 
+            <?php 
+            $likersCount = $likeData['like_count'];
+            if ($likersCount > 0) {
+                // Get the most recent liker (assuming $likers is ordered by most recent first)
+                $latestLiker = $likers[0];
+                echo '<a href="user.php?username=' . urlencode($latestLiker) . '" style="color: #007bff; text-decoration: none;">' . htmlspecialchars($latestLiker) . '</a>';
+                
+                if ($likersCount > 1) {
+                    $remainingCount = $likersCount - 1;
+                    echo ' and <a href="#" class="show-likers-modal" data-comment-id="' . $comment['id'] . '" style="color: #007bff; text-decoration: none;">' . $remainingCount . ' other' . ($remainingCount > 1 ? 's' : '') . '</a>';
                 }
-                ?>
-            </p>
+            }
+            ?>
+        </p>
         <?php else: ?>
             <p class="likers" style="font-size: 0.85rem; color: #6b6b6b; display: none;" data-comment-id="<?= $comment['id'] ?>"></p>
         <?php endif; ?>
@@ -233,6 +235,9 @@ function displayComment($comment, $conn, $depth = 0) {
                     <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">
                         <i class="fa-solid fa-thumbs-up"></i>
                     </button>
+                    <button id="dislike-button-<?= $featuredVideo['id'] ?>" onclick="dislikeVideo(<?= $featuredVideo['id'] ?>)">
+                        <i class="fa-solid fa-thumbs-down"></i>
+                    </button>
                     <button id="share-button-<?= $featuredVideo['id'] ?>" onclick="shareVideo(<?= $featuredVideo['id'] ?>)">
                         <i class="fa-solid fa-share-nodes"></i>
                     </button>
@@ -254,8 +259,9 @@ function displayComment($comment, $conn, $depth = 0) {
                     $likeData = $likesResult->fetch_assoc();
                 ?>
                 <p class="like_share">
-                    <?= $likeData['like_count'] ?> Likes |
-                    <?= $featuredVideo['share_count'] ?> Shares |
+                    <?= $likeData['like_count'] ?> Likes | 
+                    <?= $featuredVideo['dislike_count'] ?> Dislikes | 
+                    <?= $featuredVideo['share_count'] ?> Shares | 
                     <?= $featuredVideo['view_count'] ?> Views
                 </p>
             </div>
@@ -453,6 +459,59 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load Font Awesome
 document.head.insertAdjacentHTML('beforeend', '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">');
 
+
+function dislikeVideo(videoId) {
+    console.log('Attempting to dislike video:', videoId);
+    
+    fetch('dislike_video.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json'
+        },
+        body: 'video_id=' + videoId
+    })
+    .then(response => {
+        console.log('Received response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Full response data:', data);
+        
+        if (data.status === 'success') {
+            // Update button appearance
+            const dislikeBtn = document.getElementById(`dislike-button-${videoId}`);
+            if (dislikeBtn) {
+                dislikeBtn.innerHTML = '<i class="fa-solid fa-thumbs-down"></i> Disliked';
+                dislikeBtn.style.color = "#ff0000";
+            }
+            
+            // Update the counter display - this is the critical fix
+            const countersElement = document.querySelector('.like_share');
+            if (countersElement) {
+                const currentText = countersElement.textContent;
+                // Use regex to safely replace the dislike count
+                const updatedText = currentText.replace(
+                    /(\d+ Likes \| )\d+ Dislikes( \| \d+ Shares \| \d+ Views)/,
+                    `$1${data.dislike_count} Dislikes$2`
+                );
+                countersElement.textContent = updatedText;
+            }
+        } else {
+            console.error('Server returned error:', data.message);
+            alert(data.message || 'Error disliking video');
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        alert('Failed to dislike video. Please check console for details.');
+    });
+}
+
+
 function likeVideo(videoId) {
     console.log('Like button clicked for video:', videoId);
     fetch('like_video.php', {
@@ -488,6 +547,87 @@ function likeVideo(videoId) {
         alert('Failed to like video: ' + error.message);
     });
 }
+
+// like comment
+
+    function likeComment(commentId) {
+        const button = document.querySelector(`button.like-button[data-comment-id="${commentId}"]`);
+        if (!button || button.disabled) {
+            console.log(`Like button for comment ${commentId} is disabled or not found`);
+            return;
+        }
+
+        button.disabled = true;
+        button.innerHTML = `<i class="fa-solid fa-heart"></i> (Loading...)`;
+
+        const formData = new FormData();
+        formData.append('like_comment', '1');
+        formData.append('comment_id', commentId);
+        formData.append('csrf_token', '<?= $_SESSION['csrf_token'] ?>');
+
+        console.log('Liking comment:', commentId, 'with data:', Object.fromEntries(formData));
+
+        fetch('comments.php', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            console.log('Like response status:', response.status);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
+                });
+            }
+            return response.text();
+        })
+        .then(text => {
+            console.log('Like raw response:', text);
+            try {
+                const data = JSON.parse(text);
+                if (data.status === 'success') {
+                    button.innerHTML = `<i class="fa-solid fa-heart"></i> (${data.like_count})`;
+                    button.style.color = '#ff0000';
+                    const likersElement = document.querySelector(`.likers[data-comment-id="${commentId}"]`);
+                    if (likersElement) {
+                        if (data.likers && data.likers.length > 0) {
+                            const displayedLikers = data.likers.slice(0, 3);
+                            const remainingCount = data.like_count - displayedLikers.length;
+                            const likersHtml = `Liked by: ${displayedLikers.map(username => 
+                                `<a href="user.php?username=${encodeURIComponent(username)}" style="color: #007bff; text-decoration: none;">${escapeHtml(username)}</a>`
+                            ).join(', ')}${remainingCount > 0 ? ` and ${remainingCount} other${remainingCount > 1 ? 's' : ''}` : ''}`;
+                            likersElement.innerHTML = likersHtml;
+                            likersElement.style.display = 'block';
+                        } else {
+                            likersElement.style.display = 'none';
+                        }
+                    }
+                } else {
+                    console.error('Like failed:', data.message);
+                    alert(data.message || 'Failed to like comment');
+                    button.disabled = false;
+                    const currentCount = parseInt(button.innerText.match(/\((\d+)\)/)?.[1]) || 0;
+                    button.innerHTML = `<i class="fa-solid fa-heart"></i> (${currentCount})`;
+                }
+            } catch (e) {
+                console.error('Like JSON parse error:', e, 'Response text:', text);
+                // alert('Failed to like comment: Invalid server response');
+                button.disabled = false;
+                const currentCount = parseInt(button.innerText.match(/\((\d+)\)/)?.[1]) || 0;
+                button.innerHTML = `<i class="fa-solid fa-heart"></i> (${currentCount})`;
+            }
+        })
+        .catch(error => {
+            console.error('Error liking comment:', error);
+            // alert('Failed to like comment: ' + error.message);
+            button.disabled = false;
+            const currentCount = parseInt(button.innerText.match(/\((\d+)\)/)?.[1]) || 0;
+            button.innerHTML = `<i class="fa-solid fa-heart"></i> (${currentCount})`;
+        });
+    }
+
+// end like comment
+
 
 document.addEventListener('DOMContentLoaded', function() {
     // Log CSRF token for debugging
@@ -818,86 +958,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-
-// like comment
-
-    function likeComment(commentId) {
-        const button = document.querySelector(`button.like-button[data-comment-id="${commentId}"]`);
-        if (!button || button.disabled) {
-            console.log(`Like button for comment ${commentId} is disabled or not found`);
-            return;
-        }
-
-        button.disabled = true;
-        button.innerHTML = `<i class="fa-solid fa-heart"></i> (Loading...)`;
-
-        const formData = new FormData();
-        formData.append('like_comment', '1');
-        formData.append('comment_id', commentId);
-        formData.append('csrf_token', '<?= $_SESSION['csrf_token'] ?>');
-
-        console.log('Liking comment:', commentId, 'with data:', Object.fromEntries(formData));
-
-        fetch('comments.php', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => {
-            console.log('Like response status:', response.status);
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
-                });
-            }
-            return response.text();
-        })
-        .then(text => {
-            console.log('Like raw response:', text);
-            try {
-                const data = JSON.parse(text);
-                if (data.status === 'success') {
-                    button.innerHTML = `<i class="fa-solid fa-heart"></i> (${data.like_count})`;
-                    button.style.color = '#ff0000';
-                    const likersElement = document.querySelector(`.likers[data-comment-id="${commentId}"]`);
-                    if (likersElement) {
-                        if (data.likers && data.likers.length > 0) {
-                            const displayedLikers = data.likers.slice(0, 3);
-                            const remainingCount = data.like_count - displayedLikers.length;
-                            const likersHtml = `Liked by: ${displayedLikers.map(username => 
-                                `<a href="user.php?username=${encodeURIComponent(username)}" style="color: #007bff; text-decoration: none;">${escapeHtml(username)}</a>`
-                            ).join(', ')}${remainingCount > 0 ? ` and ${remainingCount} other${remainingCount > 1 ? 's' : ''}` : ''}`;
-                            likersElement.innerHTML = likersHtml;
-                            likersElement.style.display = 'block';
-                        } else {
-                            likersElement.style.display = 'none';
-                        }
-                    }
-                } else {
-                    console.error('Like failed:', data.message);
-                    alert(data.message || 'Failed to like comment');
-                    button.disabled = false;
-                    const currentCount = parseInt(button.innerText.match(/\((\d+)\)/)?.[1]) || 0;
-                    button.innerHTML = `<i class="fa-solid fa-heart"></i> (${currentCount})`;
-                }
-            } catch (e) {
-                console.error('Like JSON parse error:', e, 'Response text:', text);
-                alert('Failed to like comment: Invalid server response');
-                button.disabled = false;
-                const currentCount = parseInt(button.innerText.match(/\((\d+)\)/)?.[1]) || 0;
-                button.innerHTML = `<i class="fa-solid fa-heart"></i> (${currentCount})`;
-            }
-        })
-        .catch(error => {
-            console.error('Error liking comment:', error);
-            alert('Failed to like comment: ' + error.message);
-            button.disabled = false;
-            const currentCount = parseInt(button.innerText.match(/\((\d+)\)/)?.[1]) || 0;
-            button.innerHTML = `<i class="fa-solid fa-heart"></i> (${currentCount})`;
-        });
-    }
-
-// end like comment
 
     function escapeHtml(unsafe) {
         return String(unsafe || '')
@@ -1239,6 +1299,35 @@ function confirmCommentDelete(commentId) {
             alert('Error: Comment element not found');
         }
     }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.show-likers-modal').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const commentId = this.getAttribute('data-comment-id');
+            
+            // Here you would fetch the full list of likers for this comment via AJAX
+            // and display them in a modal
+            fetch(`get_likers.php?comment_id=${commentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Create and show modal with the list of likers
+                    showLikersModal(data.likers);
+                });
+        });
+    });
+});
+
+function showLikersModal(likers) {
+    // Implement your modal display logic here
+    // For example using Bootstrap modal or your own custom modal
+    const modalContent = likers.map(user => 
+        `<a href="user.php?username=${encodeURIComponent(user)}" style="color: #007bff; text-decoration: none;">${user}</a>`
+    ).join(', ');
+    
+    // This is a simplified example - you'd use your actual modal implementation
+    alert('All likers: ' + modalContent); // Replace with actual modal code
 }
 </script>
 <?php require_once 'includes/footer.php'; ?>
