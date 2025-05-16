@@ -257,7 +257,7 @@ function displayComment($comment, $conn, $depth = 0) {
             left: 0;
             margin-left: 20px;
             width: 98%;
-            height: 33.3%;
+            height: 80%;
             margin-left: 24px;
             border-radius: 6px;
             max-height: 480px;
@@ -476,11 +476,18 @@ function displayComment($comment, $conn, $depth = 0) {
                     continue;
                 }
             }
+
     ?>
         <div class="video-card" style="background: #ffffff; border: 0px solid #e0e0e0; border-radius: 12px; height: 380px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative;">
             <?php if ($video['is_private'] && $is_authorized): ?>
                 <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; z-index: 2;">
                     🔒 Private
+                </div>
+            <?php endif; ?>
+
+            <?php if ($video['age_restricted'] == 1): ?>
+                <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; z-index: 2;">
+                    <div>⚠️ <?= htmlspecialchars($featuredVideo['content_warning']) ?></div>
                 </div>
             <?php endif; ?>
             
