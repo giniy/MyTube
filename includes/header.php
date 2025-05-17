@@ -19,6 +19,7 @@
     <link href="static/css/user_info_card.css" rel="stylesheet">
     <link href="static/css/home.css" rel="stylesheet">
     <script src="static/js/script.js"></script>
+    <script src="static/js/follow.js"></script>
     <script src="static/js/live_count.js"></script>
     <script src="static/js/side_menu.js"></script>
 </head>

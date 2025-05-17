@@ -294,7 +294,26 @@ function displayComment($comment, $conn, $depth = 0) {
 <!-- Keep your existing video info/meta data -->
 <h3><?= htmlspecialchars($featuredVideo['title']) ?></h3>
 <p><?= htmlspecialchars($featuredVideo['description']) ?></p>
-<p>Uploaded by: <a href="user.php?username=<?= urlencode($featuredVideo['username']) ?>"><?= htmlspecialchars($featuredVideo['username']) ?></a></p>
+
+<p>Uploaded by: <a href="user.php?username=<?= urlencode($featuredVideo['username']) ?>"><?= htmlspecialchars($featuredVideo['username']) ?></a>
+
+<?php if (isLoggedIn() && $_SESSION['user_id'] != $featuredVideo['user_id']): ?>
+<button id="subscribe-btn" data-user-id="<?= $featuredVideo['user_id'] ?>" class="subscribe-btn" onclick="toggleSubscription(<?= $featuredVideo['user_id'] ?>)">
+</p>
+<?php 
+            // Check if current user is subscribed to this video's uploader
+            $isSubscribed = false;
+            if (isLoggedIn()) {
+                $checkQuery = "SELECT 1 FROM followers WHERE follower_id = ? AND following_id = ?";
+                $checkStmt = $conn->prepare($checkQuery);
+                $checkStmt->bind_param("ii", $_SESSION['user_id'], $featuredVideo['user_id']);
+                $checkStmt->execute();
+                $isSubscribed = $checkStmt->get_result()->num_rows > 0;
+            }
+            echo $isSubscribed ? 'Subscribed' : 'Subscribe';
+            ?>
+        </button>
+    <?php endif; ?>
             <div class="video-actions">
                 <?php if (isLoggedIn()): ?>
                     <button id="like-button-<?= $featuredVideo['id'] ?>" onclick="likeVideo(<?= $featuredVideo['id'] ?>)">
@@ -315,6 +334,9 @@ function displayComment($comment, $conn, $depth = 0) {
                         </button>
                     <?php endif; ?>
                 <?php endif; ?>
+
+
+
                 <?php
                     $likesQuery = "SELECT COUNT(*) as like_count FROM likes WHERE video_id = ?";
                     $stmt = $conn->prepare($likesQuery);
@@ -453,8 +475,110 @@ function displayComment($comment, $conn, $depth = 0) {
             <?php endif; ?>
         </aside>
     </div>
-    <h3>EARLIER</h3>
+       <style>
+        .subscriptions-container::-webkit-scrollbar {
+            height: 8px;
+        }
 
+        .subscriptions-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .subscriptions-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            border-radius: 10px;
+        }
+
+        .subscriptions-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(90deg, #43e97b, #38f9d7);
+        }
+    </style>
+<?php if (isLoggedIn()): ?>
+    <h3>FROM YOUR SUBSCRIPTIONS</h3>
+    <div class="subscriptions-container" style=" 
+    width: 100%;
+    overflow-x: auto;
+    padding: 14px 0;
+    background: transparent;
+    border-radius: 12px;
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.05);
+    scrollbar-width: thin;
+    scrollbar-color: #00c6ff transparent;
+    -webkit-overflow-scrolling: touch;
+    ">
+        <div class="subscriptions-scroller" style="
+        display: inline-flex;
+        gap: 18px;
+        padding: 0 24px;
+        ">
+            <?php 
+            $subscriptionsQuery = "SELECT v.*, u.username 
+                                  FROM videos v 
+                                  JOIN users u ON v.user_id = u.id 
+                                  JOIN followers f ON v.user_id = f.following_id 
+                                  WHERE f.follower_id = ? 
+                                  AND (v.is_private = 0 OR v.user_id = ? OR ? = 1)
+                                  ORDER BY v.uploaded_at DESC";
+            $stmt = $conn->prepare($subscriptionsQuery);
+            $user_id = $_SESSION['user_id'];
+            $is_admin = isset($_SESSION['is_admin']) ? 1 : 0;
+            $stmt->bind_param("iii", $user_id, $user_id, $is_admin);
+            $stmt->execute();
+            $subscriptionsResult = $stmt->get_result();
+            
+            if ($subscriptionsResult->num_rows > 0) {
+                while ($video = $subscriptionsResult->fetch_assoc()): 
+                    // Skip private videos that the user shouldn't see
+                    if ($video['is_private'] && $_SESSION['user_id'] != $video['user_id'] && !(isset($_SESSION['is_admin']) && $_SESSION['is_admin'])) {
+                        continue;
+                    }
+            ?>
+            <div class="subscription-video-card" style="flex: 0 0 300px; background: #ffffff; border-radius: 12px; height: 320px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative;">
+                <?php if ($video['is_private']): ?>
+                    <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; z-index: 2;">
+                        🔒 Private
+                    </div>
+                <?php endif; ?>
+                
+                <a href="?video_id=<?= htmlspecialchars($video['id']) ?>" class="video-link">
+                    <img src="<?= THUMBNAIL_UPLOAD_PATH . htmlspecialchars($video['thumbnail_file']) ?>" 
+                         alt="Thumbnail for <?= htmlspecialchars($video['title']) ?>" 
+                         style="width: 100%; height: 180px; object-fit: cover;">
+                </a>
+
+                <div style="padding: 10px;">
+                    <h3 style="margin: 0; font-size: 15px; line-height: 1.3; height: 40px; overflow: hidden;">
+                        <?= htmlspecialchars($video['title']) ?>
+                    </h3>
+
+                    <p style="margin: 4px 0 2px 0; font-size: 0.8rem; color: #666; font-style: italic;">
+                        Uploaded by: 
+                        <a href="user.php?username=<?= urlencode($video['username']) ?>" style="color: #0073ff; text-decoration: none;">
+                            <?= htmlspecialchars($video['username']) ?>
+                        </a>
+                    </p>
+
+                    <p style="margin: 2px 0; font-size: 12px; color: #888;">
+                        <?= htmlspecialchars($video['view_count']) ?> Views
+                    </p>
+
+                    <p style="margin: 0; font-size: 12px; color: #aaa;">
+                        <?= htmlspecialchars(date('M j, Y', strtotime($video['uploaded_at']))) ?>
+                    </p>
+                </div>
+            </div>
+
+            <?php 
+                endwhile;
+            } else {
+                echo '<div style="flex: 0 0 100%; text-align: center; padding: 20px; color: white; ">No videos from your subscriptions yet. Subscribe to creators to see their videos here.</div>';
+            }
+            ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+<h3>EARLIER</h3>
 <section class="video-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(338px, 1fr)); gap: 18px; padding: 24px; max-width: 1450px; margin: 0 auto;">
     <?php 
     if ($result) {
