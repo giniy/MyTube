@@ -257,7 +257,7 @@ function displayComment($comment, $conn, $depth = 0) {
             left: 0;
             margin-left: 20px;
             width: 98%;
-            height: 80%;
+            height: 53%;
             margin-left: 24px;
             border-radius: 6px;
             max-height: 480px;
